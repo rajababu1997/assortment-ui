@@ -1,0 +1,32 @@
+/* ============================================================================
+   Spinner — rotating ring. Color inherits from `currentColor` so it adapts
+   to dark/light mode and any parent color context automatically.
+   ============================================================================ */
+
+.spinner {
+  display: inline-block;
+  border-style: solid;
+  border-color: var(--color-divider);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  animation: spin 700ms linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Sizes ───────────────────────────────────────────────────────────────── */
+.sizeXs { width: 14px; height: 14px; border-width: 2px; }
+.sizeSm { width: 18px; height: 18px; border-width: 2px; }
+.sizeMd { width: 24px; height: 24px; border-width: 2.5px; }
+.sizeLg { width: 36px; height: 36px; border-width: 3px; }
+.sizeXl { width: 48px; height: 48px; border-width: 4px; }
+
+/* ── Wrap (for centering usage) ──────────────────────────────────────────── */
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

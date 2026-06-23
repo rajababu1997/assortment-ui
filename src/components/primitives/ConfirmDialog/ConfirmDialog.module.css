@@ -1,0 +1,144 @@
+/* ============================================================================
+   ConfirmDialog — self-contained modal matching design spec:
+   320×168 card, 24px padding, 24px gap, no dividers.
+   ============================================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 1000);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  animation: overlayIn 180ms ease-out;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-modal, 1000) + 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.card {
+  width: min(380px, calc(100vw - 32px));
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow:
+    0px 12px 16px -4px rgba(10, 13, 18, 0.08),
+    0px 4px 6px -2px rgba(10, 13, 18, 0.03),
+    0px 2px 2px -1px rgba(10, 13, 18, 0.04);
+  pointer-events: auto;
+  animation: dlgIn 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dlgIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 26px 24px 24px;
+  gap: 22px;
+}
+
+/* ── Text block ──────────────────────────────────────────────────────────── */
+.titleWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.title {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 22px;
+  color: #212529;
+}
+
+.description {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  color: #6c757d;
+}
+
+/* ── Buttons row ─────────────────────────────────────────────────────────── */
+.footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.cancelBtn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 36px;
+  border-radius: 8px !important;
+  border-color: #d2dbe6 !important;
+  background: #ffffff !important;
+  color: #2176ff !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #f8fafc !important;
+  border-color: #b0bec5 !important;
+}
+
+.confirmBtn {
+  flex: 1.45 1 0;
+  min-width: 0;
+  height: 36px;
+  border-radius: 8px !important;
+  background: #2176ff !important;
+  border-color: #2176ff !important;
+  color: #ffffff !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.confirmBtn:hover:not(:disabled) {
+  background: #1a5fd4 !important;
+  border-color: #1a5fd4 !important;
+}
+
+.dangerBtn {
+  flex: 1.45 1 0;
+  min-width: 0;
+  height: 36px;
+  border-radius: 8px !important;
+  font-size: 14px;
+  font-weight: 500;
+}

@@ -1,0 +1,99 @@
+/* ============================================================================
+   Tag — inline pill for status labels.
+   Dark mode: each severity has both light/dark token overrides.
+   ============================================================================ */
+
+.tag {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 15px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.icon svg { width: 12px; height: 12px; }
+
+/* ── Severities — Figma palette ──────────────────────────────────────────── */
+.severityDefault {
+  background: #F1F4F8;
+  color: #64748B;
+}
+:global(.dark) .severityDefault {
+  background: rgba(100, 116, 139, 0.18);
+  color: #94a3b8;
+}
+
+.severityPrimary {
+  background: #EEF3FF;
+  color: #2176FF;
+}
+:global(.dark) .severityPrimary {
+  background: rgba(33, 118, 255, 0.18);
+  color: #7babff;
+}
+
+.severitySecondary {
+  background: #F1F4F8;
+  color: #64748B;
+}
+:global(.dark) .severitySecondary {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
+.severitySuccess {
+  background: #C9F3D7;
+  color: #00944A;
+}
+:global(.dark) .severitySuccess {
+  background: rgba(0, 148, 74, 0.18);
+  color: #34d399;
+}
+
+.severityWarning {
+  background: #FFF3D6;
+  color: #B45309;
+}
+:global(.dark) .severityWarning {
+  background: rgba(180, 83, 9, 0.18);
+  color: #fbbf24;
+}
+
+.severityDanger {
+  background: #FFE2E2;
+  color: #D10000;
+}
+:global(.dark) .severityDanger {
+  background: rgba(209, 0, 0, 0.18);
+  color: #f87171;
+}
+
+.severityInfo {
+  background: #D6EEFF;
+  color: #0056B3;
+}
+:global(.dark) .severityInfo {
+  background: rgba(0, 86, 179, 0.18);
+  color: #60a5fa;
+}

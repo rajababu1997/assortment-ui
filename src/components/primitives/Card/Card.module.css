@@ -1,0 +1,52 @@
+/* ============================================================================
+   Card — generic surface container.
+   Dark mode: surface tokens from globals.css auto-apply.
+   ============================================================================ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-divider);
+  overflow: hidden;
+}
+
+/* ── Elevation variants ──────────────────────────────────────────────────── */
+.elevationFlat {
+  box-shadow: none;
+}
+
+.elevationRaised {
+  box-shadow: var(--shadow-sm);
+}
+
+.elevationSunken {
+  background: var(--color-surface-alt);
+  box-shadow: var(--shadow-inner);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.header {
+  padding: var(--space-4) var(--density-card-padding, 24px);
+  border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+.body {
+  flex: 1;
+  padding: var(--density-card-padding, 24px);
+  min-height: 0;
+}
+
+.noPadding .body {
+  padding: 0;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.footer {
+  padding: var(--space-4) var(--density-card-padding, 24px);
+  border-top: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}

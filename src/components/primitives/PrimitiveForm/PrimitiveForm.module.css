@@ -1,0 +1,117 @@
+/* ============================================================================
+   PrimitiveForm — schema-driven form renderer.
+   All tokens resolve to global design tokens (globals.css).
+   ============================================================================ */
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: var(--space-4);
+  column-gap: 15%;
+  width: 100%;
+}
+
+.cols2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.col1 {
+  grid-column: span 1;
+  min-width: 0;
+}
+
+.col2 {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+/* ── Section header ──────────────────────────────────────────────────────── */
+.section {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 10px 0;
+  border-bottom: 1.5px solid #E2E8F0;
+  margin-top: var(--space-3);
+}
+
+.section:first-child {
+  margin-top: 0;
+}
+
+.sectionIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #EFF6FF;
+  color: #2563EB;
+  flex-shrink: 0;
+}
+
+.sectionLabel {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #1E293B;
+}
+
+/* ── Field wrap — hosts primitive + optional helper text ─────────────────── */
+.fieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.helperText {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}
+
+/* ── Boolean field row (checkbox/switch) in left-label mode ─────────────── */
+.boolRow {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.boolRowLabel {
+  flex-shrink: 0;
+  width: var(--tps-label-width, 160px);
+  padding-right: var(--tps-row-gap, 12px);
+  font-size: 13px;
+  font-weight: 500;
+  color: #29313C;
+  line-height: 1.4;
+  font-family: 'Inter', sans-serif;
+}
+
+@media (max-width: 767px) {
+  .boolRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+  .boolRowLabel {
+    width: auto;
+  }
+}
+
+/* ── Responsive: single column below md ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .cols2 {
+    grid-template-columns: 1fr;
+  }
+  .col2 {
+    grid-column: span 1;
+  }
+}

@@ -1,0 +1,55 @@
+/* ============================================================================
+   Divider — horizontal or vertical rule, optional centered label.
+   ============================================================================ */
+
+.horizontal {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  margin: var(--space-3) 0;
+}
+
+.horizontal::before,
+.horizontal::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-divider);
+}
+
+.horizontal:not(.hasLabel)::after {
+  display: none;
+}
+
+.horizontal.hasLabel::before,
+.horizontal.hasLabel::after {
+  display: block;
+}
+
+.alignStart::before  { flex: 0 0 var(--space-4); }
+.alignEnd::after     { flex: 0 0 var(--space-4); }
+
+.label {
+  padding: 0 var(--space-3);
+  white-space: nowrap;
+}
+
+/* Plain rule (no label) */
+.rule {
+  width: 100%;
+  height: 1px;
+  background: var(--color-divider);
+  border: 0;
+  margin: var(--space-3) 0;
+}
+
+/* Vertical */
+.vertical {
+  display: inline-block;
+  width: 1px;
+  align-self: stretch;
+  background: var(--color-divider);
+  margin: 0 var(--space-2);
+}

@@ -1,0 +1,142 @@
+/* ============================================================================
+   Switch (Toggle) — native checkbox behind a custom track+thumb.
+   Dark mode is automatic via global tokens.
+   ============================================================================ */
+
+.root {
+  --field-border:        var(--color-border);
+  --field-border-error:  var(--color-danger);
+  --field-focus-ring:    var(--color-focus-ring);
+  --field-label-color:   var(--color-text);
+  --field-disabled-bg:   var(--color-surface-alt);
+
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Row (track + labels) ────────────────────────────────────────────────── */
+.row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.rowDisabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.rowLabelLeft {
+  flex-direction: row-reverse;
+}
+
+/* ── Hidden native checkbox ──────────────────────────────────────────────── */
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ── Track ───────────────────────────────────────────────────────────────── */
+.track {
+  flex-shrink: 0;
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  border: 1.5px solid transparent;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.row:hover:not(.rowDisabled) .track {
+  background: var(--color-text-tertiary);
+}
+
+.input:focus-visible + .track {
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
+}
+
+.trackChecked {
+  background: var(--color-primary);
+}
+
+.row:hover:not(.rowDisabled) .trackChecked {
+  background: var(--color-primary-700);
+}
+
+.trackError {
+  border-color: var(--field-border-error);
+}
+
+.rowDisabled .track {
+  background: var(--field-disabled-bg);
+}
+
+/* ── Thumb ───────────────────────────────────────────────────────────────── */
+.thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  transition: transform var(--transition-fast);
+}
+
+.thumbChecked {
+  transform: translateX(18px);
+}
+
+/* Dark mode: thumb gets slightly less bright so it's not glaring */
+:global(.dark) .thumb {
+  background: #e2e8f0;
+}
+
+/* ── Label text group ────────────────────────────────────────────────────── */
+.textGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.label {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--field-label-color);
+}
+
+.description {
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.required {
+  color: var(--field-border-error);
+  margin-left: 2px;
+}
+
+/* ── Error message ───────────────────────────────────────────────────────── */
+.errorMessage {
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  color: var(--color-danger);
+}

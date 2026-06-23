@@ -1,0 +1,51 @@
+[
+  { "id": "us-2026-jan-new-year",     "name": "New Year's Day",            "category": "festival", "start": "2026-01-01", "end": "2026-01-01" },
+  { "id": "us-2026-jan-mlk",          "name": "Martin Luther King Jr. Day","category": "national", "start": "2026-01-19", "end": "2026-01-19" },
+  { "id": "us-2026-jan-winter-eoss",  "name": "Winter Clearance",          "category": "sale",     "start": "2026-01-01", "end": "2026-01-31", "description": "Post-holiday inventory clear-out" },
+
+  { "id": "us-2026-feb-valentine",    "name": "Valentine's Day",           "category": "festival", "start": "2026-02-14", "end": "2026-02-14", "description": "Gifting + couple-wear" },
+  { "id": "us-2026-feb-presidents",   "name": "Presidents' Day",           "category": "national", "start": "2026-02-16", "end": "2026-02-16" },
+  { "id": "us-2026-feb-nyfw",         "name": "New York Fashion Week",     "category": "brand",    "start": "2026-02-12", "end": "2026-02-18", "description": "Major buy-influencer event" },
+
+  { "id": "us-2026-mar-stpat",        "name": "St. Patrick's Day",         "category": "festival", "start": "2026-03-17", "end": "2026-03-17" },
+  { "id": "us-2026-mar-ss-season",    "name": "Spring / Summer Season",    "category": "season",   "start": "2026-03-01", "end": "2026-08-31", "description": "Lightweight, brighter palette" },
+  { "id": "us-2026-mar-ss-launch",    "name": "SS26 Drop",                 "category": "brand",    "start": "2026-02-15", "end": "2026-03-31" },
+
+  { "id": "us-2026-apr-easter",       "name": "Easter Sunday",             "category": "festival", "start": "2026-04-05", "end": "2026-04-05", "description": "Family + dress-up" },
+  { "id": "us-2026-apr-tax-day",      "name": "Tax Day",                   "category": "national", "start": "2026-04-15", "end": "2026-04-15" },
+
+  { "id": "us-2026-may-cinco",        "name": "Cinco de Mayo",             "category": "festival", "start": "2026-05-05", "end": "2026-05-05" },
+  { "id": "us-2026-may-mothers",      "name": "Mother's Day",              "category": "festival", "start": "2026-05-10", "end": "2026-05-10", "description": "One of the year's top gifting days" },
+  { "id": "us-2026-may-memorial",     "name": "Memorial Day",              "category": "national", "start": "2026-05-25", "end": "2026-05-25" },
+  { "id": "us-2026-may-memorial-sale","name": "Memorial Day Sale",         "category": "sale",     "start": "2026-05-22", "end": "2026-05-26", "description": "Long-weekend retail event" },
+  { "id": "us-2026-may-wedding",      "name": "Wedding Season",            "category": "marriage", "start": "2026-05-01", "end": "2026-10-31", "description": "US peak wedding months May–October" },
+
+  { "id": "us-2026-jun-flag-day",     "name": "Flag Day",                  "category": "national", "start": "2026-06-14", "end": "2026-06-14" },
+  { "id": "us-2026-jun-fathers",      "name": "Father's Day",              "category": "festival", "start": "2026-06-21", "end": "2026-06-21" },
+  { "id": "us-2026-jun-pride",        "name": "Pride Month",               "category": "festival", "start": "2026-06-01", "end": "2026-06-30", "description": "LGBTQ+ themed collections + events" },
+
+  { "id": "us-2026-jul-independence", "name": "Independence Day",          "category": "national", "start": "2026-07-04", "end": "2026-07-04", "description": "Americana / patriotic spike" },
+  { "id": "us-2026-jul-july-4-sale",  "name": "July 4th Sale",             "category": "sale",     "start": "2026-07-01", "end": "2026-07-07", "description": "Mid-summer clearance window" },
+  { "id": "us-2026-jul-summer-eoss",  "name": "Summer Clearance",          "category": "sale",     "start": "2026-07-15", "end": "2026-08-31", "description": "End-of-summer markdown wave" },
+
+  { "id": "us-2026-aug-back-school",  "name": "Back to School",            "category": "school",   "start": "2026-07-15", "end": "2026-09-07", "description": "Second-biggest retail event of the year" },
+
+  { "id": "us-2026-sep-labor-day",    "name": "Labor Day",                 "category": "national", "start": "2026-09-07", "end": "2026-09-07" },
+  { "id": "us-2026-sep-fw-season",    "name": "Fall / Winter Season",      "category": "season",   "start": "2026-09-01", "end": "2027-02-28", "description": "Heavier fabrics, layering" },
+  { "id": "us-2026-sep-nyfw-fall",    "name": "NYFW Fall/Winter",          "category": "brand",    "start": "2026-09-10", "end": "2026-09-16" },
+  { "id": "us-2026-sep-aw-launch",    "name": "AW26 Drop",                 "category": "brand",    "start": "2026-08-15", "end": "2026-09-30" },
+
+  { "id": "us-2026-oct-columbus",     "name": "Columbus / Indigenous Day", "category": "national", "start": "2026-10-12", "end": "2026-10-12" },
+  { "id": "us-2026-oct-halloween",    "name": "Halloween",                 "category": "festival", "start": "2026-10-31", "end": "2026-10-31", "description": "Costume + party-wear surge" },
+
+  { "id": "us-2026-nov-veterans",     "name": "Veterans Day",              "category": "national", "start": "2026-11-11", "end": "2026-11-11" },
+  { "id": "us-2026-nov-thanksgiving", "name": "Thanksgiving",              "category": "festival", "start": "2026-11-26", "end": "2026-11-26", "description": "Family gathering + travel" },
+  { "id": "us-2026-nov-black-friday", "name": "Black Friday",              "category": "sale",     "start": "2026-11-27", "end": "2026-11-27", "description": "Single biggest retail day of the year" },
+  { "id": "us-2026-nov-cyber-week",   "name": "Cyber Week",                "category": "sale",     "start": "2026-11-27", "end": "2026-12-01", "description": "Black Friday → Cyber Monday window" },
+  { "id": "us-2026-nov-holiday-edit", "name": "Holiday Edit Drop",         "category": "brand",    "start": "2026-11-01", "end": "2026-12-15", "description": "Festive party-wear collection" },
+
+  { "id": "us-2026-dec-christmas-eve","name": "Christmas Eve",             "category": "festival", "start": "2026-12-24", "end": "2026-12-24" },
+  { "id": "us-2026-dec-christmas",    "name": "Christmas",                 "category": "festival", "start": "2026-12-25", "end": "2026-12-25", "description": "Peak gifting day" },
+  { "id": "us-2026-dec-boxing-sale",  "name": "Post-Christmas Sale",       "category": "sale",     "start": "2026-12-26", "end": "2026-12-31", "description": "Year-end clearance" },
+  { "id": "us-2026-dec-new-year-eve", "name": "New Year's Eve",            "category": "festival", "start": "2026-12-31", "end": "2026-12-31", "description": "Party-wear and accessories" }
+]

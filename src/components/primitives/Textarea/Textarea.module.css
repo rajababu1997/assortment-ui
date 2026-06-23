@@ -1,0 +1,89 @@
+﻿/* ============================================================================
+   Textarea â€” auto-height container, same border/focus/error treatment as Input.
+   Shared label / error styles come from _shared/field.module.css.
+   ============================================================================ */
+
+.container {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-height: 80px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--field-surface);
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-xl);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.container:hover:not(.containerDisabled):not(.containerError) {
+  border-color: var(--field-border-focus);
+}
+
+.container:focus-within:not(.containerDisabled):not(.containerError) {
+  border-color: var(--field-border-focus);
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
+}
+
+.containerError {
+  border-color: var(--field-border-error);
+}
+
+.container.containerError:focus-within {
+  border-color: var(--field-border-error);
+  box-shadow: 0 0 0 3px var(--field-focus-ring-error);
+}
+
+.containerDisabled {
+  background: var(--field-disabled-bg);
+  border-color: var(--color-neutral-300);
+  cursor: not-allowed;
+}
+
+.textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0;
+  background: transparent;
+  font-family: inherit;
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-form);
+  line-height: var(--line-height-normal);
+  color: var(--field-text-color);
+  width: 100%;
+  resize: vertical;
+  min-height: 64px;
+}
+
+.textarea::placeholder {
+  color: var(--field-placeholder);
+  opacity: 1;
+}
+
+.textarea:disabled {
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+  resize: none;
+}
+
+.textareaAutosize {
+  resize: none;
+  overflow-y: auto;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.footerError {
+  justify-content: space-between;
+}
+
+.counter {
+  font-variant-numeric: tabular-nums;
+}

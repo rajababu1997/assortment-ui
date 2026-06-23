@@ -1,0 +1,99 @@
+﻿/* ============================================================================
+   NumberInput â€” extends Input container with optional stepper buttons.
+   Dark mode: all tokens from globals.css.
+   ============================================================================ */
+
+.inputEl {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  padding: 0;
+  background: transparent;
+  font-family: inherit;
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-form);
+  line-height: var(--line-height-normal);
+  color: var(--field-text-color);
+  width: 100%;
+  /* Hide native spinners */
+  -moz-appearance: textfield;
+}
+
+.inputEl::-webkit-inner-spin-button,
+.inputEl::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.inputEl::placeholder {
+  color: var(--field-placeholder);
+  opacity: 1;
+}
+
+.inputEl:disabled {
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}
+
+/* â”€â”€ Prefix / Suffix â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.affix {
+  font-size: var(--font-size-form);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* â”€â”€ Stepper divider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.divider {
+  width: 1px;
+  height: 18px;
+  background: var(--field-border);
+  flex-shrink: 0;
+  margin: 0 var(--space-1);
+}
+
+/* â”€â”€ Stepper buttons (inside the container) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.steppers {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.stepBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 15px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--field-icon);
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.stepBtn:hover:not(:disabled) {
+  background: var(--field-surface-hover);
+  color: var(--field-icon-hover);
+}
+
+.stepBtn:focus-visible {
+  outline: 2px solid var(--field-border-focus);
+  outline-offset: 1px;
+}
+
+.stepBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepIcon {
+  width: 10px;
+  height: 10px;
+}

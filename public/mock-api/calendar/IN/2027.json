@@ -1,0 +1,52 @@
+[
+  { "id": "2027-jan-new-year",     "name": "New Year",                      "category": "festival", "start": "2027-01-01", "end": "2027-01-01", "liftPercent": 15, "description": "Gifting + party-wear demand peak" },
+  { "id": "2027-jan-lohri",        "name": "Lohri",                         "category": "festival", "start": "2027-01-13", "end": "2027-01-13", "description": "North India festive" },
+  { "id": "2027-jan-pongal",       "name": "Makar Sankranti / Pongal",      "category": "festival", "start": "2027-01-14", "end": "2027-01-14", "description": "South India harvest festive" },
+  { "id": "2027-jan-republic-day", "name": "Republic Day",                  "category": "national", "start": "2027-01-26", "end": "2027-01-26" },
+  { "id": "2027-jan-winter-eoss",  "name": "Winter EOSS",                   "category": "sale",     "start": "2027-01-01", "end": "2027-01-31", "liftPercent": 35, "description": "End-of-season clearance, peak discount weeks" },
+  { "id": "2027-jan-wedding",      "name": "Wedding Season Continues",      "category": "marriage", "start": "2027-01-01", "end": "2027-02-28", "liftPercent": 40 },
+
+  { "id": "2027-feb-valentine",    "name": "Valentine's Day",               "category": "festival", "start": "2027-02-14", "end": "2027-02-14", "liftPercent": 18, "description": "Gifting + couple-wear" },
+  { "id": "2027-feb-ss-launch",    "name": "SS27 Collection Launch",        "category": "brand",    "start": "2027-02-01", "end": "2027-02-28", "description": "Spring/Summer drops in stores" },
+
+  { "id": "2027-mar-shivaratri",   "name": "Maha Shivaratri",               "category": "festival", "start": "2027-03-06", "end": "2027-03-06" },
+  { "id": "2027-mar-eid-fitr",     "name": "Eid al-Fitr",                   "category": "festival", "start": "2027-03-10", "end": "2027-03-10", "liftPercent": 22, "description": "Ethnic & festive wear (tentative)" },
+  { "id": "2027-mar-holi",         "name": "Holi",                          "category": "festival", "start": "2027-03-22", "end": "2027-03-22", "liftPercent": 10, "description": "White-wear, casuals" },
+  { "id": "2027-mar-ss-season",    "name": "Spring / Summer Season",        "category": "season",   "start": "2027-03-01", "end": "2027-05-31", "description": "Lightweight fabrics, lighter colours" },
+  { "id": "2027-mar-fy-end",       "name": "End of FY Clearance",           "category": "sale",     "start": "2027-03-15", "end": "2027-03-31", "liftPercent": 28, "description": "Finance-driven inventory clearance" },
+
+  { "id": "2027-apr-baisakhi",     "name": "Vishu / Baisakhi",              "category": "festival", "start": "2027-04-14", "end": "2027-04-14" },
+
+  { "id": "2027-may-akshaya",      "name": "Akshaya Tritiya",               "category": "festival", "start": "2027-05-08", "end": "2027-05-08", "liftPercent": 30, "description": "Wedding & gold purchases peak" },
+  { "id": "2027-may-mothers-day",  "name": "Mother's Day",                  "category": "festival", "start": "2027-05-09", "end": "2027-05-09" },
+  { "id": "2027-may-eid-adha",     "name": "Eid al-Adha (Bakrid)",          "category": "festival", "start": "2027-05-16", "end": "2027-05-16", "liftPercent": 18, "description": "Ethnic + gifting (tentative)" },
+  { "id": "2027-may-back-school",  "name": "Back to School",                "category": "school",   "start": "2027-05-15", "end": "2027-06-30", "liftPercent": 20, "description": "Uniforms, kids-wear, basics" },
+
+  { "id": "2027-jun-fathers-day",  "name": "Father's Day",                  "category": "festival", "start": "2027-06-20", "end": "2027-06-20" },
+  { "id": "2027-jun-summer-eoss",  "name": "Summer EOSS",                   "category": "sale",     "start": "2027-06-15", "end": "2027-07-31", "liftPercent": 40, "description": "Mid-year clearance window" },
+  { "id": "2027-jun-monsoon",      "name": "Monsoon Onset",                 "category": "season",   "start": "2027-06-01", "end": "2027-09-30", "description": "Quick-dry, breathable fabrics" },
+
+  { "id": "2027-aug-ind-day",      "name": "Independence Day",              "category": "national", "start": "2027-08-15", "end": "2027-08-15", "description": "Patriotic themes, ethnic spike" },
+  { "id": "2027-aug-rakhi",        "name": "Raksha Bandhan",                "category": "festival", "start": "2027-08-17", "end": "2027-08-17", "liftPercent": 20, "description": "Sibling gifting" },
+  { "id": "2027-aug-janmashtami",  "name": "Krishna Janmashtami",           "category": "festival", "start": "2027-08-25", "end": "2027-08-25" },
+  { "id": "2027-aug-aw-launch",    "name": "AW27 Collection Launch",        "category": "brand",    "start": "2027-08-01", "end": "2027-08-31", "description": "Autumn/Winter drops in stores" },
+
+  { "id": "2027-sep-ganesh",       "name": "Ganesh Chaturthi",              "category": "festival", "start": "2027-09-04", "end": "2027-09-04", "description": "Maharashtra/South festive" },
+  { "id": "2027-sep-onam",         "name": "Onam (Thiruvonam)",             "category": "festival", "start": "2027-09-12", "end": "2027-09-12", "liftPercent": 25, "description": "Kerala ethnic-wear peak" },
+  { "id": "2027-sep-navratri",     "name": "Sharad Navratri",               "category": "festival", "start": "2027-09-30", "end": "2027-10-08", "liftPercent": 25, "description": "9-night colour-coded festive run" },
+
+  { "id": "2027-oct-dussehra",     "name": "Dussehra (Vijayadashami)",      "category": "festival", "start": "2027-10-09", "end": "2027-10-09", "liftPercent": 18 },
+  { "id": "2027-oct-karwa",        "name": "Karwa Chauth",                  "category": "festival", "start": "2027-10-18", "end": "2027-10-18", "liftPercent": 28, "description": "Sarees, lehengas, ethnic peak" },
+  { "id": "2027-oct-diwali",       "name": "Diwali",                        "category": "festival", "start": "2027-10-29", "end": "2027-10-29", "liftPercent": 80, "description": "Single biggest revenue event of the year" },
+  { "id": "2027-oct-bhai-dooj",    "name": "Bhai Dooj",                     "category": "festival", "start": "2027-10-31", "end": "2027-10-31" },
+  { "id": "2027-oct-big-sale",     "name": "Big Billion / Brand Sale Week", "category": "sale",     "start": "2027-10-05", "end": "2027-10-15", "liftPercent": 55, "description": "Marketplace mega-sale event" },
+  { "id": "2027-oct-festive-edit", "name": "Festive Edit Drop",             "category": "brand",    "start": "2027-10-01", "end": "2027-10-31", "description": "Limited-edition festive line" },
+  { "id": "2027-oct-aw-season",    "name": "Autumn / Winter Season",        "category": "season",   "start": "2027-10-01", "end": "2027-12-31", "description": "Heavier fabrics, jackets, layers" },
+
+  { "id": "2027-nov-guru-nanak",   "name": "Guru Nanak Jayanti",            "category": "festival", "start": "2027-11-14", "end": "2027-11-14" },
+  { "id": "2027-nov-wedding-peak", "name": "Wedding Season Peak",           "category": "marriage", "start": "2027-11-01", "end": "2027-12-31", "liftPercent": 50, "description": "Highest months for ethnic & wedding wear" },
+
+  { "id": "2027-dec-christmas",    "name": "Christmas",                     "category": "festival", "start": "2027-12-25", "end": "2027-12-25", "liftPercent": 30, "description": "Party-wear, gifting" },
+  { "id": "2027-dec-new-year-eve", "name": "New Year's Eve",                "category": "festival", "start": "2027-12-31", "end": "2027-12-31", "liftPercent": 25, "description": "Party-wear and accessories" },
+  { "id": "2027-dec-winter-eoss",  "name": "Winter EOSS Begins",            "category": "sale",     "start": "2027-12-26", "end": "2027-12-31", "liftPercent": 32 }
+]

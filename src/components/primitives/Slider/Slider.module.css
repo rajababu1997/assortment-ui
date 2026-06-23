@@ -1,0 +1,89 @@
+/* ============================================================================
+   Slider — range input with filled track, custom thumb, optional value bubble.
+   Driven by a CSS variable --progress (0..100) written in TSX inline style.
+   ============================================================================ */
+
+.root {
+  position: relative;
+  width: 100%;
+  padding: var(--space-2) 0;
+}
+
+.input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    var(--color-primary) 0%,
+    var(--color-primary) var(--progress, 0%),
+    var(--color-neutral-200) var(--progress, 0%),
+    var(--color-neutral-200) 100%
+  );
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Thumb — WebKit */
+.input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 2px solid var(--color-primary);
+  cursor: grab;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::-webkit-slider-thumb:hover,
+.input:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgba(33, 118, 255, 0.18);
+}
+
+.input::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+/* Thumb — Firefox */
+.input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 2px solid var(--color-primary);
+  cursor: grab;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::-moz-range-thumb:hover,
+.input:focus-visible::-moz-range-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgba(33, 118, 255, 0.18);
+}
+
+/* Value bubble */
+.valueBubble {
+  position: absolute;
+  top: -8px;
+  left: var(--progress, 0%);
+  transform: translate(-50%, -100%);
+  padding: 2px 8px;
+  background: var(--color-neutral-800);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  white-space: nowrap;
+}

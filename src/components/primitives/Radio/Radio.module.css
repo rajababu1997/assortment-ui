@@ -1,0 +1,155 @@
+/* ============================================================================
+   Radio — custom circle + native hidden input for a11y.
+   Dark mode: all surface tokens from globals.css.
+   ============================================================================ */
+
+.root {
+  --field-border: var(--color-border);
+  --field-border-focus: var(--color-primary);
+  --field-border-error: var(--color-danger);
+  --field-disabled-bg: var(--color-surface-alt);
+  --field-focus-ring: var(--color-focus-ring);
+  --field-label-color: var(--color-text);
+
+  /* Reset browser fieldset defaults */
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-family: 'Inter', sans-serif;
+  margin-top: 4px;
+}
+
+.groupLabel {
+  /* Normalize <legend> to behave exactly like a regular <label> */
+  display: flex;
+  align-items: center;
+  float: none;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: #29313c;
+}
+
+.required {
+  color: var(--field-border-error);
+  margin-left: 2px;
+}
+
+/* ── Options container ───────────────────────────────────────────────────── */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: 8px;
+}
+
+.optionsHorizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* ── Single option row ───────────────────────────────────────────────────── */
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.optionDisabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ── Hidden native input ─────────────────────────────────────────────────── */
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ── Visual circle ───────────────────────────────────────────────────────── */
+.circle {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--field-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.option:hover:not(.optionDisabled) .circle {
+  border-color: var(--field-border-focus);
+}
+
+.input:focus-visible + .circle {
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
+  border-color: var(--field-border-focus);
+}
+
+.circleChecked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.circleError {
+  border-color: var(--field-border-error);
+}
+
+.optionDisabled .circle {
+  background: var(--field-disabled-bg);
+  border-color: var(--field-border);
+}
+
+/* Inner dot */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+/* ── Label text ──────────────────────────────────────────────────────────── */
+.label {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #29313c;
+}
+
+/* ── Error message ───────────────────────────────────────────────────────── */
+.errorMessage {
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  color: var(--color-danger);
+}

@@ -1,0 +1,106 @@
+/* ============================================================================
+   Avatar — image / initials / icon fallback with optional status dot.
+   Dark mode: initials background palette uses semi-transparent primaries
+   that read well on both light and dark surfaces.
+   ============================================================================ */
+
+.wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* ── Avatar base ─────────────────────────────────────────────────────────── */
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--color-primary-100);
+  color: var(--color-primary-700);
+  font-weight: var(--font-weight-semibold);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+:global(.dark) .avatar {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--color-primary-300);
+}
+
+/* ── Shapes ──────────────────────────────────────────────────────────────── */
+.shapeCircle { border-radius: var(--radius-full); }
+.shapeSquare { border-radius: var(--radius-lg); }
+
+/* ── Sizes ───────────────────────────────────────────────────────────────── */
+.sizeXs { width: 24px; height: 24px; font-size: 10px; }
+.sizeSm { width: 32px; height: 32px; font-size: 12px; }
+.sizeMd { width: 40px; height: 40px; font-size: 14px; }
+.sizeLg { width: 48px; height: 48px; font-size: 16px; }
+.sizeXl { width: 64px; height: 64px; font-size: 20px; }
+
+/* ── Image ───────────────────────────────────────────────────────────────── */
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Fallback icon (user silhouette) ─────────────────────────────────────── */
+.fallbackIcon {
+  width: 55%;
+  height: 55%;
+  color: inherit;
+  opacity: 0.7;
+}
+
+/* ── Status dot ──────────────────────────────────────────────────────────── */
+.status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-bg);
+}
+
+.sizeXs  .status { width: 7px;  height: 7px; }
+.sizeSm  .status { width: 9px;  height: 9px; }
+.sizeMd  .status { width: 11px; height: 11px; }
+.sizeLg  .status { width: 13px; height: 13px; }
+.sizeXl  .status { width: 16px; height: 16px; }
+
+.statusOnline  { background: var(--color-success); }
+.statusOffline { background: var(--color-neutral-400); }
+.statusBusy    { background: var(--color-danger); }
+.statusAway    { background: var(--color-warning); }
+
+/* ── Avatar group ────────────────────────────────────────────────────────── */
+.group {
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.group .wrap {
+  margin-left: -8px;
+  transition: transform var(--transition-fast);
+}
+
+.group .wrap:first-child { margin-left: 0; }
+.group .wrap:hover { transform: translateY(-2px); z-index: 1; }
+
+.group .avatar {
+  border: 2px solid var(--color-bg);
+}
+
+.overflowBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  border: 2px solid var(--color-bg);
+  font-weight: var(--font-weight-semibold);
+  margin-left: -8px;
+  flex-shrink: 0;
+}

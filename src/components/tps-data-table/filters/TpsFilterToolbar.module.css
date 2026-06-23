@@ -1,0 +1,991 @@
+/* ============================================================================
+   TpsFilterToolbar — Row 2 premium filter toolbar
+   2026 enterprise SaaS design — clean, configurable, slot-based
+   All colors via CSS vars — dark mode + all 6 themes auto.
+   ============================================================================ */
+
+/* ── Root container ─────────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 8px 20px;
+  min-height: 50px;
+  background: var(--color-surface);
+  flex-wrap: wrap;
+  animation: toolbarIn 140ms ease both;
+}
+
+@keyframes toolbarIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Filters label ──────────────────────────────────────────────────────────── */
+.filterLabel {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+  margin-right: 4px;
+}
+
+/* ── Left: filter slots ─────────────────────────────────────────────────────── */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Slot wrapper — allows future label above the control */
+.slotWrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Separator between logical filter groups */
+.sep {
+  width: 1px;
+  height: 18px;
+  background: var(--color-divider);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+/* ── Right: utility controls ────────────────────────────────────────────────── */
+.utilities {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.utilSep {
+  width: 1px;
+  height: 18px;
+  background: var(--color-divider);
+  flex-shrink: 0;
+  margin: 0 6px;
+}
+
+/* ── Utility icon button ────────────────────────────────────────────────────── */
+.utilBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+.utilBtn:hover {
+  background: var(--color-hover);
+  color: var(--color-text-secondary);
+  border-color: var(--color-divider);
+  transform: translateY(-1px);
+}
+.utilBtn:active {
+  transform: translateY(0) scale(0.96);
+}
+.utilBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+.utilBtnActive {
+  background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+  color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 32%, transparent);
+}
+
+/* Badge on utility button (active filter count) */
+.utilBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 2px;
+  border-radius: 999px;
+  background: var(--color-warning);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Clear all button ───────────────────────────────────────────────────────── */
+.clearBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition:
+    color 130ms ease,
+    background 130ms ease;
+}
+.clearBtn:hover {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+}
+
+/* ── Chips: segmented pill group ────────────────────────────────────────────── */
+.chipsGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.chipsGroupActive {
+  /* kept for JS class toggling — no visual wrapper change */
+}
+
+/* Individual pill */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
+}
+.chip:hover:not(.chipActive):not(.chipMultiActive) {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+  color: var(--color-primary);
+}
+
+/* Single-select active */
+.chipActive {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+.chipActive:hover {
+  background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
+}
+
+/* Multi-select active */
+.chipMultiActive {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+.chipMultiActive:hover {
+  background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
+}
+
+/* Clear × that appears inside the group when any chip is active */
+.chipClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: none;
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 2px;
+  padding: 0;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.chipClear:hover {
+  background: color-mix(in srgb, var(--color-danger) 15%, transparent);
+  color: var(--color-danger);
+  transform: scale(1.15);
+}
+
+/* ── Select / Multi-Select dropdown button ──────────────────────────────────── */
+.selectBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 8px 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 130px;
+  max-width: 220px;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease,
+    color 140ms ease;
+}
+.selectBtn:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.selectBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.selectBtnActive {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  color: var(--color-text);
+}
+
+.selectLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.selectClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 110ms ease,
+    color 110ms ease;
+}
+.selectClear:hover {
+  background: color-mix(in srgb, var(--color-danger) 11%, transparent);
+  color: var(--color-danger);
+}
+
+/* Count badge inside multi-select button */
+.multiBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Dropdown menu (portal-rendered) ────────────────────────────────────────── */
+.dropMenu {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 28px rgba(15, 23, 43, 0.13),
+    0 2px 8px rgba(15, 23, 43, 0.06);
+  overflow: hidden;
+  min-width: 160px;
+  max-width: 280px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px;
+  animation: dropIn 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropMenu::-webkit-scrollbar {
+  width: 4px;
+}
+.dropMenu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropMenu::-webkit-scrollbar-thumb {
+  background: var(--color-divider);
+  border-radius: 4px;
+}
+
+.dropOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition:
+    background 100ms ease,
+    color 100ms ease;
+}
+.dropOption:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
+}
+.dropOptionActive {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Checkbox indicator inside dropdown row */
+.dropCheck {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 110ms ease,
+    border-color 110ms ease;
+}
+.dropCheckOn {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ── Search input slot ──────────────────────────────────────────────────────── */
+.searchWrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  width: 180px;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+.searchWrap:focus-within {
+  border-color: color-mix(in srgb, var(--color-primary) 60%, transparent);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 11%, transparent);
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  transition: color 140ms ease;
+}
+.searchWrap:focus-within .searchIcon {
+  color: var(--color-primary);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+.searchInput::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.searchClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition:
+    background 110ms ease,
+    color 110ms ease;
+}
+.searchClear:hover {
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger);
+}
+
+/* ── Date range picker button + popover ─────────────────────────────────────── */
+.dateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 150px;
+  max-width: 420px;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+.dateBtn:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  background: var(--color-surface);
+}
+.dateBtnActive {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  color: var(--color-text);
+}
+
+.dateBtnLabel {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Date range popover (portal-rendered) */
+.datePopover {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 14px;
+  box-shadow:
+    0 14px 36px rgba(15, 23, 43, 0.15),
+    0 2px 10px rgba(15, 23, 43, 0.07);
+  padding: 16px;
+  min-width: 296px;
+  animation: dropIn 140ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Preset quick-pick chips inside popover */
+.datePresets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.presetChip {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+.presetChip:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  color: var(--color-primary);
+}
+.presetChipActive {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Divider inside date popover */
+.dateDivider {
+  height: 1px;
+  background: var(--color-divider);
+  margin: 12px 0;
+}
+
+/* From / To date inputs */
+.dateInputRow {
+  display: flex;
+  gap: 10px;
+}
+
+.dateInputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.dateInputLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.03em;
+  user-select: none;
+}
+
+.dateInput {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+.dateInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 11%, transparent);
+}
+
+/* Action buttons inside popover */
+.dateActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.dateApplyBtn {
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 7px;
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    transform 100ms ease;
+}
+.dateApplyBtn:hover {
+  background: var(--color-primary-700);
+}
+.dateApplyBtn:active {
+  transform: scale(0.97);
+}
+
+.dateClearBtn {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 7px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
+}
+.dateClearBtn:hover {
+  background: color-mix(in srgb, var(--color-danger) 7%, transparent);
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+}
+
+/* ── Tags filter ────────────────────────────────────────────────────────────── */
+.tagsGroup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+.tag:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+  color: var(--color-primary);
+}
+.tagActive {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ============================================================================
+   2026 Design: Split Layout with Glassmorphism
+   ============================================================================ */
+
+/* Split layout toolbar — flat bar aligned with the main toolbar */
+.toolbarSplit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  min-height: 44px;
+  background: var(--color-surface);
+  flex-wrap: wrap;
+}
+
+/* Left section: Staged filters (API calls) */
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+/* Divider between staged filters and instant chips */
+.splitDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-divider);
+  flex-shrink: 0;
+}
+
+/* Right section: Instant chip filters */
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+/* Apply button */
+.applyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 7px;
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  flex-shrink: 0;
+  transition: background 140ms ease;
+}
+.applyBtn:hover {
+  background: var(--color-primary-700);
+}
+.applyBtn:active {
+  opacity: 0.92;
+}
+.applyBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.applyBtnPulse {
+  animation: applyPulse 1.5s ease infinite;
+}
+
+@keyframes applyPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  }
+}
+
+/* Grid/row containers for split-layout instant chips */
+.chipGrid {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chipRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Vertical divider between chip groups in split layout */
+.chipGroupDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-divider);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* Group label before each chip row in split layout */
+.chipGroupLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  user-select: none;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+/* Modern chip for split layout */
+.chipModern {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 12px;
+  border-radius: 20px;
+  background: var(--color-surface-alt);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  flex-shrink: 0;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.chipModern:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+  color: var(--color-primary);
+}
+
+/* Active chip */
+.chipModernActive {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.chipModernActive:hover {
+  background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
+}
+
+/* Count badge inside chip */
+.chipCountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--color-divider);
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.chipModernActive .chipCountBadge {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  color: var(--color-primary);
+}
+
+/* Clear filters button with modern styling */
+.clearFiltersModern {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 20px;
+
+  background: transparent;
+  border: 1.5px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  flex-shrink: 0;
+
+  transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Slide-in animation */
+  animation: slideInFromRight 200ms ease;
+}
+
+.clearFiltersModern:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateX(-2px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+}
+
+.clearFiltersModern:active {
+  transform: translateX(0) scale(0.97);
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Dark mode: CSS vars handle it automatically */
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .toolbar {
+    padding: 8px 12px;
+  }
+  .toolbarSplit {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .filters {
+    gap: 4px;
+  }
+  .rightSection {
+    gap: 4px;
+  }
+  .selectBtn {
+    min-width: 100px;
+  }
+  .searchWrap {
+    width: 140px;
+  }
+  .searchWrap:focus-within {
+    width: 180px;
+  }
+  .utilities {
+    margin-left: 0;
+  }
+  .splitDivider {
+    display: none;
+  }
+}

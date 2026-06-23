@@ -1,0 +1,175 @@
+﻿/* =========================================================================
+   Shared field primitives â€” label, container shell, error message
+   Used by: Input, Select, Textarea, NumberInput, Calendar, FileUploadâ€¦
+
+   Tokens map to globals.css. Dark mode is driven by `.dark` on <html>
+   (see src/providers/ThemeProvider.tsx), so field primitives flip themes
+   without any JS. Primary and danger colors inherit from the active theme.
+   ========================================================================= */
+
+.root {
+  /* â”€â”€ Field tokens â€” LIGHT (mapped to global tokens) â”€â”€ */
+  --field-label-color:      var(--color-text);
+  --field-text-color:       var(--color-text);
+  --field-placeholder:      var(--color-text-tertiary);
+  --field-border:           var(--color-border);
+  --field-border-focus:     var(--color-primary);
+  --field-border-error:     var(--color-danger);
+  --field-error-text:       var(--color-danger);
+  --field-icon:             var(--color-text-secondary);
+  --field-icon-hover:       var(--color-text);
+  --field-surface:          var(--color-surface);
+  --field-surface-hover:    var(--color-hover);
+  --field-surface-active:   var(--color-primary-50);
+  --field-disabled-bg:      var(--color-surface-alt);
+  --field-disabled-text:    var(--color-text-disabled);
+  --field-focus-ring:       var(--color-focus-ring);
+  --field-focus-ring-error: rgba(220, 38, 38, 0.25);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+}
+
+/* â”€â”€ Field tokens â€” DARK (inherited via .dark on <html>) â”€â”€
+   Only override the keys whose global source differs in dark mode. */
+:global(.dark) .root {
+  --field-surface-active:   rgba(59, 130, 246, 0.18);
+  --field-focus-ring-error: rgba(248, 113, 113, 0.28);
+}
+
+/* â”€â”€ Label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.label {
+  display: flex;
+  align-items: center;
+  flex: none;
+  flex-grow: 0;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: #29313C;
+}
+
+/* â”€â”€ Row-label mode â€” label on LEFT, input on RIGHT â”€â”€
+   Activated by toggling `.tps-form-rows` on an ancestor (e.g. the <form>).
+   Uses CSS grid: col 1 = label (fixed), col 2 = input column (capped).
+   Label sits on row 1 aligned with the input; any extra siblings
+   (textarea counter, error message) flow underneath in col 2.
+
+   Configurable via CSS vars on the form element:
+     --tps-label-width     (default 160px)  â€” fixed label column
+     --tps-input-max-width (default 520px)  â€” cap for the input column
+     --tps-row-gap         (default 12px)   â€” gap between columns
+     --tps-row-gap-y       (default 4px)    â€” gap between stacked rows
+
+   Below 768px the grid collapses back to the default stacked layout. */
+@media (min-width: 768px) {
+  :global(.tps-form-rows) .root {
+    display: grid;
+    grid-template-columns:
+      var(--tps-label-width, 160px)
+      minmax(0, var(--tps-input-max-width, 520px));
+    column-gap: var(--tps-row-gap, var(--space-3));
+    row-gap: var(--tps-row-gap-y, var(--space-1));
+    align-items: center;
+  }
+  :global(.tps-form-rows) .root > .label {
+    grid-column: 1;
+    grid-row: 1;
+    padding-top: 0;
+  }
+  :global(.tps-form-rows) .root > :not(.label) {
+    grid-column: 2;
+    min-width: 0;
+  }
+}
+
+.required {
+  color: var(--field-border-error);
+  margin-left: 2px;
+}
+
+.infoIcon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+  color: var(--color-text-tertiary);
+  vertical-align: middle;
+  cursor: default;
+  line-height: 0;
+  transition: color var(--transition-fast);
+}
+.infoIcon:hover { color: var(--color-primary); }
+.infoIcon svg { width: 13px; height: 13px; }
+
+/* â”€â”€ Container shell (36px, padding, rounded border) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.container {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: var(--density-input-height, 36px);
+  padding: 0 var(--space-3);
+  background: var(--field-surface);
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-xl);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Hover (default state) */
+.container:hover:not(.containerDisabled):not(.containerError) {
+  border-color: var(--field-border-focus);
+}
+
+/* Focused â€” either automatic (child has focus) or explicit via .containerFocused */
+.container:focus-within:not(.containerDisabled):not(.containerError),
+.containerFocused:not(.containerError) {
+  border-color: var(--field-border-focus);
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
+}
+
+/* Error */
+.containerError {
+  border-color: var(--field-border-error);
+}
+
+.container.containerError:focus-within,
+.containerError.containerFocused {
+  border-color: var(--field-border-error);
+  box-shadow: 0 0 0 3px var(--field-focus-ring-error);
+}
+
+/* Disabled (also covers view mode) â€” keep border visible against the tinted bg */
+.containerDisabled {
+  background: var(--field-disabled-bg);
+  border-color: var(--color-neutral-300);
+  cursor: not-allowed;
+}
+
+/* â”€â”€ Error message (below container) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.errorMessage {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-1);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  color: var(--field-error-text);
+}
+
+/* â”€â”€ Helper (optional hint below container) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.helper {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-1);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}

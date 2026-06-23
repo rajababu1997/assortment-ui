@@ -1,0 +1,118 @@
+/* ============================================================================
+   Pagination — page controls row.
+   Dark mode: all tokens from globals.css auto-apply.
+   ============================================================================ */
+
+.root {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  font-family: inherit;
+}
+
+/* ── Record summary ──────────────────────────────────────────────────────── */
+.summary {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Controls (buttons row) ──────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* ── Page button / nav button ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--space-1);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--color-hover);
+  color: var(--color-text);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Active page */
+.btnActive {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border-color: var(--color-primary);
+}
+.btnActive:hover:not(:disabled) {
+  background: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  color: var(--color-primary-contrast);
+}
+
+/* Nav icon buttons */
+.navBtn {
+  color: var(--color-text-secondary);
+}
+.navBtn svg { width: 15px; height: 15px; }
+
+/* Ellipsis */
+.ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  cursor: default;
+  user-select: none;
+}
+
+/* ── Page size selector ──────────────────────────────────────────────────── */
+.sizeSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.sizeSelect {
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+.sizeSelect:hover { border-color: var(--color-primary); }
+.sizeSelect:focus-visible { box-shadow: 0 0 0 2px var(--color-focus-ring); }

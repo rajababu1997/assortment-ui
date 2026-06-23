@@ -1,0 +1,131 @@
+/* ============================================================================
+   Checkbox — custom box + native hidden input for a11y.
+   Dark mode: all tokens from globals.css via _shared/field tokens.
+   ============================================================================ */
+
+.root {
+  /* Inherit field surface tokens from the parent's .root context.
+     We re-declare the keys we need so the Checkbox can be used outside a form. */
+  --field-border:        var(--color-border);
+  --field-border-focus:  var(--color-primary);
+  --field-border-error:  var(--color-danger);
+  --field-disabled-bg:   var(--color-surface-alt);
+  --field-disabled-text: var(--color-text-disabled);
+  --field-focus-ring:    var(--color-focus-ring);
+  --field-label-color:   var(--color-text);
+
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-family: 'Inter', sans-serif;
+}
+
+.row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.rowDisabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.rowLabelLeft {
+  flex-direction: row-reverse;
+}
+
+/* ── Hidden native input ─────────────────────────────────────────────────── */
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ── Visual box ──────────────────────────────────────────────────────────── */
+.box {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--field-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.row:hover:not(.rowDisabled) .box {
+  border-color: var(--field-border-focus);
+}
+
+/* Focus ring — applied when native input is :focus-visible */
+.input:focus-visible + .box {
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
+  border-color: var(--field-border-focus);
+}
+
+/* Checked / indeterminate */
+.boxChecked,
+.boxIndeterminate {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Error */
+.boxError {
+  border-color: var(--field-border-error);
+}
+
+.rowDisabled .box {
+  background: var(--field-disabled-bg);
+  border-color: var(--field-border);
+}
+
+/* ── Check mark (SVG inline) ─────────────────────────────────────────────── */
+.checkIcon {
+  width: 11px;
+  height: 11px;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.dashIcon {
+  width: 10px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 1px;
+}
+
+/* ── Label text ──────────────────────────────────────────────────────────── */
+.label {
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--field-label-color);
+}
+
+.required {
+  color: var(--field-border-error);
+  margin-left: 2px;
+}
+
+/* ── Error message ───────────────────────────────────────────────────────── */
+.errorMessage {
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  color: var(--color-danger);
+}

@@ -1,0 +1,114 @@
+/* ============================================================================
+   Drawer — slide-in panel from left or right edge.
+   Dark mode: surface tokens from globals.css auto-apply.
+   ============================================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drawer, 1300);
+  background: var(--color-overlay);
+  animation: fadeIn 200ms ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Drawer panel ────────────────────────────────────────────────────────── */
+.panel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: calc(var(--z-drawer, 1300) + 1);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-divider);
+  max-width: calc(100vw - var(--space-8));
+  overflow: hidden;
+}
+
+.panelRight {
+  right: 0;
+  border-radius: var(--radius-2xl) 0 0 var(--radius-2xl);
+  animation: slideInRight 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.panelLeft {
+  left: 0;
+  border-radius: 0 var(--radius-2xl) var(--radius-2xl) 0;
+  animation: slideInLeft 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin: 0;
+  min-width: 0;
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.closeBtn:hover { background: var(--color-hover); color: var(--color-text); }
+.closeBtn:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 1px; }
+.closeBtn svg { width: 18px; height: 18px; }
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-6);
+}
+
+.body::-webkit-scrollbar { width: 6px; }
+.body::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+.body::-webkit-scrollbar-track { background: transparent; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6) var(--space-5);
+  border-top: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}

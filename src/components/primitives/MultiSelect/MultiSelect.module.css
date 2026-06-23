@@ -1,0 +1,335 @@
+﻿/* ============================================================================
+   MultiSelect â€” searchable, chip-based multi-value dropdown.
+   Shared label/error from _shared/field.module.css.
+   ============================================================================ */
+
+/* â”€â”€ Trigger (flex wrap for chips) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.triggerWrap {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+.trigger {
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  text-align: left;
+  min-height: var(--density-input-height, 36px);
+  height: auto;
+  padding: var(--space-1-5) var(--space-3);
+  gap: var(--space-1-5);
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.triggerDisabled {
+  cursor: not-allowed;
+}
+
+/* â”€â”€ Chips row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.chipsWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 var(--space-1-5);
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  border-radius: var(--radius-full);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
+:global(.dark) .chip {
+  background: rgba(59, 130, 246, 0.18);
+  color: var(--color-primary-300);
+}
+
+.chipLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.65;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+.chipRemove:hover {
+  opacity: 1;
+}
+.chipRemove svg {
+  width: 10px;
+  height: 10px;
+}
+
+.chipMore {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 var(--space-1-5);
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.placeholder {
+  font-size: var(--font-size-form);
+  color: var(--field-placeholder);
+  white-space: nowrap;
+}
+
+/* â”€â”€ Chevron â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--field-icon);
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: transform var(--transition-normal);
+}
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* â”€â”€ Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.panel {
+  --field-surface: var(--color-surface, #ffffff);
+  --field-surface-hover: var(--color-surface-alt, #f8fafc);
+  --field-surface-active: var(--color-primary-50, #eff6ff);
+  --field-text-color: var(--color-text, #0f1925);
+  --field-placeholder: var(--color-text-tertiary, #94a3b8);
+  --field-icon: var(--color-text-secondary, #64748b);
+  --field-border: var(--color-border, #e2e8f0);
+
+  /* position:fixed + top/bottom/left/width applied via inline style from portal */
+  box-sizing: border-box;
+  background: var(--field-surface);
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 8px 24px -4px rgba(10, 13, 18, 0.18),
+    0 4px 8px -2px rgba(10, 13, 18, 0.1);
+  overflow: hidden;
+  padding: 0;
+  max-width: min(320px, calc(100vw - 16px));
+  animation: msSlideDown 160ms ease-out;
+}
+
+.panelAbove {
+  animation: msSlideUp 160ms ease-out;
+}
+
+/* Inner wrapper ensures border-radius clips content cleanly */
+.panelInner {
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes msSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes msSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* â”€â”€ Search box inside panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.searchWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
+  border-bottom: 1px solid var(--field-border);
+  margin-bottom: 0;
+  background: var(--field-surface-hover);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.searchIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--field-icon);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--font-size-form);
+  color: var(--field-text-color);
+}
+.searchInput::placeholder {
+  color: var(--field-placeholder);
+  opacity: 1;
+}
+
+/* â”€â”€ Select-all row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.selectAll {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
+  border: none;
+  border-bottom: 1px solid var(--field-border);
+  margin-bottom: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+.selectAll:hover {
+  background: var(--field-surface-hover);
+  color: var(--color-primary);
+}
+
+/* â”€â”€ Options list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.optionsList {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.optionsList::-webkit-scrollbar {
+  width: 6px;
+}
+.optionsList::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+.optionsList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.option {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-family: inherit;
+  font-size: var(--font-size-form);
+  color: var(--field-text-color);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+.option:hover:not(.optionDisabled) {
+  background: var(--field-surface-hover);
+}
+.optionActive {
+  background: var(--field-surface-hover);
+}
+.optionDisabled {
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}
+
+.optionCheckbox {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #94a3b8;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.optionCheckboxChecked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.optionCheckbox svg {
+  width: 10px;
+  height: 10px;
+  color: #ffffff;
+}
+
+.optionLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: var(--line-height-normal);
+}
+
+.optionEmpty {
+  padding: var(--space-3);
+  text-align: center;
+  color: var(--field-placeholder);
+  font-size: var(--font-size-form);
+}
+
+/* When a renderOption callback is provided, allow the custom content to fill the row */
+.optionCustom {
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+  align-items: stretch;
+}

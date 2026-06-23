@@ -1,0 +1,111 @@
+/* ============================================================================
+   Tooltip — CSS-driven show/hide via :has(:focus-visible) + data attribute.
+   Dark mode: --color-tooltip-bg / --color-tooltip-text from globals.css.
+   ============================================================================ */
+
+.wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Bubble ── Figma spec: dark #0F172B, 10/12 Inter, 6px radius ───────── */
+.bubble {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  padding: 6px 10px;
+  background: #0F172B;
+  color: #FFFFFF;
+  border-radius: 6px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 12px;
+  white-space: normal;
+  pointer-events: none;
+  /* Initially hidden */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(15, 23, 43, 0.25);
+}
+
+/* Show on hover/focus of the wrapper */
+.wrap:hover .bubble,
+.wrap:focus-within .bubble {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Portaled bubble — inline top/left wins; skip placement's anchor offsets
+   so it isn't double-positioned. Arrow offsets (::after) still apply. */
+.portalBubble {
+  bottom: auto !important;
+  right: auto !important;
+  transform: none !important;
+}
+
+/* ── Arrow — 11.25×6.75 triangle via clip-path, matches Figma polygon ─── */
+.bubble::after {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 7px;
+  background: #0F172B;
+}
+
+/* ── Placement variants ──────────────────────────────────────────────────── */
+.top {
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.top::after {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
+
+.bottom {
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.bottom::after {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+
+.left {
+  right: calc(100% + 7px);
+  top: 50%;
+  transform: translateY(-50%);
+  /* arrow is horizontal — swap width/height */
+  --arrow-w: 7px;
+  --arrow-h: 11px;
+}
+.left::after {
+  width: 7px;
+  height: 11px;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.right {
+  left: calc(100% + 7px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.right::after {
+  width: 7px;
+  height: 11px;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+}

@@ -1,0 +1,92 @@
+/* ============================================================================
+   Chip — compact pill for tags, filters, or removable values.
+   Dark mode: all tokens from globals.css.
+   ============================================================================ */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 28px;
+  padding: 0 var(--space-2);
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  user-select: none;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Clickable chip */
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover:not(.disabled) {
+  background: var(--color-hover);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.clickable:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+/* Selected state (filter chip) */
+.selected {
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-200);
+}
+:global(.dark) .selected {
+  background: rgba(59, 130, 246, 0.18);
+  color: var(--color-primary-300);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Disabled */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Icon ────────────────────────────────────────────────────────────────── */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.icon svg { width: 14px; height: 14px; }
+
+/* ── Label ───────────────────────────────────────────────────────────────── */
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
+
+/* ── Remove button ───────────────────────────────────────────────────────── */
+.removeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+  margin-right: -2px;
+}
+.removeBtn:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+:global(.dark) .removeBtn:hover { background: rgba(255,255,255,0.1); }
+.removeBtn svg { width: 10px; height: 10px; }

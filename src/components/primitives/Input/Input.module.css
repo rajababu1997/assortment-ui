@@ -1,0 +1,74 @@
+﻿/* ============================================================================
+   Input â€” text-input-specific styles only.
+   Shared label / container / error styles live in _shared/field.module.css.
+   ============================================================================ */
+
+/* â”€â”€ Native input element â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  padding: 0;
+  background: transparent;
+  font-family: inherit;
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-form);
+  line-height: var(--line-height-normal);
+  color: var(--field-text-color);
+  width: 100%;
+}
+
+.input::placeholder {
+  color: var(--field-placeholder);
+  opacity: 1;               /* Firefox reset */
+}
+
+.input:disabled {
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}
+
+.input:disabled::placeholder {
+  color: var(--field-disabled-text);
+}
+
+/* Hide native clear/reveal buttons for consistent cross-browser look */
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration,
+.input::-ms-reveal,
+.input::-ms-clear {
+  display: none;
+}
+
+/* â”€â”€ Clear button (X) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.clearButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--field-icon);
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.clearButton:hover {
+  background: var(--field-surface-hover);
+  color: var(--field-icon-hover);
+}
+
+.clearButton:focus-visible {
+  outline: 2px solid var(--field-border-focus);
+  outline-offset: 1px;
+}
+
+.clearIcon {
+  width: 14px;
+  height: 14px;
+}

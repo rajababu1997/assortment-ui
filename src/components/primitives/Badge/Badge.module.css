@@ -1,0 +1,61 @@
+/* ============================================================================
+   Badge — status tag pill / numeric counter overlay.
+   Figma: 4px 8px padding, 999px radius, 10px/12px Inter Regular, soft bg.
+   ============================================================================ */
+
+/* Anchor wrapper (when wrapping a child element) */
+.anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+/* ── Badge pill ──────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  height: 20px;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 12px;
+  white-space: nowrap;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* Anchored: positioned over the top-right of the child (notification counter) */
+.anchored {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  height: 18px;
+  min-width: 18px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 2px solid var(--color-bg, #ffffff);
+}
+
+/* Dot variant */
+.dot {
+  min-width: 8px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+}
+
+.dotAnchored {
+  top: -2px;
+  right: -2px;
+}
+
+/* ── Severities — soft/muted palette matching Figma ─────────────────────── */
+.severityDanger  { background: rgba(220, 38, 38, 0.10);  color: #DC2626; }
+.severitySuccess { background: rgba(0, 185, 65, 0.10);   color: #00B941; }
+.severityInfo    { background: #E9F1FF;                   color: #1E6BE8; }
+.severityDefault { background: #EFF1F4;                   color: #29313C; }
+.severityPrimary { background: rgba(30, 107, 232, 0.10); color: #1E6BE8; }
+.severityWarning { background: rgba(234, 88, 12, 0.10);  color: #EA580C; }

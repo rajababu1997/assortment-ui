@@ -1,0 +1,80 @@
+/* ============================================================================
+   ProgressBar — determinate fill + indeterminate bounce.
+   Dark mode: track and fill use globals.css tokens.
+   ============================================================================ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+/* ── Label row ───────────────────────────────────────────────────────────── */
+.labelRow {
+  display: flex;
+  justify-content: flex-end;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+/* ── Track ───────────────────────────────────────────────────────────────── */
+.track {
+  width: 100%;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid var(--color-divider);
+}
+
+/* ── Fill ────────────────────────────────────────────────────────────────── */
+.fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Severity colors ─────────────────────────────────────────────────────── */
+.severityPrimary { background: var(--color-primary); }
+.severitySuccess { background: var(--color-success); }
+.severityWarning { background: var(--color-warning); }
+.severityDanger  { background: var(--color-danger); }
+.severityInfo    { background: var(--color-info); }
+
+/* ── Striped overlay ─────────────────────────────────────────────────────── */
+.striped::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    45deg,
+    rgba(255,255,255,0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,255,255,0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 16px 16px;
+  animation: stripeScroll 600ms linear infinite;
+}
+
+@keyframes stripeScroll {
+  from { background-position: 0 0; }
+  to   { background-position: 32px 0; }
+}
+
+/* ── Indeterminate ───────────────────────────────────────────────────────── */
+.indeterminate {
+  width: 40% !important;
+  animation: indeterminate 1.4s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}

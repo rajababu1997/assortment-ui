@@ -1,0 +1,213 @@
+/* ============================================================================
+   Tabs — line + pill variants · WAI-ARIA keyboard nav built-in
+   2026 redesign: spring-animated active pill (framer-motion layoutId),
+   solid brand-color fill on active, refined light / dark surfaces.
+   All colors via CSS vars → theme + dark-mode switches work automatically.
+   ============================================================================ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ── Shared tablist container ─────────────────────────────────────────────── */
+.tablist {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tablist::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================================
+   LINE VARIANT — slim animated underline, primary accent
+   ============================================================================ */
+.variantLine .tablist {
+  border-bottom: 1.5px solid var(--color-divider);
+  align-items: flex-end;
+  gap: 0;
+  padding: 0 4px;
+}
+
+.variantLine .tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px 10px;
+  margin-bottom: -1.5px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  user-select: none;
+  letter-spacing: 0.01em;
+  transition:
+    color 180ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 180ms cubic-bezier(0.4, 0, 0.2, 1),
+    background 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.variantLine .tab:hover:not(.tabDisabled) {
+  color: var(--color-text-secondary);
+  background: var(--color-hover);
+}
+
+.variantLine .tab:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+.variantLine .tabActive {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+:global(.dark) .variantLine .tabActive {
+  color: var(--color-primary-300, var(--color-primary));
+  border-bottom-color: var(--color-primary-300, var(--color-primary));
+}
+
+.variantLine .tabActive .badge {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+:global(.dark) .variantLine .tabActive .badge {
+  background: color-mix(in srgb, var(--color-primary-300, var(--color-primary)) 15%, transparent);
+  color: var(--color-primary-300, var(--color-primary));
+}
+
+/* ============================================================================
+   PILL VARIANT — individual floating pills, no shared tray.
+   2026 pattern for page-level tab navigation:
+     Inactive: own rounded background + subtle border
+     Active:   solid brand-color fill + white text, spring-animated
+   No container box, no bottom separator — tabs stand alone.
+   ============================================================================ */
+.variantPill .tablist {
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.variantPill .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  user-select: none;
+  letter-spacing: 0.01em;
+  transition:
+    color 150ms ease,
+    background 150ms ease,
+    border-color 150ms ease;
+}
+
+.variantPill .tab:hover:not(.tabDisabled):not(.tabActive) {
+  background: var(--color-hover);
+  color: var(--color-text);
+  border-color: var(--color-text-tertiary);
+}
+
+.variantPill .tab:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Active tab — solid primary fill, white text */
+.variantPill .tabActive {
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: var(--font-weight-semibold);
+  border-color: var(--color-primary);
+}
+
+/* Dark mode inactive tabs */
+:global(.dark) .variantPill .tab {
+  background: var(--color-surface);
+  border-color: var(--color-divider);
+}
+
+/* Active badge on brand fill — white tint */
+.variantPill .tabActive .badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================================================
+   DISABLED (shared)
+   ============================================================================ */
+.tabDisabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ============================================================================
+   ICON (shared)
+   ============================================================================ */
+.tabIcon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.tabIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ============================================================================
+   BADGE (shared) — count / label chip inside a tab
+   ============================================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--color-surface-alt);
+  color: var(--color-text-tertiary);
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+/* ============================================================================
+   CONTENT PANEL
+   ============================================================================ */
+.panel {
+  padding-top: var(--space-4);
+  min-width: 0;
+}
