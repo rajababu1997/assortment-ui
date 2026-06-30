@@ -70,14 +70,17 @@ export const setupFormSchema = z
     }
   });
 
+// Pre-filled with sensible demo defaults so a fresh tenant doesn't have to
+// type anything to get past Setup — they can just hit Save and continue to
+// OTB Planning. Override anything by editing the form before saving.
 export const SETUP_FORM_DEFAULTS: WizardFormValues = {
-  name: '',
+  name: 'RKs Fashion Ltd',
   base_currency: 'INR',
   planning_horizon_months: 12,
   lead_time_days: 90,
   planning_cycle: 'monthly',
   allow_mid_planning: false,
-  lock_deadline_days_before: 30,
+  lock_deadline_days_before: 60,
   release_day_of_week: 'any',
 };
 

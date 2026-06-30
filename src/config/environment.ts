@@ -32,6 +32,7 @@ export const environment = {
   // ── Branding ──────────────────────────────────────────────────────────────
   appTitle: import.meta.env.VITE_APP_TITLE,
   appSubtitle: import.meta.env.VITE_APP_SUBTITLE ?? '',
+  companyName: import.meta.env.VITE_COMPANY_NAME ?? 'RKs Fashion Ltd',
   poweredBy: import.meta.env.VITE_POWERED_BY ?? '',
   copyrights: import.meta.env.VITE_COPYRIGHTS ?? '',
   helpEmail: import.meta.env.VITE_HELP_EMAIL ?? '',

@@ -40,6 +40,7 @@ import type {
   TimeConfig,
   WizardFormValues,
 } from '@/features/setup/types';
+import { SETUP_FORM_DEFAULTS } from '@/features/setup/form/setup-form.model';
 
 // ── One-time setup: register schema version + migrations ─────────────────────
 
@@ -76,12 +77,24 @@ export function loadCompany(): Company | null {
 
 export function loadAllConfigs() {
   const companyId = getCompanyId();
-  return {
-    company: loadCompany(),
-    timeConfig: getItem<TimeConfig>(timeConfigKey(companyId)),
-    releaseConfig: getItem<ReleaseConfig>(releaseConfigKey(companyId)),
-    setupProgress: getItem<SetupProgress>(setupProgressKey(companyId)),
-  };
+  let company = loadCompany();
+  let timeConfig = getItem<TimeConfig>(timeConfigKey(companyId));
+  let releaseConfig = getItem<ReleaseConfig>(releaseConfigKey(companyId));
+  let setupProgress = getItem<SetupProgress>(setupProgressKey(companyId));
+
+  // Auto-bootstrap setup with the hardcoded demo defaults when nothing has
+  // been persisted yet. OTB Setup is hidden from the menu in this build, so
+  // a fresh tenant (cleared localStorage / new browser) would otherwise be
+  // stuck on every page that gates on `!company`.
+  if (!company || !timeConfig || !releaseConfig) {
+    submitWizard(SETUP_FORM_DEFAULTS);
+    company = loadCompany();
+    timeConfig = getItem<TimeConfig>(timeConfigKey(companyId));
+    releaseConfig = getItem<ReleaseConfig>(releaseConfigKey(companyId));
+    setupProgress = getItem<SetupProgress>(setupProgressKey(companyId));
+  }
+
+  return { company, timeConfig, releaseConfig, setupProgress };
 }
 
 export function loadSetupProgress(): SetupProgress | null {

@@ -12,7 +12,6 @@ interface Props {
 const FEATURES = [
   { icon: Layers, title: 'Layered Planning', text: 'OTB → Value → Option, in one cascade' },
   { icon: Palette, title: 'Range & Design', text: 'Line list to designer brief, locked to plan' },
-  { icon: TrendingUp, title: 'Sales-Driven', text: 'YoY, occasion, and weekly velocity built in' },
 ] as const;
 
 const LINKS = [

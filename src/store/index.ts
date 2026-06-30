@@ -3,6 +3,7 @@ import themeReducer from './slices/themeSlice';
 import authReducer from './slices/authSlice';
 import otbReducer from './slices/otbSlice';
 import valuePlanReducer from './slices/valuePlanSlice';
+import optionPlanReducer from './slices/optionPlanSlice';
 import demoClockReducer from './slices/demoClockSlice';
 
 export const store = configureStore({
@@ -11,6 +12,7 @@ export const store = configureStore({
     auth: authReducer,
     otb: otbReducer,
     valuePlan: valuePlanReducer,
+    optionPlan: optionPlanReducer,
     demoClock: demoClockReducer,
   },
 });

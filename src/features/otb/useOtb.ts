@@ -12,28 +12,72 @@
 import { useMemo } from 'react';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
-import { useAllConfigs } from '@/features/setup/useSetup';
+import { SETUP_FORM_DEFAULTS } from '@/features/setup/form/setup-form.model';
+import { getCompanyId } from '@/constants/setupKeys';
+import { environment } from '@/config/environment';
 import { OTB_STATES } from './constants';
 import { generatePeriods } from './utils/periods';
 import { calcOtb } from './types';
 import type { AnnualPlan, Period, PeriodPlan } from './types';
+import type { Company, ReleaseConfig, TimeConfig } from '@/features/setup/types';
+
+// OTB Setup is hidden from the menu and the values are constants. Build the
+// Company / TimeConfig / ReleaseConfig once at module load from
+// SETUP_FORM_DEFAULTS so every consumer gets a stable, synchronous answer —
+// no React Query, no localStorage bootstrap, no spinner.
+const STATIC_COMPANY_ID = getCompanyId();
+const STATIC_TIMESTAMP = '2026-01-01T00:00:00.000Z';
+
+const STATIC_COMPANY: Company = {
+  id: STATIC_COMPANY_ID,
+  // Name comes from VITE_COMPANY_NAME so different builds can ship under
+  // different brand names without a code change.
+  name: environment.companyName,
+  base_currency: SETUP_FORM_DEFAULTS.base_currency,
+  status: 'configured',
+  created_at: STATIC_TIMESTAMP,
+  updated_at: STATIC_TIMESTAMP,
+};
+
+const STATIC_TIME_CONFIG: TimeConfig = {
+  company_id: STATIC_COMPANY_ID,
+  planning_horizon_months: SETUP_FORM_DEFAULTS.planning_horizon_months,
+  lead_time_days: SETUP_FORM_DEFAULTS.lead_time_days,
+  planning_cycle: SETUP_FORM_DEFAULTS.planning_cycle,
+  allow_mid_planning: SETUP_FORM_DEFAULTS.allow_mid_planning,
+  updated_at: STATIC_TIMESTAMP,
+};
+
+const STATIC_RELEASE_CONFIG: ReleaseConfig = {
+  company_id: STATIC_COMPANY_ID,
+  lock_deadline_days_before: SETUP_FORM_DEFAULTS.lock_deadline_days_before,
+  release_day_of_week: SETUP_FORM_DEFAULTS.release_day_of_week,
+  updated_at: STATIC_TIMESTAMP,
+};
 
 export function useSetupConfig() {
-  const { data, isLoading } = useAllConfigs();
   return {
-    isLoading,
-    company: data?.company ?? null,
-    timeConfig: data?.timeConfig ?? null,
-    releaseConfig: data?.releaseConfig ?? null,
+    isLoading: false,
+    company: STATIC_COMPANY,
+    timeConfig: STATIC_TIME_CONFIG,
+    releaseConfig: STATIC_RELEASE_CONFIG,
   };
 }
 
 /** Every plan in the store, in deterministic order (earliest start first). */
 export function useAllPlans(): AnnualPlan[] {
-  return useAppSelector((s) => {
-    const list = Object.values(s.otb.plans);
-    return [...list].sort((a, b) => a.plan_start_iso.localeCompare(b.plan_start_iso));
-  });
+  // Select the stable record from the store, then derive the sorted array
+  // in a useMemo. Sorting/spreading inside the selector itself returns a
+  // new reference on every call, which trips react-redux's equality check
+  // and causes infinite re-renders.
+  const plans = useAppSelector((s) => s.otb.plans);
+  return useMemo(
+    () =>
+      Object.values(plans).sort((a, b) =>
+        a.plan_start_iso.localeCompare(b.plan_start_iso),
+      ),
+    [plans],
+  );
 }
 
 /**
@@ -43,13 +87,18 @@ export function useAllPlans(): AnnualPlan[] {
  *   useAnnualPlan()                         // first plan (legacy fallback)
  */
 export function useAnnualPlan(planId?: string): AnnualPlan | null {
-  return useAppSelector((s) => {
-    if (planId) return s.otb.plans[planId] ?? null;
-    const list = Object.values(s.otb.plans);
+  // Same memoization pattern as useAllPlans — pull the stable record out
+  // of the store, then sort outside the selector so react-redux's identity
+  // check stays stable across re-renders.
+  const plans = useAppSelector((s) => s.otb.plans);
+  return useMemo(() => {
+    if (planId) return plans[planId] ?? null;
+    const list = Object.values(plans);
     if (list.length === 0) return null;
-    // Sort so "first" is deterministic — earliest start wins.
-    return [...list].sort((a, b) => a.plan_start_iso.localeCompare(b.plan_start_iso))[0];
-  });
+    return list
+      .slice()
+      .sort((a, b) => a.plan_start_iso.localeCompare(b.plan_start_iso))[0];
+  }, [plans, planId]);
 }
 
 /**

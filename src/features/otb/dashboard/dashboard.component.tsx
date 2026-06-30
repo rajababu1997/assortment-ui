@@ -14,9 +14,7 @@ import { motion } from 'framer-motion';
 import {
   AlertTriangle,
   ArrowRight,
-  Banknote,
   Calendar,
-  CalendarClock,
   CalendarRange,
   CheckCircle2,
   Clock4,
@@ -27,19 +25,17 @@ import {
   Lock,
   PlayCircle,
   Plus,
-  Repeat,
   RotateCcw,
   Sparkles,
   SkipForward,
-  Trash2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Button, Card, DatePicker, SpinnerCenter } from '@/components/primitives';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useDemoToday } from '@/hooks/useDemoClock';
 import { resetDemoToday, setDemoToday } from '@/store/slices/demoClockSlice';
-import { hydrateAnnualPlans, resetAnnualPlan } from '@/store/slices/otbSlice';
-import { useApiAnnualPlans, useDeleteAnnualPlan } from '../useApiAnnualPlans';
+import { hydrateAnnualPlans } from '@/store/slices/otbSlice';
+import { useApiAnnualPlans } from '../useApiAnnualPlans';
 import { useSetupConfig, usePeriods, useAnnualPlan, annualTotal, periodTotal } from '../useOtb';
 import { fmtDate, fmtMoney } from '../utils/format';
 import { daysBetween } from '../utils/periods';
@@ -48,7 +44,6 @@ import { StateBadge } from '../components/StateBadge';
 import type { Period } from '../types';
 
 export default function OtbDashboardPage() {
-  const deletePlan = useDeleteAnnualPlan();
   const apiPlans = useApiAnnualPlans();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -165,22 +160,6 @@ export default function OtbDashboardPage() {
           </div>
         </div>
 
-        {/* ── Config pills strip ─────────────────────────────────────────── */}
-        <div
-          className="flex flex-wrap items-center gap-2 border-b px-3 py-2 md:px-4"
-          style={{
-            borderColor: 'var(--color-divider)',
-            background: 'var(--color-surface-alt, #f8fafc)',
-          }}
-        >
-          <ConfigPill icon={Banknote}      label="Currency"     value={company.base_currency} />
-          <ConfigPill icon={Repeat}        label="Cycle"        value={cap(timeConfig.planning_cycle)} />
-          <ConfigPill icon={CalendarRange} label="Horizon"      value={`${timeConfig.planning_horizon_months} mo`} />
-          <ConfigPill icon={Clock4}        label="Lead time"    value={`${timeConfig.lead_time_days} d`} />
-          <ConfigPill icon={CalendarClock} label="Release by"   value={`${releaseConfig.lock_deadline_days_before} d before`} />
-          <ConfigPill icon={Calendar}      label="Release day"  value={cap(releaseConfig.release_day_of_week)} />
-        </div>
-
         {/* ── Body: Annual plan pinned, Periods grid scrolls inside ────── */}
         <div className={`flex min-h-0 flex-1 flex-col ${hasSubmittedPlan ? 'gap-3 px-3 py-3 md:px-4' : ''}`}>
           {!hasSubmittedPlan ? (
@@ -191,15 +170,6 @@ export default function OtbDashboardPage() {
               hasDraft={draftHasContent}
               draftRowCount={totalRows}
               draftBudgetSet={overallBudget > 0}
-              onDiscardDraft={
-                draftHasContent && annual
-                  ? () => {
-                      const id = annual.plan_id;
-                      dispatch(resetAnnualPlan({ plan_id: id }));
-                      deletePlan.mutate(id);
-                    }
-                  : undefined
-              }
             />
           ) : (
             <>
@@ -287,41 +257,16 @@ export default function OtbDashboardPage() {
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 
-interface ConfigPillProps {
-  icon: LucideIcon;
-  label: string;
-  value: string;
-}
-
-function ConfigPill({ icon: Icon, label, value }: ConfigPillProps) {
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs"
-      style={{
-        background: 'var(--color-surface)',
-        borderColor: 'var(--color-divider)',
-        color: 'var(--color-text-primary)',
-      }}
-    >
-      <Icon size={11} strokeWidth={2} style={{ color: 'var(--color-primary)' }} />
-      <span style={{ color: 'var(--color-text-tertiary)' }}>{label}</span>
-      <span className="font-semibold">{value}</span>
-    </span>
-  );
-}
-
 function EmptyHero({
   onCreate,
   hasDraft,
   draftRowCount,
   draftBudgetSet,
-  onDiscardDraft,
 }: {
   onCreate: () => void;
   hasDraft: boolean;
   draftRowCount: number;
   draftBudgetSet: boolean;
-  onDiscardDraft?: () => void;
 }) {
   const eyebrow = hasDraft ? 'Draft in progress' : 'Get started';
   const headline = hasDraft ? 'Pick up where you left off.' : 'Create your annual OTB plan.';
@@ -396,17 +341,6 @@ function EmptyHero({
             {hasDraft ? <ArrowRight size={14} strokeWidth={2} /> : <Plus size={14} strokeWidth={2} />}
             {ctaLabel}
           </button>
-          {hasDraft && onDiscardDraft && (
-            <button
-              type="button"
-              onClick={onDiscardDraft}
-              className="inline-flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-xs font-medium backdrop-blur-sm transition-colors hover:bg-white/10"
-              style={{ borderColor: 'rgba(255,255,255,0.22)', color: '#e2e8f0' }}
-              title="Throw away the draft and start fresh"
-            >
-              <Trash2 size={12} /> Discard draft
-            </button>
-          )}
         </div>
       </div>
     </div>
@@ -730,7 +664,3 @@ function PeriodCard({
   );
 }
 
-function cap(s: string): string {
-  if (!s) return '';
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}

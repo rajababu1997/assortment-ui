@@ -200,11 +200,20 @@ export function BrandCategoryPicker({ selected, onChange, disabled }: Props) {
       {/* Body — tight padding so content sits close to card border */}
       <div className="flex flex-col gap-2 p-2">
       {/* Brand search-add */}
+      {/* When `brandOptions` hasn't loaded yet but we already have selected
+          brand UUIDs (re-opening a saved draft), the MultiSelect chips fall
+          back to rendering the raw UUID via `String(value)`. Seed temporary
+          "Loading…" options keyed on the selected UUIDs so chips stay
+          readable until the brand master resolves. */}
       <MultiSelect<string>
         placeholder={`Search brands… (${brands.length} available)`}
         value={selectedBrands}
         onChange={handleBrandsChange}
-        options={brandOptions}
+        options={
+          brandOptions.length > 0
+            ? brandOptions
+            : selectedBrands.map((uuid) => ({ value: uuid, label: 'Loading…' }))
+        }
         disabled={disabled}
         searchable
       />
@@ -264,11 +273,24 @@ function BrandRow({
 }: BrandRowProps) {
   // const brand = findBrand(brandUuid); // ← swapped to API
   // const cats = useMemo(() => categoriesForBrand(brandUuid), [brandUuid]); // ← swapped to API
-  const { data: brands = [] } = useApiBrands();
+  const { data: brands = [], isLoading: brandsLoading } = useApiBrands();
   const brand = useMemo(() => brands.find((b) => b.uuid === brandUuid), [brands, brandUuid]);
   const { data: cats = [] } = useApiCategoriesByBrand(brandUuid);
-  const options = useMemo(() => cats.map((c) => ({ value: c.uuid, label: c.name })), [cats]);
+  // Same UUID-flash guard as the brand picker above: while the per-brand
+  // category list is loading, fall back to placeholder labels keyed on the
+  // selected uuids so chips stay readable.
+  const options = useMemo(() => {
+    if (cats.length > 0) return cats.map((c) => ({ value: c.uuid, label: c.name }));
+    if (selectedCategoryUuids.length > 0) {
+      return selectedCategoryUuids.map((uuid) => ({ value: uuid, label: 'Loading…' }));
+    }
+    return [];
+  }, [cats, selectedCategoryUuids]);
   const selectedCount = selectedCategoryUuids.length;
+  // While the brand master hasn't resolved yet, the lookup returns undefined.
+  // Falling back to the raw UUID makes the card flash a 36-char hash for a
+  // few hundred ms — show a neutral placeholder instead until names arrive.
+  const brandLabel = brand?.name ?? (brandsLoading ? 'Loading…' : 'Unknown brand');
 
   return (
     <div
@@ -288,7 +310,7 @@ function BrandRow({
         />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {brand?.name ?? brandUuid}
+            {brandLabel}
           </p>
           <p className="text-[10px] tabular-nums" style={{ color: 'var(--color-text-tertiary)' }}>
             {selectedCount}/{cats.length} categor{cats.length === 1 ? 'y' : 'ies'}

@@ -230,7 +230,15 @@ export default function OtbPlansListPage() {
         </div> */}
 
         {/* ── Body ──────────────────────────────────────────────────────── */}
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">
+        {/* When EmptyHero is the body, drop the surrounding padding so the
+            wallpaper sits flush against the card border (edge-to-edge feel). */}
+        <div
+          className={
+            totals.total === 0 && !apiPlans.isLoading && !apiPlans.error
+              ? 'flex min-h-0 flex-1 flex-col overflow-y-auto'
+              : 'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4'
+          }
+        >
           {apiPlans.isLoading ? (
             <div className="flex min-h-[240px] flex-1 items-center justify-center">
               <SpinnerCenter label="Loading plans…" />
@@ -306,36 +314,29 @@ function PlanCard({
 
   return (
     <div
-      className="group flex flex-col gap-3 overflow-hidden rounded-xl border p-3 transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-md"
       style={{
         borderColor: isComplete ? 'rgba(16,185,129,0.45)' : 'var(--color-divider)',
         background: 'var(--color-surface)',
       }}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <h2
-              className="truncate text-[15px] font-bold leading-tight"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              {plan.name}
-            </h2>
-            {isComplete && (
-              <Sparkles size={12} style={{ color: '#047857' }} />
-            )}
-          </div>
-          <p className="mt-1 text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
-            {fmtDate(plan.plan_start_iso)} → {fmtDate(plan.plan_end_iso)}
-          </p>
-          <p
-            className="mt-1 font-mono text-[9.5px] tabular-nums"
-            style={{ color: 'var(--color-text-tertiary)' }}
-            title={plan.plan_id}
+      {/* Soft-blue header — year, status, delete */}
+      <div
+        className="flex items-center justify-between gap-2 border-b px-3 py-2"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(96,165,250,0.12), rgba(167,139,250,0.10))',
+          borderColor: 'rgba(96,165,250,0.22)',
+        }}
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <h2
+            className="truncate text-[15px] font-bold leading-tight"
+            style={{ color: 'var(--color-text-primary)' }}
           >
-            {plan.plan_id}
-          </p>
+            {plan.name}
+          </h2>
+          {isComplete && <Sparkles size={12} style={{ color: '#047857' }} />}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <StateBadge state={plan.state} />
@@ -355,6 +356,27 @@ function PlanCard({
           )}
         </div>
       </div>
+
+      {/* Body — date range + OTB id (highlighted) + progress + budget */}
+      <div className="flex flex-1 flex-col gap-3 p-3">
+        <div>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
+            {fmtDate(plan.plan_start_iso)} → {fmtDate(plan.plan_end_iso)}
+          </p>
+          {/* Plan id chip — highlighted so the deterministic OTB key is
+              scannable at a glance (it's the value used in URLs / API calls). */}
+          <span
+            className="mt-1.5 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[10.5px] font-semibold tabular-nums"
+            style={{
+              background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+              borderColor: 'color-mix(in srgb, var(--color-primary) 28%, var(--color-divider))',
+              color: 'var(--color-primary)',
+            }}
+            title={plan.plan_id}
+          >
+            {plan.plan_id}
+          </span>
+        </div>
 
       {/* Progress bar */}
       <div>
@@ -416,6 +438,7 @@ function PlanCard({
           Open
         </Button>
       </div>
+      </div>
     </div>
   );
 }
@@ -460,7 +483,7 @@ function CreateCard({ onCreate }: { onCreate: () => void }) {
 function EmptyHero({ onCreate }: { onCreate?: () => void }) {
   return (
     <div
-      className="relative flex min-h-0 flex-1 flex-col justify-center overflow-hidden rounded-xl p-8 md:p-12 lg:p-14"
+      className="relative flex min-h-0 flex-1 flex-col justify-center overflow-hidden p-8 md:p-12 lg:p-14"
       style={{
         backgroundImage:
           // Dark gradient overlay on the left fades into the photo on the right
@@ -493,13 +516,12 @@ function EmptyHero({ onCreate }: { onCreate?: () => void }) {
           Create your annual OTB plan.
         </h2>
         <p className="mt-3 max-w-md text-sm text-slate-300 md:text-base">
-          Each plan covers one fiscal year (or any custom date window). Pick a year and start
+          Each plan covers one fiscal period (or any custom date window). Pick a year and start
           date, set the overall budget, then release periods over the year as the cycle rolls
           out.
         </p>
 
         <ul className="mt-5 flex flex-col gap-2 text-sm text-slate-200">
-          <FeatureBullet>Multi-year support (FY24, FY25, FY26 and beyond)</FeatureBullet>
           <FeatureBullet>Brand × Category cascade across 12 periods</FeatureBullet>
           <FeatureBullet>Per-period release &amp; re-release workflow</FeatureBullet>
         </ul>

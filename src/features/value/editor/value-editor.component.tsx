@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   Banknote,
+  CalendarDays,
   CheckCircle2,
   Coins,
   LineChart,
@@ -30,6 +31,8 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Alert, Button, Dialog, NumberInput, Slider, SpinnerCenter } from '@/components/primitives';
+import { useDemoToday } from '@/hooks/useDemoClock';
+import { FashionCalendar } from '@/components/calendar';
 import { AllValuePlansTable } from '../all-plans/AllValuePlansTable';
 import { toast } from '@/lib/toast';
 import { usePeriods, useSetupConfig } from '@/features/otb/useOtb';
@@ -56,6 +59,7 @@ import {
   upsertValuePlan,
 } from '@/store/slices/valuePlanSlice';
 import { useApiValuePlansForPlan, useSaveValuePlan } from '../useApiValuePlans';
+import { useApiOptionPlan } from '@/features/option/useApiOptionPlans';
 import { useApiAnnualPlans } from '@/features/otb/useApiAnnualPlans';
 import { hydrateAnnualPlans } from '@/store/slices/otbSlice';
 import { useCanEditValuePlan } from '@/hooks/useCanEditValuePlan';
@@ -128,6 +132,12 @@ export default function ValuePlanEditorPage() {
   const plan = useValuePlan(otbCode);
   const currentBudget = useCurrentOtbBudget(otbCode);
   const canEdit = useCanEditValuePlan();
+  // Lock the editor whenever an Option Plan exists for this OTB — editing
+  // the VP after that would silently invalidate the OP's derived qty math.
+  // Any OP state (DRAFT/SUBMITTED/REVISIONS_REQUESTED/APPROVED) triggers
+  // the lock; only "no OP yet" leaves the VP editable.
+  const { data: existingOp } = useApiOptionPlan(planId, otbCode);
+  const lockedByOp = !!existingOp;
   const backToPlanList = planId ? `/value/${planId}` : '/value';
 
   // Hydrate annual plans + VPs from server so a hard refresh on this URL
@@ -225,7 +235,8 @@ export default function ValuePlanEditorPage() {
       category={category}
       currency={company.base_currency}
       currentBudget={currentBudget}
-      readonly={!canEdit}
+      readonly={!canEdit || lockedByOp}
+      lockedByOp={lockedByOp}
       allTableDefaultRange={allTableDefaultRange}
       onBack={() => navigate(backToPlanList)}
     />
@@ -245,6 +256,7 @@ function EditorShell({
   currency,
   currentBudget,
   readonly,
+  lockedByOp,
   allTableDefaultRange,
   onBack,
 }: {
@@ -255,6 +267,7 @@ function EditorShell({
   currency: BaseCurrency;
   currentBudget: number | null;
   readonly: boolean;
+  lockedByOp: boolean;
   allTableDefaultRange: { from: Date; to: Date } | null;
   onBack: () => void;
 }) {
@@ -262,6 +275,8 @@ function EditorShell({
   const saveMutation = useSaveValuePlan();
   const navigate = useNavigate();
   const [allTableOpen, setAllTableOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const todayMs = useDemoToday();
 
   // ── Derived values ────────────────────────────────────────────────────
   const allocatedPct = planAllocatedPct(plan);
@@ -418,6 +433,15 @@ function EditorShell({
             <Button
               variant="secondary"
               size="sm"
+              leftIcon={<CalendarDays size={13} />}
+              onClick={() => setCalendarOpen(true)}
+              title="Festivals, sale windows, marriage season & collection drops"
+            >
+              Calendar
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               leftIcon={<TableIcon size={13} />}
               onClick={() => setAllTableOpen(true)}
               title="View every Value Plan band across all annual plans"
@@ -478,6 +502,16 @@ function EditorShell({
 
         {/* ── Body — alerts, bar, band cards ─────────────────────────────── */}
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">
+          {lockedByOp && (
+            <div className="shrink-0">
+              <Alert severity="warning">
+                <strong>Read-only.</strong> An Option Plan has been started for this
+                OTB — Value Plan inputs are locked to keep the OP's derived qty math
+                consistent. Delete the Option Plan if you need to revise band allocations.
+              </Alert>
+            </div>
+          )}
+
           {isStale && (
             <div className="shrink-0">
               <Alert severity="warning">
@@ -531,6 +565,7 @@ function EditorShell({
                   onPctChange={(v) => handleSetPct(band.band_id, v)}
                   onMrpChange={(v) => handleSetMrp(band.band_id, v)}
                   onCostChange={(v) => handleSetCost(band.band_id, v)}
+                  readonly={readonly}
                 />
               );
             })}
@@ -559,7 +594,15 @@ function EditorShell({
             </span>
           </div>
           <div className="flex items-center gap-2.5">
-            {readonly && (
+            {lockedByOp ? (
+              <span
+                className="text-[11px]"
+                style={{ color: '#b45309' }}
+                title="Option Plan exists — VP can no longer be modified. Delete the OP if you need to revise the VP."
+              >
+                Read-only — Option Plan in progress
+              </span>
+            ) : readonly ? (
               <span
                 className="text-[11px]"
                 style={{ color: 'var(--color-text-tertiary)' }}
@@ -567,38 +610,44 @@ function EditorShell({
               >
                 Read-only — ADMIN / BUYER role required
               </span>
+            ) : null}
+            {/* Action buttons hidden when locked by OP — VP is committed at
+                that point and nothing the buyer types here can change. */}
+            {!lockedByOp && (
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  leftIcon={<RotateCcw size={12} />}
+                  onClick={handleResetDefaults}
+                  disabled={readonly || saveMutation.isPending}
+                  title="Clear all bands back to 0% (MRP/cost kept at band midpoints)"
+                >
+                  Reset
+                </Button>
+                <Button
+                  variant="secondary"
+                  leftIcon={<Save size={13} />}
+                  onClick={handleSaveDraft}
+                  disabled={readonly || saveMutation.isPending}
+                  title="Save and come back later"
+                >
+                  {saveMutation.isPending ? 'Saving…' : 'Save Draft'}
+                </Button>
+                <Button
+                  variant="primary"
+                  leftIcon={<Send size={13} />}
+                  disabled={readonly || !allocationValid || saveMutation.isPending}
+                  onClick={handleSubmit}
+                >
+                  {saveMutation.isPending
+                    ? 'Submitting…'
+                    : plan.state === VP_STATES.APPROVED
+                      ? 'Re-approve'
+                      : 'Submit'}
+                </Button>
+              </>
             )}
-            <Button
-              variant="secondary"
-              size="sm"
-              leftIcon={<RotateCcw size={12} />}
-              onClick={handleResetDefaults}
-              disabled={readonly || saveMutation.isPending}
-              title="Clear all bands back to 0% (MRP/cost kept at band midpoints)"
-            >
-              Reset
-            </Button>
-            <Button
-              variant="secondary"
-              leftIcon={<Save size={13} />}
-              onClick={handleSaveDraft}
-              disabled={readonly || saveMutation.isPending}
-              title="Save and come back later"
-            >
-              {saveMutation.isPending ? 'Saving…' : 'Save Draft'}
-            </Button>
-            <Button
-              variant="primary"
-              leftIcon={<Send size={13} />}
-              disabled={readonly || !allocationValid || saveMutation.isPending}
-              onClick={handleSubmit}
-            >
-              {saveMutation.isPending
-                ? 'Submitting…'
-                : plan.state === VP_STATES.APPROVED
-                  ? 'Re-approve'
-                  : 'Submit for Approval'}
-            </Button>
           </div>
         </div>
       </div>
@@ -626,6 +675,27 @@ function EditorShell({
             navigate(`/value/${planId}/${otbCode}`);
           }}
         />
+      </Dialog>
+
+      {/* Fashion-planning calendar — same one used on the OTB Annual planning
+          screen. Year is derived from the OTB period label, falling back to
+          the demo "today" if the label can't be parsed. */}
+      <Dialog
+        open={calendarOpen}
+        onClose={() => setCalendarOpen(false)}
+        title="Fashion Planning Calendar"
+        description="Festivals, sale windows, marriage season, climate cycles & collection drops — use this to align your Value Plan to the year's revenue peaks."
+        size="full"
+      >
+        <div className="p-2">
+          <FashionCalendar
+            year={
+              parseInt(otbRow.period_label.match(/\d{4}/)?.[0] ?? '', 10) ||
+              new Date(todayMs).getFullYear()
+            }
+            highlightDate={new Date(todayMs).toISOString().slice(0, 10)}
+          />
+        </div>
       </Dialog>
     </div>
   );
@@ -807,6 +877,7 @@ function BandCard({
   onPctChange,
   onMrpChange,
   onCostChange,
+  readonly,
 }: {
   band: BandAllocation;
   master: MrpBand;
@@ -816,6 +887,7 @@ function BandCard({
   onPctChange: (v: number) => void;
   onMrpChange: (v: number) => void;
   onCostChange: (v: number) => void;
+  readonly: boolean;
 }) {
   const palette = BAND_PALETTE;
   const amount = bandBudget(band, budget);
@@ -825,7 +897,7 @@ function BandCard({
   const lowMargin = margin < SOFT_LIMITS.MIN_MARGIN_PCT;
   const warnings = bandWarnings(band);
 
-  const mrpRange = formatMrpRange(master, ' – ₹');
+  const mrpRange = formatMrpRange(master, ' – ');
   const costRange = formatCostRange(master);
   const lyDelta = band.budget_pct - lastYearPct;
 
@@ -834,9 +906,6 @@ function BandCard({
       className="flex shrink-0 flex-col overflow-hidden rounded-xl border"
       style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
     >
-      {/* Colored top stripe */}
-      <div className="h-[3px] w-full" style={{ background: palette.accent }} />
-
       {/* Card header — MRP + Cost as paired chips on the left, %/₹ on the right */}
       <div
         className="flex flex-wrap items-center justify-between gap-3 border-b px-3.5 py-2.5"
@@ -899,7 +968,8 @@ function BandCard({
             <button
               type="button"
               onClick={() => onPctChange(lastYearPct)}
-              className="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[9.5px] font-semibold tabular-nums transition-colors hover:opacity-80"
+              disabled={readonly}
+              className="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[9.5px] font-semibold tabular-nums transition-colors hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
               style={{ background: 'var(--color-surface-alt, #f1f5f9)', color: 'var(--color-text-secondary)' }}
               title={`Use last-year split (${lastYearPct}%)`}
             >
@@ -919,6 +989,7 @@ function BandCard({
                 min={0}
                 max={TOTAL_PCT}
                 step={1}
+                disabled={readonly}
               />
             </div>
             <div className="w-20">
@@ -929,6 +1000,7 @@ function BandCard({
                 max={TOTAL_PCT}
                 step={1}
                 showButtons={false}
+                disabled={readonly}
               />
             </div>
           </div>
@@ -946,6 +1018,7 @@ function BandCard({
             max={master.mrp_max ?? undefined}
             step={50}
             showButtons={false}
+            disabled={readonly}
           />
         </div>
 
@@ -961,6 +1034,7 @@ function BandCard({
             max={master.cost_max}
             step={10}
             showButtons={false}
+            disabled={readonly}
           />
         </div>
       </div>
@@ -1028,3 +1102,4 @@ function DerivedStat({
     </div>
   );
 }
+

@@ -18,10 +18,15 @@ const PLAN_KEY = (planId: string) => ['otb', 'value', 'plan', planId] as const;
  * Optional `fromIso` / `toIso` push the date filter to the server; the
  * cache key includes them so each range gets its own slot.
  */
-export const useApiAllValuePlanRows = (fromIso?: string, toIso?: string) =>
+export const useApiAllValuePlanRows = (
+  fromIso?: string,
+  toIso?: string,
+  options?: { enabled?: boolean },
+) =>
   useQuery({
     queryKey: [...ALL_KEY, fromIso ?? '_', toIso ?? '_'] as const,
     queryFn: () => valuePlanApi.list(fromIso, toIso),
+    enabled: options?.enabled ?? true,
     staleTime: 30 * 1000,
   });
 

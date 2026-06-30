@@ -1,22 +1,19 @@
 /**
- * Pure derivation of landing-page insights from Redux + setup state.
- * Powers the hero headline/summary and the 4 floating KPI cards.
+ * Pure derivation of landing-page insights from the all-OTBs lifecycle feed.
+ * Powers the hero headline/summary, the brief widget rows, and the 4 KPI
+ * cards in the StatStrip.
+ *
+ * The home page now reflects the *whole* pipeline — every OTB across every
+ * annual plan — instead of the single-plan release view it used pre-refactor.
  */
 
 import { useMemo } from 'react';
-import { OTB_STATES } from '@/features/otb/constants';
-import { daysBetween } from '@/features/otb/utils/periods';
-import type { AnnualPlan, Period } from '@/features/otb/types';
-import type { TimeConfig } from '@/features/setup/types';
+import type { OtbRowView, LifecycleState } from '@/features/otb/lifecycle/types';
 import type { StatTone } from './components/StatStrip';
 
 interface Input {
-  todayMs: number;
-  periods: Period[];
-  annual: AnnualPlan | null;
-  timeConfig: TimeConfig | null;
-  allocated: number;
-  overallBudget: number;
+  rows: OtbRowView[];
+  isLoading: boolean;
 }
 
 interface Stat {
@@ -39,140 +36,142 @@ export interface BriefRow {
 interface Output {
   heroHeadline: string;
   heroSummary: string;
-  dueThisWeek: number;
   briefRingPct: number;
   briefRingSubtitle: string;
   briefRows: BriefRow[];
   stats: Stat[];
+  totalOtbs: number;
+  hasData: boolean;
 }
 
-export function useLandingInsights(input: Input): Output {
-  const { todayMs, periods, annual, allocated, overallBudget } = input;
-
+export function useLandingInsights({ rows, isLoading }: Input): Output {
   return useMemo(() => {
-    const allocatedPct = overallBudget > 0 ? Math.round((allocated / overallBudget) * 100) : 0;
+    const counts = countByStage(rows);
+    const totalOtbs = rows.length;
+    const finalisedPct = totalOtbs > 0 ? Math.round((counts.final_approved / totalOtbs) * 100) : 0;
 
-    const dueThisWeek = periods.filter((p) => {
-      const plan = annual?.periods[p.key];
-      if (!plan) return false;
-      if (plan.state === OTB_STATES.LOCKED || plan.state === OTB_STATES.SKIPPED) return false;
-      const d = daysBetween(p.lock_deadline_iso, todayMs);
-      return d >= 0 && d <= 7;
-    }).length;
+    // Action-oriented counts — each one is "the next thing someone needs to do"
+    // at that stage. The home page makes those visible at a glance.
+    const pendingVp = counts.released;                  // released but no VP yet
+    const pendingOp = counts.value_planned;             // VP done, no OP yet
+    const pendingFinal = counts.option_planned;         // OP done, awaiting Admin
 
-    const overdueCount = periods.filter((p) => {
-      const plan = annual?.periods[p.key];
-      if (!plan) return false;
-      if (plan.state === OTB_STATES.LOCKED || plan.state === OTB_STATES.SKIPPED) return false;
-      return daysBetween(p.lock_deadline_iso, todayMs) < 0;
-    }).length;
+    const hasData = totalOtbs > 0;
+    const heroHeadline = buildHeroHeadline({ hasData, isLoading, pendingFinal, pendingVp });
+    const heroSummary = buildHeroSummary({ hasData, totalOtbs, pendingVp, pendingOp, pendingFinal, finalised: counts.final_approved });
 
-    // TODO-DATA: sales-vs-plan MTD wired to a real selector once execution
-    // metrics land. Stubbed for now.
-    const salesMtdDelta = 4.2;
-    // TODO-DATA: designer briefs once Range/Design module ships.
-    const pendingBriefs = 12;
+    const briefRingSubtitle = hasData
+      ? `${counts.final_approved} of ${totalOtbs} OTBs finalised`
+      : 'No OTBs in the pipeline yet';
 
-    const heroHeadline = buildHeroHeadline({ hasPlan: !!annual, dueThisWeek, overdueCount });
-    const heroSummary = buildHeroSummary({ hasPlan: !!annual, allocatedPct, dueThisWeek, overdueCount });
-
-    // Brief widget — uses real values when a plan exists, else demo fallbacks
-    // so the hero looks alive in client demos before any plan has been created.
-    const totalPeriods = periods.length || 12;
-    const lockedCount = periods.filter((p) => {
-      const plan = annual?.periods[p.key];
-      return plan?.state === OTB_STATES.LOCKED || plan?.state === OTB_STATES.SKIPPED;
-    }).length;
-    const lockedPct = totalPeriods > 0 ? Math.round((lockedCount / totalPeriods) * 100) : 0;
-
-    const briefRingPct = annual ? lockedPct : 42;
-    const briefRingSubtitle = annual ? 'of periods locked' : 'of demo plan locked';
-
-    const briefRows: BriefRow[] = annual
+    const briefRows: BriefRow[] = hasData
       ? [
-          { label: 'Plan allocated',     value: `${allocatedPct}%`,                   tone: 'accent' },
-          { label: 'Periods locked',     value: `${lockedCount} of ${totalPeriods}`,  tone: 'neutral' },
-          { label: 'Releases this week', value: `${dueThisWeek}`,                     tone: dueThisWeek > 0 ? 'accent' : 'neutral' },
-          { label: 'Overdue locks',      value: `${overdueCount}`,                    tone: overdueCount > 0 ? 'down' : 'up' },
+          { label: 'Total OTBs',     value: `${totalOtbs}`,    tone: 'neutral' },
+          { label: 'Released',       value: `${counts.released + counts.value_planned + counts.option_planned + counts.final_approved}`, tone: 'accent' },
+          { label: 'Value-planned',  value: `${counts.value_planned + counts.option_planned + counts.final_approved}`, tone: 'accent' },
+          { label: 'Awaiting Admin', value: `${pendingFinal}`, tone: pendingFinal > 0 ? 'down' : 'up' },
         ]
       : [
-          { label: 'Plan allocated',     value: '68%',         tone: 'accent' },
-          { label: 'Periods locked',     value: '5 of 12',     tone: 'neutral' },
-          { label: 'Releases this week', value: '3',           tone: 'accent' },
-          { label: 'Overdue locks',      value: '0',           tone: 'up' },
+          { label: 'Total OTBs',     value: '0',   tone: 'neutral' },
+          { label: 'Released',       value: '0',   tone: 'neutral' },
+          { label: 'Value-planned',  value: '0',   tone: 'neutral' },
+          { label: 'Awaiting Admin', value: '0',   tone: 'neutral' },
         ];
 
     const stats: Stat[] = [
       {
-        label: 'Plan allocated',
-        value: allocatedPct,
-        suffix: '%',
-        formatter: 'percent',
-        delta: annual ? `${formatShortMoney(allocated)} / ${formatShortMoney(overallBudget)}` : 'No plan yet',
+        label: 'Total OTBs',
+        value: totalOtbs,
+        formatter: 'number',
+        delta: hasData ? `${counts.final_approved} finalised` : 'No OTBs yet',
         deltaTone: 'neutral',
         tone: 'primary',
       },
       {
-        label: 'Releases this week',
-        value: dueThisWeek,
+        label: 'Pending Value Plan',
+        value: pendingVp,
         formatter: 'number',
-        delta: overdueCount > 0 ? `${overdueCount} overdue` : 'On schedule',
-        deltaTone: overdueCount > 0 ? 'down' : 'up',
-        tone: overdueCount > 0 ? 'warning' : 'success',
+        delta: pendingVp > 0 ? 'buyers to act' : 'all caught up',
+        deltaTone: pendingVp > 0 ? 'down' : 'up',
+        tone: pendingVp > 0 ? 'warning' : 'success',
       },
       {
-        label: 'Sales vs plan (MTD)',
-        value: salesMtdDelta,
-        suffix: '%',
-        formatter: 'percent',
-        delta: 'vs plan',
-        deltaTone: 'up',
-        tone: 'success',
+        label: 'Pending Option Plan',
+        value: pendingOp,
+        formatter: 'number',
+        delta: pendingOp > 0 ? 'buyers + designer' : 'all caught up',
+        deltaTone: pendingOp > 0 ? 'down' : 'up',
+        tone: pendingOp > 0 ? 'warning' : 'success',
       },
       {
-        label: 'Designer briefs pending',
-        value: pendingBriefs,
+        label: 'Awaiting Admin',
+        value: pendingFinal,
         formatter: 'number',
-        delta: 'awaiting design',
-        deltaTone: 'neutral',
-        tone: 'info',
+        delta: pendingFinal > 0 ? 'final approval' : 'no backlog',
+        deltaTone: pendingFinal > 0 ? 'down' : 'up',
+        tone: pendingFinal > 0 ? 'info' : 'success',
       },
     ];
 
-    return { heroHeadline, heroSummary, dueThisWeek, briefRingPct, briefRingSubtitle, briefRows, stats };
-  }, [todayMs, periods, annual, allocated, overallBudget]);
+    return {
+      heroHeadline,
+      heroSummary,
+      briefRingPct: finalisedPct,
+      briefRingSubtitle,
+      briefRows,
+      stats,
+      totalOtbs,
+      hasData,
+    };
+  }, [rows, isLoading]);
+}
+
+type StageCounts = Record<LifecycleState, number>;
+
+function countByStage(rows: OtbRowView[]): StageCounts {
+  const out: StageCounts = {
+    planned: 0,
+    released: 0,
+    value_planned: 0,
+    option_planned: 0,
+    final_approved: 0,
+  };
+  for (const r of rows) {
+    out[r.lifecycle_state] = (out[r.lifecycle_state] ?? 0) + 1;
+  }
+  return out;
 }
 
 function buildHeroHeadline(args: {
-  hasPlan: boolean;
-  dueThisWeek: number;
-  overdueCount: number;
+  hasData: boolean;
+  isLoading: boolean;
+  pendingFinal: number;
+  pendingVp: number;
 }): string {
-  if (!args.hasPlan) return 'Shape the season — start with a plan.';
-  if (args.overdueCount > 0) return `Decisions are waiting — ${args.overdueCount} overdue.`;
-  if (args.dueThisWeek > 0) return `This week's locks — ${args.dueThisWeek} on the table.`;
-  return 'You shape the season — the plan keeps the team aligned.';
+  if (args.isLoading) return 'Loading your pipeline…';
+  if (!args.hasData) return 'Shape the season — start with an annual plan.';
+  if (args.pendingFinal > 0)
+    return `Admin queue — ${args.pendingFinal} OTB${args.pendingFinal === 1 ? '' : 's'} awaiting final approval.`;
+  if (args.pendingVp > 0)
+    return `Released — ${args.pendingVp} OTB${args.pendingVp === 1 ? '' : 's'} ready for value planning.`;
+  return 'Pipeline is moving — every released OTB is being planned.';
 }
 
 function buildHeroSummary(args: {
-  hasPlan: boolean;
-  allocatedPct: number;
-  dueThisWeek: number;
-  overdueCount: number;
+  hasData: boolean;
+  totalOtbs: number;
+  pendingVp: number;
+  pendingOp: number;
+  pendingFinal: number;
+  finalised: number;
 }): string {
-  if (!args.hasPlan) {
-    return 'No annual plan yet. Set the budget envelope and we will cascade it across periods, brands, and categories.';
+  if (!args.hasData) {
+    return 'No annual plan yet. Create one in OTB Planning and we will cascade through release, value, option, and final approval.';
   }
-  const parts: string[] = [];
-  if (args.dueThisWeek > 0) parts.push(`${args.dueThisWeek} period${args.dueThisWeek === 1 ? '' : 's'} to lock this week`);
-  if (args.overdueCount > 0) parts.push(`${args.overdueCount} overdue`);
-  parts.push(`plan is ${args.allocatedPct}% allocated`);
+  const parts: string[] = [`${args.totalOtbs} OTB${args.totalOtbs === 1 ? '' : 's'} in pipeline`];
+  if (args.pendingVp > 0) parts.push(`${args.pendingVp} pending VP`);
+  if (args.pendingOp > 0) parts.push(`${args.pendingOp} pending OP`);
+  if (args.pendingFinal > 0) parts.push(`${args.pendingFinal} awaiting Admin`);
+  parts.push(`${args.finalised} finalised`);
   return parts.join(' · ') + '.';
-}
-
-function formatShortMoney(n: number): string {
-  if (n >= 1e7) return `₹${(n / 1e7).toFixed(1)}Cr`;
-  if (n >= 1e5) return `₹${(n / 1e5).toFixed(1)}L`;
-  if (n >= 1e3) return `₹${(n / 1e3).toFixed(0)}K`;
-  return `₹${n}`;
 }

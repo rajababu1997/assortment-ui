@@ -12,6 +12,7 @@
  * service would return; swapping to a real API later is a one-line change.
  */
 
+import { useState } from 'react';
 import {
   Activity,
   AlertTriangle,
@@ -19,6 +20,8 @@ import {
   ArrowUp,
   Banknote,
   CalendarHeart,
+  ChevronDown,
+  ChevronUp,
   Compass,
   Percent,
   Search,
@@ -47,14 +50,25 @@ export function SalesInsightsSection({
   currency: BaseCurrency;
   bandMaster: Record<MrpBand['id'], MrpBand>;
 }) {
+  // Default collapsed — LY data is reference, not the primary editor action.
+  const [open, setOpen] = useState(false);
   return (
     <section
       className="flex shrink-0 flex-col overflow-hidden rounded-xl border"
       style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
     >
-      {/* ── Section header ─────────────────────────────────────────────────── */}
+      {/* ── Section header (click anywhere to toggle) ────────────────────── */}
       <div
-        className="flex items-start justify-between gap-3 border-b px-3.5 py-2.5"
+        role="button"
+        tabIndex={0}
+        onClick={() => setOpen((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setOpen((v) => !v);
+          }
+        }}
+        className={`flex cursor-pointer items-start justify-between gap-3 px-3.5 py-2.5 transition-colors hover:bg-[var(--color-surface-alt,#f1f5f9)] ${open ? 'border-b' : ''}`}
         style={{
           borderColor: 'var(--color-divider)',
           background: 'var(--color-surface-alt, #f8fafc)',
@@ -80,17 +94,20 @@ export function SalesInsightsSection({
           </div>
         </div>
         <span
-          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
+          className="flex h-6 w-6 items-center justify-center rounded-md border"
           style={{
+            borderColor: 'var(--color-divider)',
             background: 'var(--color-surface)',
-            border: '1px solid var(--color-divider)',
-            color: 'var(--color-text-tertiary)',
+            color: 'var(--color-text-secondary)',
           }}
+          aria-hidden
         >
-          demo data
+          {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
         </span>
       </div>
 
+      {open && (
+        <>
       {/* ── KPI strip (aggregate numbers) ──────────────────────────────────── */}
       <div
         className="flex flex-wrap items-stretch gap-2 border-b px-3 py-2.5"
@@ -188,6 +205,8 @@ export function SalesInsightsSection({
           tone="neutral"
         />
       </div>
+        </>
+      )}
     </section>
   );
 }
@@ -312,11 +331,9 @@ function BandPerformanceCard({
   const mdTone: 'success' | 'neutral' | 'danger' =
     band.markdown_depth_pct <= 15 ? 'success' : band.markdown_depth_pct <= 28 ? 'neutral' : 'danger';
 
-  const accent = isTop
-    ? 'rgba(16,185,129,0.45)'
-    : isWorst
-      ? 'rgba(245,158,11,0.45)'
-      : 'var(--color-divider)';
+  // Border stays neutral for every tier — the Top / Weak pills inside the
+  // card carry the highlight, so coloring the border too is visual noise.
+  const accent = 'var(--color-divider)';
   const flagBg = isTop ? 'rgba(16,185,129,0.14)' : isWorst ? 'rgba(245,158,11,0.14)' : null;
   const flagFg = isTop ? '#047857' : isWorst ? '#b45309' : null;
 

@@ -9,14 +9,11 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
-  CalendarRange,
   CheckCircle2,
   CircleDashed,
   Layers,
   ListChecks,
-  PackageSearch,
   Sparkles,
-  TrendingUp,
 } from 'lucide-react';
 import { Button, SpinnerCenter } from '@/components/primitives';
 import { OTB_STATES } from '@/features/otb/constants';
@@ -50,7 +47,26 @@ export default function ValuePlansListPage() {
     }
   }, [apiAnnual.data, dispatch]);
 
-  const apiVps = useApiAllValuePlanRows();
+  // Date range = union of every annual plan window. Sending a bounded range
+  // (rather than calling `/otb/value/all` unbounded) lets the server's
+  // date-overlap filter narrow the result set to VPs the page might display
+  // — cheaper round-trip, and surfaces the date scope in the network panel.
+  const vpDateRange = useMemo(() => {
+    if (plans.length === 0) return null;
+    let from = plans[0].plan_start_iso;
+    let to = plans[0].plan_end_iso;
+    for (const p of plans) {
+      if (p.plan_start_iso < from) from = p.plan_start_iso;
+      if (p.plan_end_iso > to) to = p.plan_end_iso;
+    }
+    return { from, to };
+  }, [plans]);
+
+  const apiVps = useApiAllValuePlanRows(
+    vpDateRange?.from,
+    vpDateRange?.to,
+    { enabled: !!vpDateRange },
+  );
   useEffect(() => {
     if (!apiVps.data) return;
     // The All-VPs decorated rows include enough to reconstruct ValuePlan
@@ -75,25 +91,6 @@ export default function ValuePlansListPage() {
     () => plans.map((plan) => deriveStats(plan, valuePlans)),
     [plans, valuePlans],
   );
-
-  // ── Aggregates for the info strip ──────────────────────────────────────
-  const totals = useMemo(() => {
-    let totalPlans = plans.length;
-    let plansWithRows = 0;
-    let plansComplete = 0;
-    let marginSum = 0;
-    let marginCount = 0;
-    for (const s of planStats) {
-      if (s.releasedCount > 0) plansWithRows += 1;
-      if (s.isComplete) plansComplete += 1;
-      if (s.avgMargin > 0) {
-        marginSum += s.avgMargin;
-        marginCount += 1;
-      }
-    }
-    const avgMargin = marginCount > 0 ? marginSum / marginCount : 0;
-    return { totalPlans, plansWithRows, plansComplete, avgMargin };
-  }, [planStats, plans.length]);
 
   if (isLoading || apiAnnual.isLoading || apiVps.isLoading || !company) {
     return <SpinnerCenter />;
@@ -143,45 +140,9 @@ export default function ValuePlansListPage() {
           </Button>
         </div>
 
-        {/* ── Info strip ─────────────────────────────────────────────────── */}
-        <div
-          className="flex flex-wrap items-stretch gap-2 border-b px-3 py-2.5"
-          style={{
-            borderColor: 'var(--color-divider)',
-            background: 'var(--color-surface-alt, #f8fafc)',
-          }}
-        >
-          <InfoTile
-            icon={<PackageSearch size={13} />}
-            label="Plans"
-            value={String(totals.totalPlans)}
-            tone="accent"
-          />
-          <InfoTile
-            icon={<CalendarRange size={13} />}
-            label="With released rows"
-            value={String(totals.plansWithRows)}
-            tone={totals.plansWithRows > 0 ? 'success' : 'muted'}
-          />
-          <InfoTile
-            icon={<CheckCircle2 size={13} />}
-            label="Fully planned"
-            value={String(totals.plansComplete)}
-            tone={totals.plansComplete > 0 ? 'success' : 'muted'}
-          />
-          <div className="ml-auto flex flex-wrap items-stretch gap-2">
-            <InfoTile
-              icon={<TrendingUp size={13} />}
-              label="Avg margin"
-              value={totals.avgMargin > 0 ? `${totals.avgMargin.toFixed(1)}%` : '—'}
-              tone={totals.avgMargin > 0 ? 'success' : 'muted'}
-            />
-          </div>
-        </div>
-
         {/* ── Body ──────────────────────────────────────────────────────── */}
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">
-          {totals.totalPlans === 0 ? (
+          {plans.length === 0 ? (
             <EmptyHero onGoOtb={() => navigate('/otb')} />
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -273,35 +234,30 @@ function PlanCard({
 
   return (
     <div
-      className="group flex flex-col gap-3 overflow-hidden rounded-xl border p-3 transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-md"
       style={{
         borderColor: isComplete ? 'rgba(16,185,129,0.45)' : 'var(--color-divider)',
         background: noReleases ? 'var(--color-surface-alt, #f8fafc)' : 'var(--color-surface)',
         opacity: noReleases ? 0.85 : 1,
       }}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <h2
-              className="truncate text-[15px] font-bold leading-tight"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              {plan.name}
-            </h2>
-            {isComplete && <Sparkles size={12} style={{ color: '#047857' }} />}
-          </div>
-          <p className="mt-1 text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
-            {fmtDate(plan.plan_start_iso)} → {fmtDate(plan.plan_end_iso)}
-          </p>
-          <p
-            className="mt-1 font-mono text-[9.5px] tabular-nums"
-            style={{ color: 'var(--color-text-tertiary)' }}
-            title={plan.plan_id}
+      {/* Soft-blue header — year, status, (no delete here; value plans can't be removed at the plan level) */}
+      <div
+        className="flex items-center justify-between gap-2 border-b px-3 py-2"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(96,165,250,0.12), rgba(167,139,250,0.10))',
+          borderColor: 'rgba(96,165,250,0.22)',
+        }}
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <h2
+            className="truncate text-[15px] font-bold leading-tight"
+            style={{ color: 'var(--color-text-primary)' }}
           >
-            {plan.plan_id}
-          </p>
+            {plan.name}
+          </h2>
+          {isComplete && <Sparkles size={12} style={{ color: '#047857' }} />}
         </div>
         {isComplete ? (
           <span
@@ -319,6 +275,26 @@ function PlanCard({
           </span>
         ) : null}
       </div>
+
+      {/* Body — date range + highlighted plan-id chip + progress + footer */}
+      <div className="flex flex-1 flex-col gap-3 p-3">
+        <div>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
+            {fmtDate(plan.plan_start_iso)} → {fmtDate(plan.plan_end_iso)}
+          </p>
+          {/* Plan id chip — highlighted (matches OTB Plans card styling). */}
+          <span
+            className="mt-1.5 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[10.5px] font-semibold tabular-nums"
+            style={{
+              background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+              borderColor: 'color-mix(in srgb, var(--color-primary) 28%, var(--color-divider))',
+              color: 'var(--color-primary)',
+            }}
+            title={plan.plan_id}
+          >
+            {plan.plan_id}
+          </span>
+        </div>
 
       {/* Progress bar (only when there are released rows) */}
       {!noReleases && (
@@ -386,6 +362,7 @@ function PlanCard({
           </Button>
         )}
       </div>
+      </div>
     </div>
   );
 }
@@ -423,88 +400,7 @@ function EmptyHero({ onGoOtb }: { onGoOtb: () => void }) {
   );
 }
 
-// ── Presentational helpers (info tile / stat) ─────────────────────────────
-
-type Tone = 'neutral' | 'muted' | 'accent' | 'success' | 'warning' | 'danger';
-
-const TONE: Record<Tone, { bg: string; border: string; iconBg: string; fg: string }> = {
-  neutral: {
-    bg: 'var(--color-surface)',
-    border: 'var(--color-divider)',
-    iconBg: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-    fg: 'var(--color-text-primary)',
-  },
-  muted: {
-    bg: 'var(--color-surface)',
-    border: 'var(--color-divider)',
-    iconBg: 'var(--color-surface-alt, #f1f5f9)',
-    fg: 'var(--color-text-secondary)',
-  },
-  accent: {
-    bg: 'color-mix(in srgb, var(--color-primary) 8%, var(--color-surface))',
-    border: 'color-mix(in srgb, var(--color-primary) 30%, var(--color-divider))',
-    iconBg: 'color-mix(in srgb, var(--color-primary) 16%, transparent)',
-    fg: 'var(--color-primary)',
-  },
-  success: {
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.35)',
-    iconBg: 'rgba(16,185,129,0.16)',
-    fg: '#047857',
-  },
-  warning: {
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.35)',
-    iconBg: 'rgba(245,158,11,0.16)',
-    fg: '#b45309',
-  },
-  danger: {
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.35)',
-    iconBg: 'rgba(239,68,68,0.16)',
-    fg: '#b91c1c',
-  },
-};
-
-function InfoTile({
-  icon,
-  label,
-  value,
-  tone = 'neutral',
-}: {
-  icon?: React.ReactNode;
-  label: string;
-  value: string;
-  tone?: Tone;
-}) {
-  const palette = TONE[tone];
-  return (
-    <div
-      className="flex min-w-[140px] items-center gap-2 rounded-lg border px-2.5 py-1.5"
-      style={{ background: palette.bg, borderColor: palette.border }}
-    >
-      {icon && (
-        <span
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
-          style={{ background: palette.iconBg, color: palette.fg }}
-        >
-          {icon}
-        </span>
-      )}
-      <div className="min-w-0 leading-tight">
-        <div
-          className="text-[9.5px] font-semibold uppercase tracking-[0.12em]"
-          style={{ color: 'var(--color-text-tertiary)' }}
-        >
-          {label}
-        </div>
-        <div className="mt-0.5 text-[12px] font-semibold tabular-nums" style={{ color: palette.fg }}>
-          {value}
-        </div>
-      </div>
-    </div>
-  );
-}
+// ── Presentational helpers ────────────────────────────────────────────────
 
 function Stat({
   label,

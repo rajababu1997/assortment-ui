@@ -13,9 +13,7 @@ import {
   BarChart3,
   Layers,
   Grid3x3,
-  Palette,
-  ShoppingCart,
-  ArrowRight,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -31,12 +29,11 @@ interface Phase {
 }
 
 const PHASES: Phase[] = [
-  { id: 'otb',    step: '01', title: 'OTB Planning',   description: 'Annual budget. Periodic release.',     icon: Calculator,   href: '/otb',     status: 'live', needsSetup: true },
-  { id: 'value',  step: '02', title: 'Value Planning', description: 'MRP × cost cascade per released OTB.',  icon: Layers,       href: '/value',   status: 'live' },
-  { id: 'option', step: '03', title: 'Option Planning',description: 'SKU and option counts per category.',  icon: Grid3x3,      href: null,       status: 'soon' },
-  { id: 'range',  step: '04', title: 'Range & Design', description: 'Line list. Designer briefs. Range lock.', icon: Palette,   href: null,       status: 'soon' },
-  { id: 'buying', step: '05', title: 'Buying',         description: 'Vendor allocation. POs. Lead-time.',   icon: ShoppingCart, href: null,       status: 'soon' },
-  { id: 'history',step: '06', title: 'Sales History',  description: 'YoY, occasion lifts, weekly velocity.',icon: BarChart3,    href: '/history', status: 'live' },
+  { id: 'otb',    step: '01', title: 'OTB Planning',    description: 'Annual budget. Periodic release.',          icon: Calculator,  href: '/otb',     status: 'live', needsSetup: true },
+  { id: 'value',  step: '02', title: 'Value Planning',  description: 'MRP × cost cascade per released OTB.',      icon: Layers,      href: '/value',   status: 'live' },
+  { id: 'option', step: '03', title: 'Option Planning', description: 'Fabric × Fit × Composition per band.',      icon: Grid3x3,     href: '/option',  status: 'live' },
+  { id: 'final',  step: '04', title: 'Final Approval',  description: 'Admin closes each OTB after option plan.',  icon: ShieldCheck, href: '/otb/all', status: 'live' },
+  { id: 'history',step: '05', title: 'Sales History',   description: 'YoY, occasion lifts, weekly velocity.',     icon: BarChart3,   href: '/history', status: 'live' },
 ];
 
 const ITEM = {
@@ -62,9 +59,6 @@ export function LifecycleNavigator({ setupComplete }: Props) {
             From budget envelope to in-store buy.
           </h2>
         </div>
-        <span className="hidden text-sm md:inline" style={{ color: 'var(--color-text-secondary)' }}>
-          2 of 6 phases live · 4 launching soon
-        </span>
       </div>
 
       {/* Horizontal scroll on mobile, grid on desktop */}
@@ -79,7 +73,7 @@ export function LifecycleNavigator({ setupComplete }: Props) {
           }}
         />
 
-        <div className="-mx-2 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-6 md:gap-3 md:overflow-visible">
+        <div className="-mx-2 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-5 md:gap-3 md:overflow-visible">
           {PHASES.map((p, i) => {
             const Icon = p.icon;
             const disabled = p.status === 'soon' || !p.href;
@@ -172,14 +166,6 @@ export function LifecycleNavigator({ setupComplete }: Props) {
                   </p>
                 </div>
 
-                {!disabled && (
-                  <span
-                    className="mt-auto inline-flex items-center gap-1 text-xs font-semibold transition-transform group-hover:translate-x-1"
-                    style={{ color: 'var(--color-primary)' }}
-                  >
-                    Open <ArrowRight size={11} />
-                  </span>
-                )}
               </button>
             );
           })}

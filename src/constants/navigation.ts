@@ -8,31 +8,50 @@ import type { NavigationItem } from '@/types/navigation';
  */
 export const SIDEBAR_NAV: NavigationItem[] = [
   { id: 'home', title: 'Home', type: 'basic', icon: 'home', link: '/home' },
-  { id: 'setup', title: 'OTB Setup', type: 'basic', icon: 'sliders', link: '/setup' },
-  { id: 'otb', title: 'OTB Planning', type: 'basic', icon: 'layoutDashboard', link: '/otb' },
+  {
+    id: 'otb',
+    title: 'OTB',
+    type: 'collapsable',
+    icon: 'layoutDashboard',
+    children: [
+      { id: 'otb-plans', title: 'OTB Planning', type: 'basic', link: '/otb' },
+      { id: 'otb-all', title: 'OTBs List', type: 'basic', link: '/otb/all' },
+    ],
+  },
   {
     id: 'value',
     title: 'Value Planning',
     type: 'collapsable',
     icon: 'layers',
     children: [
-      { id: 'value-plans', title: 'Annual Plans', type: 'basic', link: '/value' },
-      { id: 'value-all', title: 'All Value Plans', type: 'basic', link: '/value/all' },
+      { id: 'value-plans', title: 'OTB Value Planning', type: 'basic', link: '/value' },
+      { id: 'value-all', title: 'OTB Value Plan List', type: 'basic', link: '/value/all' },
     ],
   },
-  { id: 'history', title: 'Sales History', type: 'basic', icon: 'barChart', link: '/history' },
   {
-    id: 'examples',
-    title: 'Examples',
+    id: 'option',
+    title: 'Option Planning',
     type: 'collapsable',
-    icon: 'layoutDashboard',
+    icon: 'packageCheck',
     children: [
-      { id: 'sample-list', title: 'Sample CRUD', type: 'basic', link: '/sample' },
+      { id: 'option-plans', title: 'OTB Option Planning', type: 'basic', link: '/option' },
+      { id: 'option-all', title: 'OTB Option Plan List', type: 'basic', link: '/option/all' },
     ],
   },
+  
+  // {
+  //   id: 'examples',
+  //   title: 'Examples',
+  //   type: 'collapsable',
+  //   icon: 'layoutDashboard',
+  //   children: [
+  //     { id: 'sample-list', title: 'Sample CRUD', type: 'basic', link: '/sample' },
+  //   ],
+  // },
   { id: 'divider-1', title: '', type: 'divider' },
-  { id: 'profile', title: 'Profile', type: 'basic', icon: 'user', link: '/user-profile' },
-  { id: 'settings', title: 'Settings', type: 'basic', icon: 'settings', link: '/settings' },
+  { id: 'history', title: 'Sales History', type: 'basic', icon: 'barChart', link: '/history' },
+  // { id: 'profile', title: 'Profile', type: 'basic', icon: 'user', link: '/user-profile' },
+  // { id: 'settings', title: 'Settings', type: 'basic', icon: 'settings', link: '/settings' },
 ];
 
 export function getHomePage(): string {

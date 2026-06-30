@@ -212,7 +212,7 @@ export function AllValuePlansTable({
   const columns: ColumnConfig<TableRow>[] = useMemo(() => {
     const currency = (company?.base_currency ?? 'INR') as BaseCurrency;
     return [
-      { field: 'otb_code', header: 'OTB Code', copyable: true, minWidth: 180, cardRole: 'title' },
+      { field: 'otb_code', header: 'OTB Code', copyable: true, minWidth: 260, cardRole: 'title' },
       { field: 'brand_name', header: 'Brand', minWidth: 110 },
       { field: 'category_name', header: 'Category', minWidth: 130 },
       { field: 'period', header: 'Period', minWidth: 90 },
