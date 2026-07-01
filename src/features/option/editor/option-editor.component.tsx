@@ -70,7 +70,13 @@ import {
   calcProductionQty,
 } from '../utils/calc';
 import { validateHard } from '../utils/hardValidation';
-import { generateOptionPlanInsights } from '../mockData/salesInsights';
+import { useOptionPlanInsights } from '@/features/sales/useInsights';
+import type { OptionPlanInsights } from '@/features/sales/insightTypes';
+import { useOptionRecommendation } from '@/features/recommendation/useRecommendation';
+import { SuggestButton } from '@/features/recommendation/components/SuggestButton';
+import { WhyAiButton } from '@/features/recommendation/components/WhyAiButton';
+import { ExplanationDrawer, type SectionedExplanation } from '@/features/recommendation/components/ExplanationDrawer';
+import type { OptionPlanRecommendation } from '@/features/recommendation/types';
 import type { OptionBand, OptionLine, OptionPlan } from '../types';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -186,6 +192,8 @@ export default function OptionPlanEditorPage() {
         budget_pct: b.budget_pct,
         avg_cost: b.avg_cost,
       }))}
+      brandUuid={vp.brand_uuid}
+      categoryUuid={vp.category_uuid}
       categoryName={category.name}
       categoryBands={category.bands}
       periodLabel={periodLabel}
@@ -253,6 +261,8 @@ interface ShellProps {
   op: OptionPlan | null;
   vpBudget: number;
   vpBands: Array<{ band_id: MrpBand['id']; budget_pct: number; avg_cost: number }>;
+  brandUuid: string;
+  categoryUuid: string;
   categoryName: string;
   categoryBands: MrpBand[];
   periodLabel: string;
@@ -268,8 +278,8 @@ interface ShellProps {
 
 function EditorShell(props: ShellProps) {
   const {
-    op, vpBudget, vpBands, categoryName, categoryBands, periodLabel, otbCode,
-    onBack, saving, onSave,
+    op, vpBudget, vpBands, brandUuid, categoryUuid, categoryName, categoryBands,
+    periodLabel, otbCode, planId, onBack, saving, onSave,
   } = props;
 
   const editable = !op || op.state === OP_STATES.DRAFT || op.state === OP_STATES.REVISIONS_REQUESTED;
@@ -291,6 +301,12 @@ function EditorShell(props: ShellProps) {
   const [modal, setModal] = useState<null | 'approve' | 'revisions'>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const todayMs = useDemoToday();
+
+  // ── AI Suggest ───────────────────────────────────────────────────────────
+  const recMut = useOptionRecommendation();
+  const [rec, setRec] = useState<OptionPlanRecommendation | null>(null);
+  const [recGeneratedAt, setRecGeneratedAt] = useState<number | null>(null);
+  const [recDrawerOpen, setRecDrawerOpen] = useState(false);
 
   // ── Draft state. Hydrate from OP if present, else seed from VP.
   const [draft, setDraft] = useState<OptionBand[]>(() =>
@@ -318,17 +334,16 @@ function EditorShell(props: ShellProps) {
     });
   }, [draft, vpBands, vpBudget]);
 
-  // ── Sales Insights — deterministic per OTB code.
-  const insights = useMemo(
-    () =>
-      generateOptionPlanInsights({
-        otb_code: otbCode,
-        ly_period_label: shiftPeriodLabelBackOneYear(periodLabel),
-        category_label: categoryName,
-        band_ids: categoryBands.map((b) => b.id),
-      }),
-    [otbCode, periodLabel, categoryName, categoryBands],
-  );
+  // ── Sales Insights — fetched from `/sales/*`. Same data the dashboard
+  // reads. Returns `undefined` while in flight; downstream consumers
+  // already accept the undefined case (see HistoricalSalesInsights props).
+  const { data: insights } = useOptionPlanInsights({
+    brand_uuid: brandUuid,
+    category_uuid: categoryUuid,
+    category_label: categoryName,
+    ly_period_label: shiftPeriodLabelBackOneYear(periodLabel),
+    band_ids: categoryBands.map((b) => b.id),
+  });
 
   // ── Mutation handlers (state setters).
   const setBandAvg = (bandId: MrpBand['id'], val: number) => {
@@ -347,6 +362,53 @@ function EditorShell(props: ShellProps) {
         return { ...b, lines: qty > 0 ? [...others, next] : others };
       }),
     );
+  };
+
+  // ── Suggest handler — replaces draft bands with AI-recommended ones.
+  const handleSuggest = async () => {
+    const hasEntries = draft.some(
+      (b) => (b.avg_production_qty_per_option ?? 0) > 0 || b.lines.some((l) => (l.qty ?? 0) > 0),
+    );
+    if (hasEntries && !window.confirm(
+      'This will replace your current entries with system suggestions. Continue?',
+    )) return;
+    try {
+      const result = await recMut.mutateAsync({ planUuid: planId, otbCode });
+      setRec(result);
+      setRecGeneratedAt(Date.now());
+      // Map recommended bands → draft OptionBand[]. Categories that didn't
+      // get a recommendation keep their existing draft entries (preserves
+      // 0% bands).
+      const next: OptionBand[] = categoryBands.map((master) => {
+        const r = result.bands.find((rb) => rb.bandId === master.id);
+        const existing = draft.find((b) => b.band_id === master.id);
+        if (!r) return existing ?? {
+          band_id: master.id,
+          avg_production_qty_per_option: 0,
+          option_plan_qty: 0,
+          production_qty_snapshot: 0,
+          lines: [],
+        };
+        return {
+          band_id: master.id,
+          avg_production_qty_per_option: r.avgProductionQtyPerOption,
+          option_plan_qty: Number(r.optionPlanQty),
+          production_qty_snapshot: Number(r.productionQtySnapshot),
+          lines: r.lines.map((l) => ({
+            option_type: l.optionType,
+            sub_type_key: l.subTypeKey,
+            sub_type_label: l.subTypeLabel,
+            qty: Number(l.qty),
+          })),
+        };
+      });
+      setDraft(next);
+      toast.success('System suggestions applied — review and edit any field.');
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[option-editor] suggest failed', err);
+      toast.error('Could not generate suggestions — try again');
+    }
   };
 
   // ── Validation. Reused for the footer summary + Submit gate.
@@ -484,6 +546,13 @@ function EditorShell(props: ShellProps) {
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            {writable && isBuyer && (
+              <SuggestButton
+                loading={recMut.isPending}
+                hasResult={!!rec}
+                onClick={handleSuggest}
+              />
+            )}
             <Button
               variant="secondary"
               size="sm"
@@ -498,6 +567,12 @@ function EditorShell(props: ShellProps) {
               <span className="rounded-full px-2 py-0.5" style={{ background: 'var(--color-surface-alt, #f1f5f9)' }}>
                 Not started
               </span>
+            )}
+            {rec && recGeneratedAt && (
+              <WhyAiButton
+                generatedAtMs={recGeneratedAt}
+                onClick={() => setRecDrawerOpen(true)}
+              />
             )}
           </div>
         </div>
@@ -537,8 +612,10 @@ function EditorShell(props: ShellProps) {
 
           <HistoricalSalesInsights
             categoryLabel={categoryName}
-            periodLabel={`LY ${insights.ly_period_label}`}
+            periodLabel={`LY ${insights?.ly_period_label ?? ''}`}
             categoryBands={categoryBands}
+            brandUuid={brandUuid}
+            categoryUuid={categoryUuid}
           />
 
           {/* Band sections */}
@@ -558,6 +635,8 @@ function EditorShell(props: ShellProps) {
                   vpBudget={vpBudget}
                   insights={insights}
                   readOnly={!writable || inactive}
+                  brandUuid={brandUuid}
+                  categoryUuid={categoryUuid}
                   onChangeAvgPerOption={(v) => setBandAvg(band.band_id, v)}
                   onChangeLineQty={(ot, k, l, q) => setLine(band.band_id, ot, k, l, q)}
                 />
@@ -622,6 +701,21 @@ function EditorShell(props: ShellProps) {
           />
         </div>
       </Dialog>
+
+      {/* AI explanation drawer — opens after Suggest applies */}
+      <ExplanationDrawer
+        open={recDrawerOpen}
+        onClose={() => setRecDrawerOpen(false)}
+        title={`Why these option allocations — ${otbCode}`}
+        overall={rec?.summary}
+        sections={
+          rec?.bands.map((b): SectionedExplanation => ({
+            title: `${b.bandId.toUpperCase()} · ${b.optionPlanQty} options`,
+            subtitle: `${b.productionQtySnapshot.toLocaleString()} units · ${b.avgProductionQtyPerOption.toLocaleString()} per option`,
+            explanation: b.explanation,
+          })) ?? []
+        }
+      />
     </div>
   );
 }
@@ -708,14 +802,17 @@ interface BandSectionProps {
   vpPct: number;
   vpAvgCost: number;
   vpBudget: number;
-  insights: ReturnType<typeof generateOptionPlanInsights>;
+  insights: OptionPlanInsights | undefined;
   readOnly: boolean;
+  brandUuid: string;
+  categoryUuid: string;
   onChangeAvgPerOption: (v: number) => void;
   onChangeLineQty: (ot: OptionType, key: string, label: string, qty: number) => void;
 }
 
 function BandSection({
   band, master, inactive, vpPct, vpAvgCost, vpBudget, insights, readOnly,
+  brandUuid, categoryUuid,
   onChangeAvgPerOption, onChangeLineQty,
 }: BandSectionProps) {
   const bandBudget = Math.round((vpBudget * vpPct) / 100);
@@ -791,10 +888,9 @@ function BandSection({
         </div>
       </div>
 
-      {/* Last year reference — what the buyer filled in LY for this band */}
-      <div className="border-b px-3.5 py-2.5" style={{ borderColor: 'var(--color-divider)' }}>
-        <LastYearReference bandId={master.id} periodLabel={`LY ${insights.ly_period_label}`} />
-      </div>
+      {/* Last year reference hidden — engine's avg/option floor and zero-history
+          sub-type rules make the LY comparison misleading for premium bands.
+          Re-enable when the engine's per-band rules are tuned. */}
 
       {/* Sub-grids */}
       <div className="grid grid-cols-1 gap-3 px-3.5 py-3 lg:grid-cols-3">

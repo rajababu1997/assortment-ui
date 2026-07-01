@@ -1,63 +1,35 @@
 /**
- * Last-year reference strip — shows what the buyer filled into the option
- * sub-grids LY for this same category × MRP band. Read-only, dummy-data
- * only. Replaces the per-band SalesInsightsPanel: the buyer's most useful
- * anchor when deciding this season's mix is "what did we actually do last
- * year and did it work?".
+ * Last-year reference strip — shows what was actually launched in the same
+ * (brand × category × band × month) one year ago. Sourced from the
+ * `/sales/aggregate` + `/sales/attribute` mock backends via
+ * `useLastYearOptionRef`.
  */
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, History } from 'lucide-react';
 import type { MrpBand } from '@/features/otb/types';
-
-interface LyBandPlan {
-  avgPerOption: number;
-  optionPlanQty: number;
-  fabricType:  Array<{ key: string; label: string; qty: number }>;
-  fit:         Array<{ key: string; label: string; qty: number }>;
-  composition: Array<{ key: string; label: string; qty: number }>;
-}
-
-const LY_BY_BAND: Record<MrpBand['id'], LyBandPlan> = {
-  entry: {
-    avgPerOption: 400,
-    optionPlanQty: 14,
-    fabricType:  [{ key: 'plain', label: 'Plain', qty: 6 }, { key: 'printed', label: 'Printed', qty: 4 }, { key: 'checks', label: 'Checks', qty: 3 }, { key: 'strips', label: 'Strips', qty: 1 }],
-    fit:         [{ key: 'regular_fit', label: 'Regular Fit', qty: 10 }, { key: 'slim_fit', label: 'Slim Fit', qty: 4 }],
-    composition: [{ key: 'cotton_100', label: '100% Cotton', qty: 10 }, { key: 'polyester_100', label: '100% Polyester', qty: 4 }],
-  },
-  core: {
-    avgPerOption: 300,
-    optionPlanQty: 18,
-    fabricType:  [{ key: 'plain', label: 'Plain', qty: 8 }, { key: 'printed', label: 'Printed', qty: 5 }, { key: 'checks', label: 'Checks', qty: 3 }, { key: 'strips', label: 'Strips', qty: 2 }],
-    fit:         [{ key: 'regular_fit', label: 'Regular Fit', qty: 12 }, { key: 'slim_fit', label: 'Slim Fit', qty: 6 }],
-    composition: [{ key: 'cotton_100', label: '100% Cotton', qty: 13 }, { key: 'polyester_100', label: '100% Polyester', qty: 5 }],
-  },
-  upper: {
-    avgPerOption: 200,
-    optionPlanQty: 10,
-    fabricType:  [{ key: 'plain', label: 'Plain', qty: 5 }, { key: 'printed', label: 'Printed', qty: 3 }, { key: 'checks', label: 'Checks', qty: 1 }, { key: 'strips', label: 'Strips', qty: 1 }],
-    fit:         [{ key: 'regular_fit', label: 'Regular Fit', qty: 7 }, { key: 'slim_fit', label: 'Slim Fit', qty: 3 }],
-    composition: [{ key: 'cotton_100', label: '100% Cotton', qty: 8 }, { key: 'polyester_100', label: '100% Polyester', qty: 2 }],
-  },
-  statement: {
-    avgPerOption: 120,
-    optionPlanQty: 6,
-    fabricType:  [{ key: 'plain', label: 'Plain', qty: 3 }, { key: 'printed', label: 'Printed', qty: 2 }, { key: 'checks', label: 'Checks', qty: 1 }, { key: 'strips', label: 'Strips', qty: 0 }],
-    fit:         [{ key: 'regular_fit', label: 'Regular Fit', qty: 5 }, { key: 'slim_fit', label: 'Slim Fit', qty: 1 }],
-    composition: [{ key: 'cotton_100', label: '100% Cotton', qty: 5 }, { key: 'polyester_100', label: '100% Polyester', qty: 1 }],
-  },
-};
+import { useLastYearOptionRef } from '@/features/sales/useInsights';
 
 interface Props {
   bandId: MrpBand['id'];
   /** Display label, e.g. "LY Jan 2025" */
   periodLabel: string;
+  brandUuid: string;
+  categoryUuid: string;
+  /** LY period label, e.g. "Jan 2025" — used to query the backend. */
+  lyPeriodLabel: string;
 }
 
-export function LastYearReference({ bandId, periodLabel }: Props) {
-  const ly = LY_BY_BAND[bandId];
+export function LastYearReference({
+  bandId, periodLabel, brandUuid, categoryUuid, lyPeriodLabel,
+}: Props) {
   const [open, setOpen] = useState(false);
+  const { data } = useLastYearOptionRef({
+    brand_uuid: brandUuid,
+    category_uuid: categoryUuid,
+    ly_period_label: lyPeriodLabel,
+  });
+  const ly = data?.[bandId];
   if (!ly) return null;
 
   const totalUnits = ly.avgPerOption * ly.optionPlanQty;

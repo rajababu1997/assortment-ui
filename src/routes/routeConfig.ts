@@ -6,7 +6,7 @@ export interface RouteConfig {
   layout: 'authenticated' | 'fullscreen';
 }
 
-const HomePage = lazy(() => import('@/features/landing/landing.component'));
+const LandingPage = lazy(() => import('@/features/landing/landing.component'));
 const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
 const SettingsPage = lazy(() => import('@/features/settings/SettingsPage'));
 const SampleListPage = lazy(() => import('@/features/sample/SampleListPage'));
@@ -26,10 +26,15 @@ const OptionPlansListPage = lazy(() => import('@/features/option/plans-list/plan
 const OptionDashboardPage = lazy(() => import('@/features/option/dashboard/option-dashboard.component'));
 const OptionEditorPage = lazy(() => import('@/features/option/editor/option-editor.component'));
 const OptionAllPlansPage = lazy(() => import('@/features/option/all-plans/all-plans.component'));
-const HistoryPage = lazy(() => import('@/features/history/history.component'));
+const SalesHistoryPage = lazy(() => import('@/features/saleshistory/saleshistory.component'));
+const DashboardPage = lazy(() => import('@/features/dashboard/dashboard.component'));
 
 export const routes: RouteConfig[] = [
-  { path: '/home', component: HomePage, layout: 'authenticated' },
+  // `/home` is the post-login landing — point it at the OTB Dashboard.
+  // The original hero/lifecycle landing is preserved at `/landing` for now
+  // so it can be brought back later without restoring deleted code.
+  { path: '/home', component: DashboardPage, layout: 'authenticated' },
+  { path: '/landing', component: LandingPage, layout: 'authenticated' },
   { path: '/user-profile', component: ProfilePage, layout: 'authenticated' },
   { path: '/settings', component: SettingsPage, layout: 'authenticated' },
   { path: '/sample', component: SampleListPage, layout: 'authenticated' },
@@ -50,5 +55,6 @@ export const routes: RouteConfig[] = [
   { path: '/option/all', component: OptionAllPlansPage, layout: 'authenticated' },
   { path: '/option/:planId', component: OptionDashboardPage, layout: 'authenticated' },
   { path: '/option/:planId/:otbCode', component: OptionEditorPage, layout: 'authenticated' },
-  { path: '/history', component: HistoryPage, layout: 'authenticated' },
+  { path: '/saleshistory', component: SalesHistoryPage, layout: 'authenticated' },
+  { path: '/dashboard', component: DashboardPage, layout: 'authenticated' },
 ];

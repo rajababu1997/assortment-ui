@@ -7,9 +7,10 @@
  *   - Top / weak tier flags so the buyer can spot the obvious moves
  *   - Calendar + competitor trend chips for context
  *
- * The data is mocked (UI-only) and deterministic per OTB code — see
- * `mockData/salesInsights.ts`. The shape mirrors what a real sales-history
- * service would return; swapping to a real API later is a one-line change.
+ * Data is sourced from the `/sales/aggregate` mock backend via
+ * `useValueSalesInsights` — same data the Sales History dashboard reads.
+ * The component is purely presentational; the parent passes the resolved
+ * `SalesInsights` payload as a prop.
  */
 
 import { useState } from 'react';
@@ -32,7 +33,7 @@ import {
 import { fmtMoneyCompact } from '@/features/otb/utils/format';
 import type { BaseCurrency } from '@/features/setup/types';
 import type { MrpBand } from '@/features/otb/types';
-import type { BandLyPerformance, SalesInsights } from '../mockData/salesInsights';
+import type { BandLyPerformance, SalesInsights } from '@/features/sales/insightTypes';
 
 const BAND_LABEL: Record<MrpBand['id'], string> = {
   entry:     'Entry',
@@ -46,12 +47,27 @@ export function SalesInsightsSection({
   currency,
   bandMaster,
 }: {
-  insights: SalesInsights;
+  insights: SalesInsights | undefined;
   currency: BaseCurrency;
   bandMaster: Record<MrpBand['id'], MrpBand>;
 }) {
   // Default collapsed — LY data is reference, not the primary editor action.
   const [open, setOpen] = useState(false);
+  // Loading state — keep the header so the section's presence is visible,
+  // but suppress the body until data arrives.
+  if (!insights) {
+    return (
+      <section
+        className="flex shrink-0 flex-col overflow-hidden rounded-xl border"
+        style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
+      >
+        <div className="flex items-center justify-between px-4 py-2.5 text-xs"
+          style={{ color: 'var(--color-text-tertiary)' }}>
+          <span>Loading last-year sales insights…</span>
+        </div>
+      </section>
+    );
+  }
   return (
     <section
       className="flex shrink-0 flex-col overflow-hidden rounded-xl border"

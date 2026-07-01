@@ -61,4 +61,17 @@ export const API_CONFIG = {
     lifecycleTimeline:   { url: 'otb/lifecycle/{planId}/{otbCode}/timeline',       type: 'GET',  paramList: ['planId', 'otbCode'] } as ApiEndpoint,
     lifecycleFinalApprove: { url: 'otb/lifecycle/{planId}/{otbCode}/final-approve', type: 'POST', paramList: ['planId', 'otbCode'] } as ApiEndpoint,
   },
+  sales: {
+    aggregate:      { url: 'sales/aggregate',      type: 'GET' } as ApiEndpoint,
+    attribute:      { url: 'sales/attribute',      type: 'GET' } as ApiEndpoint,
+    kpi:            { url: 'sales/kpi',             type: 'GET' } as ApiEndpoint,
+    monthly:        { url: 'sales/monthly',         type: 'GET' } as ApiEndpoint,
+    calendar:       { url: 'sales/calendar',        type: 'GET' } as ApiEndpoint,
+    calendarYears:  { url: 'sales/calendar/years',  type: 'GET' } as ApiEndpoint,
+  },
+  recommendation: {
+    annual: { url: 'recommendation/annual/{planUuid}',                type: 'GET', paramList: ['planUuid'] } as ApiEndpoint,
+    value:  { url: 'recommendation/value/{planUuid}/{otbCode}',       type: 'GET', paramList: ['planUuid', 'otbCode'] } as ApiEndpoint,
+    option: { url: 'recommendation/option/{planUuid}/{otbCode}',      type: 'GET', paramList: ['planUuid', 'otbCode'] } as ApiEndpoint,
+  },
 } as const;

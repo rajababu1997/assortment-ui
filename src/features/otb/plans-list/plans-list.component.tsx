@@ -278,7 +278,7 @@ export default function OtbPlansListPage() {
         title={`Delete plan ${pendingDeletion?.name ?? ''}?`}
         description={
           'This permanently wipes the plan, all its periods, and every OTB row. ' +
-          'You can recreate the same year afterwards for a fresh demo.'
+          'You can recreate the same year afterwards.'
         }
         confirmLabel="Delete"
       />

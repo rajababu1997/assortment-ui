@@ -122,7 +122,7 @@ export function HeroBanner({
             </button>
             <button
               type="button"
-              onClick={() => navigate('/history')}
+              onClick={() => navigate('/saleshistory')}
               className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-slate-100 backdrop-blur-sm transition-all hover:bg-white/[0.08]"
             >
               <TrendingUp size={14} /> Explore sales history

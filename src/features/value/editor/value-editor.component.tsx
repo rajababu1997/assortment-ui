@@ -64,7 +64,7 @@ import { useApiAnnualPlans } from '@/features/otb/useApiAnnualPlans';
 import { hydrateAnnualPlans } from '@/store/slices/otbSlice';
 import { useCanEditValuePlan } from '@/hooks/useCanEditValuePlan';
 import { validateHard } from '../utils/hardValidation';
-import { SOFT_LIMITS, TOTAL_PCT, VP_STATES } from '../constants';
+import { DEFAULT_SPLIT, SOFT_LIMITS, TOTAL_PCT, VP_STATES } from '../constants';
 import {
   bandBudget,
   bandMargin,
@@ -79,8 +79,12 @@ import {
   planTotalUnits,
 } from '../utils/calc';
 import { bandWarnings } from '../utils/validation';
-import { mockLastYearPct } from '../mockData/lastYearSplit';
-import { generateSalesInsights } from '../mockData/salesInsights';
+import { useValueLastYearShares, useValueSalesInsights } from '@/features/sales/useInsights';
+import { useValueRecommendation } from '@/features/recommendation/useRecommendation';
+import { SuggestButton } from '@/features/recommendation/components/SuggestButton';
+import { WhyAiButton } from '@/features/recommendation/components/WhyAiButton';
+import { ExplanationDrawer, type SectionedExplanation } from '@/features/recommendation/components/ExplanationDrawer';
+import type { ValuePlanRecommendation } from '@/features/recommendation/types';
 import { SalesInsightsSection } from '../components/SalesInsightsSection';
 import type { BandAllocation, ValuePlan } from '../types';
 
@@ -262,7 +266,15 @@ function EditorShell({
 }: {
   plan: ValuePlan;
   planId: string;
-  otbRow: { period_label: string; brand_name: string; category_name: string; budget: number };
+  otbRow: {
+    period_label: string;
+    period_key: string;
+    brand_uuid: string;
+    category_uuid: string;
+    brand_name: string;
+    category_name: string;
+    budget: number;
+  };
   category: { name: string; bands: MrpBand[] };
   currency: BaseCurrency;
   currentBudget: number | null;
@@ -277,6 +289,45 @@ function EditorShell({
   const [allTableOpen, setAllTableOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const todayMs = useDemoToday();
+
+  // ── AI Suggest ───────────────────────────────────────────────────────────
+  const recMut = useValueRecommendation();
+  const [rec, setRec] = useState<ValuePlanRecommendation | null>(null);
+  const [recGeneratedAt, setRecGeneratedAt] = useState<number | null>(null);
+  const [recDrawerOpen, setRecDrawerOpen] = useState(false);
+  const handleSuggest = async () => {
+    // Confirm if buyer already has data — Suggest replaces everything.
+    const hasEntries = plan.bands.some((b) => b.budget_pct > 0 || b.avg_mrp > 0);
+    if (hasEntries && !window.confirm(
+      'This will replace your current band entries with system suggestions. Continue?',
+    )) return;
+    try {
+      const result = await recMut.mutateAsync({ planUuid: planId, otbCode: plan.otb_code });
+      setRec(result);
+      setRecGeneratedAt(Date.now());
+      // Apply to redux band state
+      const bands = category.bands
+        .map((master) => {
+          const r = result.bands.find((rb) => rb.bandId === master.id);
+          if (!r) return null;
+          return {
+            band_id: master.id,
+            budget_pct: Math.round(r.budgetPct),
+            avg_mrp: clampMrp(r.avgMrp, master),
+            avg_cost: clampCost(r.avgCost, master),
+          };
+        })
+        .filter((b): b is NonNullable<typeof b> => b !== null);
+      if (bands.length > 0) {
+        dispatch(setAllBands({ otb_code: plan.otb_code, bands }));
+        toast.success('System suggestions applied — review and edit any field.');
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[value-editor] suggest failed', err);
+      toast.error('Could not generate suggestions — try again');
+    }
+  };
 
   // ── Derived values ────────────────────────────────────────────────────
   const allocatedPct = planAllocatedPct(plan);
@@ -296,18 +347,23 @@ function EditorShell({
     return m;
   }, [category]);
 
-  // Last-year sales insights — deterministic per OTB code. The LY label is
-  // the current period rolled back by one year (e.g. "Jan 2026" → "Jan 2025"),
-  // because that's what the buyer compares against.
-  const salesInsights = useMemo(
-    () =>
-      generateSalesInsights({
-        otb_code: plan.otb_code,
-        ly_period_label: shiftPeriodLabelBackOneYear(otbRow.period_label),
-        band_ids: category.bands.map((b) => b.id),
-      }),
-    [plan.otb_code, otbRow.period_label, category.bands],
-  );
+  // Last-year sales insights — fetched from `/sales/*` (same data the
+  // dashboard reads). The LY label is the current period rolled back by one
+  // year (e.g. "Jan 2026" → "Jan 2025"), because that's what the buyer compares
+  // against. Hook returns undefined while the request is in flight.
+  const lyPeriodLabel = shiftPeriodLabelBackOneYear(otbRow.period_label);
+  const { data: salesInsights } = useValueSalesInsights({
+    brand_uuid: otbRow.brand_uuid,
+    category_uuid: plan.category_uuid,
+    ly_period_label: lyPeriodLabel,
+    band_ids: category.bands.map((b) => b.id),
+  });
+  // Per-band last-year share — drives the comparison chip on each BandCard.
+  const { shares: lyBandShares } = useValueLastYearShares({
+    brand_uuid: otbRow.brand_uuid,
+    category_uuid: plan.category_uuid,
+    ly_period_label: lyPeriodLabel,
+  });
 
   // ── Handlers ──────────────────────────────────────────────────────────
   const handleSetPct = (bandId: MrpBand['id'], pct: number) => {
@@ -430,6 +486,13 @@ function EditorShell({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {!readonly && (
+              <SuggestButton
+                loading={recMut.isPending}
+                hasResult={!!rec}
+                onClick={handleSuggest}
+              />
+            )}
             <Button
               variant="secondary"
               size="sm"
@@ -449,6 +512,12 @@ function EditorShell({
               View all
             </Button>
             <StateBadge state={plan.state} />
+            {rec && recGeneratedAt && (
+              <WhyAiButton
+                generatedAtMs={recGeneratedAt}
+                onClick={() => setRecDrawerOpen(true)}
+              />
+            )}
           </div>
         </div>
 
@@ -561,7 +630,9 @@ function EditorShell({
                   master={master}
                   budget={plan.budget_snapshot}
                   currency={currency}
-                  lastYearPct={mockLastYearPct(plan.category_uuid, band.band_id)}
+                  lastYearPct={
+                    lyBandShares[band.band_id] ?? DEFAULT_SPLIT[band.band_id]
+                  }
                   onPctChange={(v) => handleSetPct(band.band_id, v)}
                   onMrpChange={(v) => handleSetMrp(band.band_id, v)}
                   onCostChange={(v) => handleSetCost(band.band_id, v)}
@@ -697,6 +768,21 @@ function EditorShell({
           />
         </div>
       </Dialog>
+
+      {/* AI explanation drawer — opens automatically after Suggest applies */}
+      <ExplanationDrawer
+        open={recDrawerOpen}
+        onClose={() => setRecDrawerOpen(false)}
+        title={`Why these band allocations — ${plan.otb_code}`}
+        overall={rec?.summary}
+        sections={
+          rec?.bands.map((b): SectionedExplanation => ({
+            title: `${b.bandId.toUpperCase()} · ${b.budgetPct.toFixed(1)}%`,
+            subtitle: `Avg MRP ₹${b.avgMrp.toLocaleString()} · Avg cost ₹${b.avgCost.toLocaleString()}`,
+            explanation: b.explanation,
+          })) ?? []
+        }
+      />
     </div>
   );
 }

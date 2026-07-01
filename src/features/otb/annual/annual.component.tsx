@@ -73,6 +73,11 @@ import { useApiBrands, useApiCategories, useBrandCategoryLookup } from '../useOt
 import { useApiAnnualPlans, useDeleteAnnualPlan, useSaveAnnualPlan } from '../useApiAnnualPlans';
 import { hydrateAnnualPlans } from '@/store/slices/otbSlice';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useAnnualRecommendation } from '@/features/recommendation/useRecommendation';
+import { SuggestButton } from '@/features/recommendation/components/SuggestButton';
+import { WhyAiButton } from '@/features/recommendation/components/WhyAiButton';
+import { ExplanationDrawer, type SectionedExplanation } from '@/features/recommendation/components/ExplanationDrawer';
+import type { AnnualRecommendation } from '@/features/recommendation/types';
 
 export default function OtbAnnualPage() {
   const { data: apiBrands = [] } = useApiBrands();      // prefetch for picker + autofill
@@ -108,11 +113,15 @@ export default function OtbAnnualPage() {
   const annual = isCreating ? null : resolvedPlan;
   const todayMs = useDemoToday();
   const [activeKey, setActiveKey] = useState<string | undefined>();
-  const [confirmAutofill, setConfirmAutofill] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
+  // ── AI Suggest ───────────────────────────────────────────────────────────
+  const recMut = useAnnualRecommendation();
+  const [rec, setRec] = useState<AnnualRecommendation | null>(null);
+  const [recGeneratedAt, setRecGeneratedAt] = useState<number | null>(null);
+  const [recDrawerOpen, setRecDrawerOpen] = useState(false);
 
   // Default plan start: Jan 1 of the NEXT calendar year (planners think one
   // year ahead — if "today" lands in 2024, the default plan is for 2025).
@@ -239,28 +248,111 @@ export default function OtbAnnualPage() {
     );
   }
 
-  const handleAutofill = () => {
+  /**
+   * One-click annual plan generation.
+   *
+   *   1. If the grid is empty, populate every (brand × category × period) cell
+   *      with the deterministic autofill skeleton so the backend has rows
+   *      to recommend against.
+   *   2. Persist that grid to the server (the recommender reads rows from
+   *      the DB, not from Redux).
+   *   3. Call the AI recommender.
+   *   4. Overwrite every row's 5 buyer fields with the recommended values.
+   *
+   * Already-typed cells are replaced — the user is told that up-front via
+   * the confirm dialog.
+   */
+  const handleSuggest = async () => {
     if (!budgetSet) {
       toast.error('Set an overall budget first');
       return;
     }
     if (apiBrands.length === 0 || apiCategories.length === 0) {
-      toast.error('Brands/categories still loading — try again in a moment');
+      toast.error('Brands and categories are still loading — try again in a moment');
       return;
     }
-    const id = ensurePlan();
-    const rowsByPeriod = generateAutoFilledRows({
-      periods: activePeriods,
-      overallBudget,
-      brands: apiBrands,
-      categories: apiCategories,
-    });
-    Object.entries(rowsByPeriod).forEach(([periodKey, rows]) => {
-      dispatch(setPeriodRows({ plan_id: id, period_key: periodKey, rows }));
-    });
-    setConfirmAutofill(false);
-    const filled = Object.values(rowsByPeriod).reduce((sum, rs) => sum + rs.length, 0);
-    toast.success(`Auto-filled ${filled} rows across ${Object.keys(rowsByPeriod).length} periods`);
+
+    // Confirm overwrite if the user already has values
+    const hasEntries = annual && Object.values(annual.periods).some((p) =>
+      p.rows.some((r) =>
+        r.planned_sales > 0 || r.markdowns > 0 || r.eom_inventory > 0 ||
+        r.bom_inventory > 0 || r.on_order > 0,
+      ),
+    );
+    if (hasEntries && !window.confirm(
+      'This will replace existing values across every brand × category × month with AI-generated suggestions. Continue?',
+    )) return;
+
+    const planId = ensurePlan();
+
+    try {
+      // ── Step 1: build a full (brand × category × period) grid ──────────
+      const seededByPeriod = generateAutoFilledRows({
+        periods: activePeriods,
+        overallBudget,
+        brands: apiBrands,
+        categories: apiCategories,
+      });
+      Object.entries(seededByPeriod).forEach(([periodKey, rows]) => {
+        dispatch(setPeriodRows({ plan_id: planId, period_key: periodKey, rows }));
+      });
+
+      // ── Step 2: persist the seeded grid so the recommender can read it ─
+      // Build the snapshot inline — Redux dispatch above hasn't flushed yet
+      // when we send to the server, so we have to construct the plan manually.
+      const planToSave = annual
+        ? {
+            ...annual,
+            plan_id: planId,
+            periods: Object.fromEntries(
+              Object.entries(annual.periods).map(([k, p]) => [
+                k,
+                { ...p, rows: seededByPeriod[k] ?? p.rows },
+              ]),
+            ),
+          }
+        : null;
+      if (planToSave) {
+        await savePlan.mutateAsync(planToSave);
+      }
+
+      // ── Step 3: ask the recommender for AI values ──────────────────────
+      const result = await recMut.mutateAsync({ planUuid: planId });
+      setRec(result);
+      // Stamp the moment the rec was generated so the "Why this plan?"
+      // button can show "Generated N min ago". Session-only — clears on
+      // reload, by design (per the storage-size discussion).
+      setRecGeneratedAt(Date.now());
+
+      // ── Step 4: overwrite every row's 5 fields with the AI values ──────
+      // Index by (period, brand, category) so the lookup is O(1) per row.
+      const recIndex = new Map(
+        result.rows.map((rr) => [`${rr.periodKey}|${rr.brandUuid}|${rr.categoryUuid}`, rr]),
+      );
+      Object.entries(seededByPeriod).forEach(([periodKey, rows]) => {
+        const updated = rows.map((row) => {
+          const recRow = recIndex.get(`${periodKey}|${row.brand_uuid}|${row.category_uuid}`);
+          if (!recRow) return row;
+          return {
+            ...row,
+            planned_sales: Number(recRow.plannedSales),
+            markdowns: Number(recRow.markdowns),
+            eom_inventory: Number(recRow.eomInventory),
+            bom_inventory: Number(recRow.bomInventory),
+            on_order: Number(recRow.onOrder),
+          };
+        });
+        dispatch(setPeriodRows({ plan_id: planId, period_key: periodKey, rows: updated }));
+      });
+      const filledPeriods = Object.keys(seededByPeriod).length;
+      toast.success(
+        `Auto-planned ${result.rows.length} rows across ${filledPeriods} periods`,
+      );
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[annual] auto-plan failed', err);
+      toast.error('Could not generate plan — try again');
+    }
   };
 
   const handleSubmit = async () => {
@@ -387,6 +479,12 @@ export default function OtbAnnualPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <SuggestButton
+              loading={recMut.isPending || savePlan.isPending}
+              hasResult={!!rec}
+              onClick={handleSuggest}
+              label="Auto-Plan"
+            />
             <Button
               variant="secondary"
               size="sm"
@@ -414,6 +512,12 @@ export default function OtbAnnualPage() {
             >
               Import CSV
             </Button>
+            {rec && recGeneratedAt && (
+              <WhyAiButton
+                generatedAtMs={recGeneratedAt}
+                onClick={() => setRecDrawerOpen(true)}
+              />
+            )}
           </div>
         </div>
 
@@ -476,18 +580,6 @@ export default function OtbAnnualPage() {
               currency={company.base_currency}
             />
           </div>
-          {isAdmin && (
-            <Button
-              variant="secondary"
-              size="sm"
-              leftIcon={<Wand2 size={12} />}
-              disabled={!budgetSet}
-              onClick={() => (hasAnyRow ? setConfirmAutofill(true) : handleAutofill())}
-              title={!budgetSet ? 'Set an overall budget first' : 'Fill every period with realistic demo values'}
-            >
-              Auto-fill (demo)
-            </Button>
-          )}
         </div>
 
         {/* ── Period chip strip ─────────────────────────────────────────── */}
@@ -677,14 +769,6 @@ export default function OtbAnnualPage() {
         </div>
       </div>
 
-      <ConfirmDialog
-        open={confirmAutofill}
-        onClose={() => setConfirmAutofill(false)}
-        onConfirm={handleAutofill}
-        title="Replace all OTB values?"
-        description={`Auto-fill will overwrite the rows in all ${periods.length} periods with realistic demo numbers. Total will land at ~92% of your overall budget.`}
-        confirmLabel="Auto-fill"
-      />
 
       <Drawer
         open={historyOpen}
@@ -806,6 +890,21 @@ export default function OtbAnnualPage() {
           </div>
         </div>
       </Dialog>
+
+      {/* AI explanation drawer — opens after Suggest applies */}
+      <ExplanationDrawer
+        open={recDrawerOpen}
+        onClose={() => setRecDrawerOpen(false)}
+        title="Why these annual allocations"
+        overall={rec?.summary}
+        sections={
+          rec?.rows.map((r): SectionedExplanation => ({
+            title: `${r.periodKey} · ${r.otbCode ?? `${r.brandUuid.slice(0, 6)}…/${r.categoryUuid.slice(0, 6)}…`}`,
+            subtitle: `OTB ${fmtMoneyCompact(r.recommendedOtbAmount, company.base_currency)}`,
+            explanation: r.explanation,
+          })) ?? []
+        }
+      />
     </div>
   );
 }

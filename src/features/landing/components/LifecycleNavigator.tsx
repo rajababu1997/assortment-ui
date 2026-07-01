@@ -33,7 +33,7 @@ const PHASES: Phase[] = [
   { id: 'value',  step: '02', title: 'Value Planning',  description: 'MRP × cost cascade per released OTB.',      icon: Layers,      href: '/value',   status: 'live' },
   { id: 'option', step: '03', title: 'Option Planning', description: 'Fabric × Fit × Composition per band.',      icon: Grid3x3,     href: '/option',  status: 'live' },
   { id: 'final',  step: '04', title: 'Final Approval',  description: 'Admin closes each OTB after option plan.',  icon: ShieldCheck, href: '/otb/all', status: 'live' },
-  { id: 'history',step: '05', title: 'Sales History',   description: 'YoY, occasion lifts, weekly velocity.',     icon: BarChart3,   href: '/history', status: 'live' },
+  { id: 'history',step: '05', title: 'Sales History',   description: 'YoY, occasion lifts, weekly velocity.',     icon: BarChart3,   href: '/saleshistory', status: 'live' },
 ];
 
 const ITEM = {

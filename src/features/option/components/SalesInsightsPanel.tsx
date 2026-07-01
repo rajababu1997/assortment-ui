@@ -10,7 +10,7 @@
 import { useState } from 'react';
 import { Activity, ChevronDown, ChevronUp, TrendingDown, TrendingUp } from 'lucide-react';
 import { OPTION_TYPE_LABELS, OPTION_TYPES, type OptionType } from '../constants';
-import type { OptionPlanInsights, SubTypeLyPerformance } from '../mockData/salesInsights';
+import type { OptionPlanInsights, SubTypeLyPerformance } from '@/features/sales/insightTypes';
 import type { MrpBand } from '@/features/otb/types';
 
 const TYPES: OptionType[] = [OPTION_TYPES.FABRIC_TYPE, OPTION_TYPES.FIT, OPTION_TYPES.COMPOSITION];

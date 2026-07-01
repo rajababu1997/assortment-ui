@@ -1,16 +1,14 @@
 /**
- * Historical Sales Insights — category-level LY snapshot rendered above the
+ * Historical Sales Insights — category-level snapshot rendered above the
  * Option Allocation area in the buyer editor.
  *
  * Sections (when expanded):
  *   1. Date range picker (Go / Reset)
- *   2. Volume & Option Sell Data — KPI tiles + volume-tier breakdown
+ *   2. Volume & Option Sell Data — KPI tiles + per-band breakdown
  *   3. Fabric Type / Fit / Composition performance (2-column grid)
- *   4. Top Selling Articles (full width)
  *
- * Collapsed by default — the buyer toggles it on when they want the
- * snapshot. Data is mocked; the picker scales it deterministically by the
- * range length so the buyer sees "this would be a 90-day slice" etc.
+ * Data is fetched from `/sales/aggregate` + `/sales/attribute` via
+ * `useHistoricalSnapshot`, scoped to (brand, category, picker range).
  */
 
 import { useMemo, useState } from 'react';
@@ -25,73 +23,26 @@ import {
   Package,
   RotateCcw,
   Search,
-  ShoppingBag,
   Sparkles,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
 import { Button, DatePicker } from '@/components/primitives';
 import type { MrpBand } from '@/features/otb/types';
+import { useHistoricalSnapshot } from '@/features/sales/useInsights';
 
 interface Props {
   categoryLabel: string;
   /** Display label only (e.g. "LY Jan 2025"). Picker controls the actual range. */
   periodLabel: string;
-  /** MRP bands of the category — drives the per-band volume breakdown. */
+  /** MRP bands of the category — drives the per-band row order. */
   categoryBands: MrpBand[];
+  brandUuid: string;
+  categoryUuid: string;
   /** Default from/to. Falls back to last calendar year if not provided. */
   defaultFrom?: Date;
   defaultTo?: Date;
 }
-
-// ── Base mock data (full-year shape) ───────────────────────────────────────
-
-const FABRIC_BASE = [
-  { name: 'Plain',   salesCr: 8.4, badge: 'best' as const },
-  { name: 'Printed', salesCr: 5.2, badge: null },
-  { name: 'Checks',  salesCr: 3.0, badge: null },
-  { name: 'Strips',  salesCr: 1.6, badge: 'markdown' as const },
-];
-
-const FIT_BASE = [
-  { name: 'Regular Fit', salesCr: 11.8, badge: 'top' as const },
-  { name: 'Slim Fit',    salesCr: 6.4,  badge: null },
-];
-
-const COMPOSITION_BASE = [
-  { name: '100% Cotton',    salesCr: 12.4, badge: 'best' as const },
-  { name: '100% Polyester', salesCr: 5.8,  badge: null },
-];
-
-interface ArticleBase {
-  code: string;
-  name: string;
-  fabric: string;
-  fit: string;
-  comp: string;
-  salesL: number;
-}
-
-const TOP_ARTICLES_BASE: ArticleBase[] = [
-  { code: 'ATH-001', name: 'Performance Tee', fabric: 'Plain',   fit: 'Regular Fit', comp: '100% Cotton',    salesL: 42 },
-  { code: 'ATH-014', name: 'Active Tee',      fabric: 'Printed', fit: 'Regular Fit', comp: '100% Cotton',    salesL: 39 },
-  { code: 'ATH-027', name: 'Runner Tee',      fabric: 'Plain',   fit: 'Regular Fit', comp: '100% Cotton',    salesL: 35 },
-  { code: 'ATH-033', name: 'Training Tee',    fabric: 'Checks',  fit: 'Slim Fit',    comp: '100% Polyester', salesL: 31 },
-  { code: 'ATH-040', name: 'Gym Tee',         fabric: 'Printed', fit: 'Regular Fit', comp: '100% Cotton',    salesL: 29 },
-];
-
-// Per-MRP-band volume mix. The buyer's mental model is "how did each price
-// tier sell" — so we map options/volume/avg-units by band id. Percentages
-// are normalised at render time across whichever bands the category has.
-const PER_BAND_MOCK: Record<
-  MrpBand['id'],
-  { optionsPct: number; volumePct: number; avgUnits: number }
-> = {
-  entry:     { optionsPct: 22, volumePct: 32, avgUnits: 3200 },
-  core:      { optionsPct: 38, volumePct: 44, avgUnits: 2400 },
-  upper:     { optionsPct: 26, volumePct: 18, avgUnits: 1400 },
-  statement: { optionsPct: 14, volumePct:  6, avgUnits:  900 },
-};
 
 const BAND_ORDER: Record<MrpBand['id'], number> = {
   entry: 0, core: 1, upper: 2, statement: 3,
@@ -103,34 +54,22 @@ function fmtMrpRange(b: MrpBand): string {
   return `₹${min} – ₹${b.mrp_max.toLocaleString('en-IN')}`;
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-
 function defaultLyRange(): { from: Date; to: Date } {
   const today = new Date();
   const lyYear = today.getFullYear() - 1;
   return { from: new Date(lyYear, 0, 1), to: new Date(lyYear, 11, 31) };
 }
 
-function rangeDays(from: Date | null, to: Date | null): number {
-  if (!from || !to) return 365;
-  const ms = to.getTime() - from.getTime();
-  if (ms <= 0) return 365;
-  return Math.max(1, Math.round(ms / 86_400_000) + 1);
-}
-
 const fmtCr = (n: number) => `₹${n.toFixed(1)} Cr`;
-const fmtL  = (n: number) => `₹${Math.round(n)} L`;
 const fmtUnits = (n: number) => n.toLocaleString('en-IN');
 const fmtDate = (d: Date | null) =>
   !d ? '—' : d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
 
-// ── Component ──────────────────────────────────────────────────────────────
-
 export function HistoricalSalesInsights({
   categoryLabel, periodLabel, categoryBands,
+  brandUuid, categoryUuid,
   defaultFrom, defaultTo,
 }: Props) {
-  // Collapsed by default — buyer expands when they want the snapshot.
   const [open, setOpen] = useState(false);
 
   const seed = useMemo(() => defaultLyRange(), []);
@@ -138,63 +77,42 @@ export function HistoricalSalesInsights({
   const initTo = defaultTo ?? seed.to;
 
   // Pending = picker display state; applied = data scoping state.
-  // Go promotes pending → applied (mirrors the All Plans table pattern).
   const [pendingFrom, setPendingFrom] = useState<Date | null>(initFrom);
-  const [pendingTo, setPendingTo] = useState<Date | null>(initTo);
+  const [pendingTo,   setPendingTo]   = useState<Date | null>(initTo);
   const [appliedFrom, setAppliedFrom] = useState<Date | null>(initFrom);
-  const [appliedTo, setAppliedTo] = useState<Date | null>(initTo);
+  const [appliedTo,   setAppliedTo]   = useState<Date | null>(initTo);
 
-  // Scale mock numbers by the applied range vs full year. 1.0 = full year.
-  const scale = useMemo(() => rangeDays(appliedFrom, appliedTo) / 365, [appliedFrom, appliedTo]);
+  const { data: snapshot, isLoading } = useHistoricalSnapshot({
+    brand_uuid: brandUuid,
+    category_uuid: categoryUuid,
+    from: appliedFrom,
+    to: appliedTo,
+  });
 
-  const fabricRows      = useMemo(() => FABRIC_BASE.map((r)      => ({ ...r, salesCr: r.salesCr * scale })), [scale]);
-  const fitRows         = useMemo(() => FIT_BASE.map((r)         => ({ ...r, salesCr: r.salesCr * scale })), [scale]);
-  const compositionRows = useMemo(() => COMPOSITION_BASE.map((r) => ({ ...r, salesCr: r.salesCr * scale })), [scale]);
-  const topArticles     = useMemo(() => TOP_ARTICLES_BASE.map((a) => ({ ...a, salesL: a.salesL * scale })), [scale]);
-
-  // Per-MRP-band rows. Sort by canonical band order so the table reads
-  // cheapest → most expensive. Normalise % across the bands the category
-  // actually has (e.g. if a category has only entry+core+upper, the share
-  // % still sums to 100).
+  // Order per-band rows by canonical band order, restricted to the bands
+  // the category actually has so the labels/ranges line up correctly.
   const bandRows = useMemo(() => {
+    if (!snapshot) return [];
     const present = [...categoryBands].sort(
       (a, b) => (BAND_ORDER[a.id] ?? 99) - (BAND_ORDER[b.id] ?? 99),
     );
-    const optionsPctRaw = present.map((b) => PER_BAND_MOCK[b.id]?.optionsPct ?? 0);
-    const volumePctRaw  = present.map((b) => PER_BAND_MOCK[b.id]?.volumePct  ?? 0);
-    const optionsSum = optionsPctRaw.reduce((s, n) => s + n, 0) || 1;
-    const volumeSum  = volumePctRaw.reduce((s, n) => s + n, 0) || 1;
-
-    // Total options baseline = 48; scales with the date range.
-    const TOTAL_OPTIONS_BASE = 48;
-    const totalOptions = Math.max(present.length, Math.round(TOTAL_OPTIONS_BASE * scale));
-
-    let assigned = 0;
-    return present.map((b, i) => {
-      const optionsPct = Math.round((optionsPctRaw[i] / optionsSum) * 100);
-      const volumePct  = Math.round((volumePctRaw[i]  / volumeSum)  * 100);
-      // Distribute totalOptions proportionally; let last row absorb rounding drift.
-      const count = i === present.length - 1
-        ? Math.max(0, totalOptions - assigned)
-        : Math.max(0, Math.round((optionsPctRaw[i] / optionsSum) * totalOptions));
-      assigned += count;
-      const avgUnits = Math.round((PER_BAND_MOCK[b.id]?.avgUnits ?? 0) * scale);
+    return present.map((b) => {
+      const row = snapshot.perBand.find((p) => p.bandId === b.id);
       return {
         bandId: b.id,
         label: b.label,
         range: fmtMrpRange(b),
-        count,
-        avgUnits,
-        optionsPct,
-        volumePct,
+        count: row?.count ?? 0,
+        avgUnits: row?.avgUnits ?? 0,
+        optionsPct: row?.optionsPct ?? 0,
+        volumePct: row?.volumePct ?? 0,
       };
     });
-  }, [categoryBands, scale]);
+  }, [snapshot, categoryBands]);
 
-  // KPI tiles derive from the same per-band data.
   const volume = useMemo(() => {
-    const totalOptions = bandRows.reduce((s, r) => s + r.count, 0);
-    const totalUnits = bandRows.reduce((s, r) => s + r.count * r.avgUnits, 0);
+    const totalOptions = snapshot?.totalOptions ?? 0;
+    const totalUnits   = snapshot?.totalUnits ?? 0;
     const avgPerOption = totalOptions > 0 ? Math.round(totalUnits / totalOptions) : 0;
     const top = bandRows.reduce(
       (best, r) => (r.volumePct > best.volumePct ? r : best),
@@ -205,9 +123,8 @@ export function HistoricalSalesInsights({
       totalUnits,
       avgPerOption,
       topBandLabel: top?.label ?? '—',
-      topBandUnits: top?.avgUnits ?? 0,
     };
-  }, [bandRows]);
+  }, [snapshot, bandRows]);
 
   const dateFilterDirty =
     (pendingFrom?.getTime() ?? null) !== (appliedFrom?.getTime() ?? null) ||
@@ -226,7 +143,6 @@ export function HistoricalSalesInsights({
 
   return (
     <section className="flex-none shrink-0 rounded-lg border border-slate-200 bg-white">
-      {/* Header — click to toggle */}
       <div
         role="button"
         tabIndex={0}
@@ -289,104 +205,98 @@ export function HistoricalSalesInsights({
             </Button>
           </div>
 
-          {/* ── 1. Volume & Option Sell Data ────────────────────────── */}
-          <Subsection icon={<Package size={13} />} title="Volume & Option Sell Data">
-            <div className="flex flex-col gap-3">
-              {/* KPI tiles */}
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <KpiTile icon={<Layers3 size={13} />}     label="Options Launched"   value={`${volume.totalOptions}`}    tone="indigo" />
-                <KpiTile icon={<ShoppingBag size={13} />} label="Total Units Sold"   value={fmtUnits(volume.totalUnits)} tone="blue" />
-                <KpiTile icon={<TrendingUp size={13} />}  label="Avg Units / Option" value={fmtUnits(volume.avgPerOption)} tone="emerald" />
-                <KpiTile icon={<Crown size={13} />}       label="Top MRP Band"       value={volume.topBandLabel}         tone="amber" />
+          {isLoading && (
+            <p className="text-xs text-slate-500">Loading historical sales…</p>
+          )}
+
+          {!isLoading && snapshot && volume.totalOptions === 0 && (
+            <p className="text-xs italic text-slate-500">
+              No sales data found for this brand × category in the selected range.
+            </p>
+          )}
+
+          {!isLoading && snapshot && volume.totalOptions > 0 && (
+            <>
+              {/* ── 1. Volume & Option Sell Data ────────────────────────── */}
+              <Subsection icon={<Package size={13} />} title="Volume & Option Sell Data">
+                <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <KpiTile icon={<Layers3 size={13} />}     label="Options Launched"   value={`${volume.totalOptions}`}    tone="indigo" />
+                    <KpiTile icon={<Sparkles size={13} />}    label="Total Units Sold"   value={fmtUnits(volume.totalUnits)} tone="blue" />
+                    <KpiTile icon={<TrendingUp size={13} />}  label="Avg Units / Option" value={fmtUnits(volume.avgPerOption)} tone="emerald" />
+                    <KpiTile icon={<Crown size={13} />}       label="Top MRP Band"       value={volume.topBandLabel}         tone="amber" />
+                  </div>
+
+                  <PerfTable
+                    columns={['MRP Band', 'Price Range', 'Options', 'Avg Units / Option', 'Share of Volume']}
+                    rows={bandRows.map((r) => {
+                      const topShare = Math.max(...bandRows.map((x) => x.volumePct));
+                      return {
+                        key: r.bandId,
+                        cells: [
+                          <span className="font-medium capitalize text-slate-900">{r.label}</span>,
+                          <span className="text-slate-600">{r.range}</span>,
+                          <span className="tabular-nums text-slate-900">{r.count}</span>,
+                          <span className="tabular-nums text-slate-900">{fmtUnits(r.avgUnits)}</span>,
+                          <ShareCell value={r.volumePct} highlight={r.volumePct === topShare} />,
+                        ],
+                      };
+                    })}
+                  />
+                  <p className="text-[10.5px] italic text-slate-500">
+                    Reading: <strong>{volume.topBandLabel}</strong> drove the largest share of
+                    volume in this category for the selected range. Use this to bias option counts
+                    toward the bands that actually move.
+                  </p>
+                </div>
+              </Subsection>
+
+              {/* ── 2. Fabric Type / Fit / Composition (2-col grid) ─────── */}
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                <Subsection icon={<Sparkles size={13} />} title="Fabric Type Performance">
+                  <PerfTable
+                    columns={['Fabric Type', 'Sales', '']}
+                    rows={snapshot.fabric.map((r) => ({
+                      key: r.name,
+                      cells: [
+                        <span className="font-medium text-slate-900">{r.name}</span>,
+                        <span className="tabular-nums font-semibold text-slate-900">{fmtCr(r.salesCr)}</span>,
+                        <RowBadge type={r.badge} />,
+                      ],
+                    }))}
+                  />
+                </Subsection>
+
+                <Subsection icon={<TrendingUp size={13} />} title="Fit Performance">
+                  <PerfTable
+                    columns={['Fit', 'Sales', '']}
+                    rows={snapshot.fit.map((r) => ({
+                      key: r.name,
+                      cells: [
+                        <span className="font-medium text-slate-900">{r.name}</span>,
+                        <span className="tabular-nums font-semibold text-slate-900">{fmtCr(r.salesCr)}</span>,
+                        <RowBadge type={r.badge} />,
+                      ],
+                    }))}
+                  />
+                </Subsection>
+
+                <Subsection icon={<Award size={13} />} title="Fabric Composition Performance">
+                  <PerfTable
+                    columns={['Composition', 'Sales', '']}
+                    rows={snapshot.composition.map((r) => ({
+                      key: r.name,
+                      cells: [
+                        <span className="font-medium text-slate-900">{r.name}</span>,
+                        <span className="tabular-nums font-semibold text-slate-900">{fmtCr(r.salesCr)}</span>,
+                        <RowBadge type={r.badge} />,
+                      ],
+                    }))}
+                  />
+                </Subsection>
               </div>
-
-              {/* Per-MRP-band breakdown */}
-              <PerfTable
-                columns={['MRP Band', 'Price Range', 'Options', 'Avg Units / Option', 'Share of Volume']}
-                rows={bandRows.map((r) => {
-                  const topShare = Math.max(...bandRows.map((x) => x.volumePct));
-                  return {
-                    key: r.bandId,
-                    cells: [
-                      <span className="font-medium capitalize text-slate-900">{r.label}</span>,
-                      <span className="text-slate-600">{r.range}</span>,
-                      <span className="tabular-nums text-slate-900">{r.count}</span>,
-                      <span className="tabular-nums text-slate-900">{fmtUnits(r.avgUnits)}</span>,
-                      <ShareCell value={r.volumePct} highlight={r.volumePct === topShare} />,
-                    ],
-                  };
-                })}
-              />
-              <p className="text-[10.5px] italic text-slate-500">
-                Reading: <strong>{volume.topBandLabel}</strong> drove the largest share of LY
-                volume in this category. Use this to bias option counts toward the bands that
-                actually move.
-              </p>
-            </div>
-          </Subsection>
-
-          {/* ── 2. Fabric Type / Fit / Composition (2-col grid) ─────── */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            <Subsection icon={<Sparkles size={13} />} title="Fabric Type Performance">
-              <PerfTable
-                columns={['Fabric Type', 'Sales', '']}
-                rows={fabricRows.map((r) => ({
-                  key: r.name,
-                  cells: [
-                    <span className="font-medium text-slate-900">{r.name}</span>,
-                    <span className="tabular-nums font-semibold text-slate-900">{fmtCr(r.salesCr)}</span>,
-                    <RowBadge type={r.badge} />,
-                  ],
-                }))}
-              />
-            </Subsection>
-
-            <Subsection icon={<TrendingUp size={13} />} title="Fit Performance">
-              <PerfTable
-                columns={['Fit', 'Sales', '']}
-                rows={fitRows.map((r) => ({
-                  key: r.name,
-                  cells: [
-                    <span className="font-medium text-slate-900">{r.name}</span>,
-                    <span className="tabular-nums font-semibold text-slate-900">{fmtCr(r.salesCr)}</span>,
-                    <RowBadge type={r.badge} />,
-                  ],
-                }))}
-              />
-            </Subsection>
-
-            <Subsection icon={<Award size={13} />} title="Fabric Composition Performance">
-              <PerfTable
-                columns={['Composition', 'Sales', '']}
-                rows={compositionRows.map((r) => ({
-                  key: r.name,
-                  cells: [
-                    <span className="font-medium text-slate-900">{r.name}</span>,
-                    <span className="tabular-nums font-semibold text-slate-900">{fmtCr(r.salesCr)}</span>,
-                    <RowBadge type={r.badge} />,
-                  ],
-                }))}
-              />
-            </Subsection>
-          </div>
-
-          {/* ── 3. Top Selling Articles ─────────────────────────────── */}
-          <Subsection icon={<Crown size={13} />} title="Top Selling Articles">
-            <PerfTable
-              columns={['Code', 'Article', 'Fabric', 'Fit', 'Composition', 'Sales']}
-              rows={topArticles.map((a) => ({
-                key: a.code,
-                cells: [
-                  <span className="font-mono text-xs tabular-nums text-slate-600">{a.code}</span>,
-                  <span className="font-medium text-slate-900">{a.name}</span>,
-                  <span className="text-slate-700">{a.fabric}</span>,
-                  <span className="text-slate-700">{a.fit}</span>,
-                  <span className="text-slate-700">{a.comp}</span>,
-                  <span className="tabular-nums font-semibold text-slate-900">{fmtL(a.salesL)}</span>,
-                ],
-              }))}
-            />
-          </Subsection>
+            </>
+          )}
         </div>
       )}
     </section>

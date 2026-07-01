@@ -7,6 +7,8 @@ import type { NavigationItem } from '@/types/navigation';
  * Add new entries here; `icon` keys come from `NAV_ICONS` in `@/constants/icons`.
  */
 export const SIDEBAR_NAV: NavigationItem[] = [
+  // `/home` is now the OTB Dashboard. The original landing page is still
+  // available at `/landing` (no nav entry — internal route for now).
   { id: 'home', title: 'Home', type: 'basic', icon: 'home', link: '/home' },
   {
     id: 'otb',
@@ -49,7 +51,7 @@ export const SIDEBAR_NAV: NavigationItem[] = [
   //   ],
   // },
   { id: 'divider-1', title: '', type: 'divider' },
-  { id: 'history', title: 'Sales History', type: 'basic', icon: 'barChart', link: '/history' },
+  { id: 'history', title: 'Sales History', type: 'basic', icon: 'barChart', link: '/saleshistory' },
   // { id: 'profile', title: 'Profile', type: 'basic', icon: 'user', link: '/user-profile' },
   // { id: 'settings', title: 'Settings', type: 'basic', icon: 'settings', link: '/settings' },
 ];
