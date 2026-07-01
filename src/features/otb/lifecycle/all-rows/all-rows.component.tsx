@@ -16,7 +16,7 @@
  * the grid CTA just deep-links there.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Eye,
   ListChecks,
@@ -25,10 +25,10 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, DatePicker, SpinnerCenter } from '@/components/primitives';
 import { TpsDataTable } from '@/components/tps-data-table';
 import type { ColumnConfig, FilterSlotConfig } from '@/components/tps-data-table';
-import { useDemoToday } from '@/hooks/useDemoClock';
 import { useSetupConfig } from '@/features/otb/useOtb';
 import { useBrandCategoryLookup } from '@/features/otb/useOtbMaster';
 import { fmtMoney } from '@/features/otb/utils/format';
@@ -61,23 +61,19 @@ interface TableRow {
 
 export default function OtbAllRowsPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { company, isLoading } = useSetupConfig();
   const {
     findBrand, findCategory,
     brands, categories,
     isLoading: masterLoading,
   } = useBrandCategoryLookup();
-  const todayMs = useDemoToday();
-
-  // Default range = Jan 1 → Dec 31 of the current (demo) year, so the grid
-  // shows the full fiscal year by default instead of just a couple of months.
-  const defaultDateRange = useMemo(() => {
-    const year = new Date(todayMs).getFullYear();
-    return {
-      from: new Date(year, 0, 1),
-      to: new Date(year, 11, 31),
-    };
-  }, [todayMs]);
+  // Fixed default range = Oct 1 2025 → Feb 28 2026 to match the dashboard's
+  // demo window (buyers land on data they can actually see).
+  const defaultDateRange = useMemo(() => ({
+    from: new Date(2025, 9, 1),
+    to: new Date(2026, 1, 28),
+  }), []);
 
   const [pendingFrom, setPendingFrom] = useState<Date | null>(defaultDateRange.from);
   const [pendingTo, setPendingTo] = useState<Date | null>(defaultDateRange.to);
@@ -94,6 +90,10 @@ export default function OtbAllRowsPage() {
   const fromIso = appliedFrom ? toIso(appliedFrom) : undefined;
   const toIsoStr = appliedTo ? toIso(appliedTo) : undefined;
   const { data, isLoading: rowsLoading } = useApiAllOtbRows(fromIso, toIsoStr);
+
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['otb', 'lifecycle', 'all'] });
+  }, [queryClient]);
 
   const dateFilterDirty =
     (pendingFrom?.getTime() ?? null) !== (appliedFrom?.getTime() ?? null) ||
@@ -173,6 +173,7 @@ export default function OtbAllRowsPage() {
       { field: 'op_label', header: 'Option Plan', minWidth: 110 },
       {
         field: 'final_at', header: 'Finalised', minWidth: 130,
+        valueFormatter: (v: number | undefined) => (v ? new Date(v).toLocaleDateString() : ''),
         render: (_v, row) =>
           row.final_at ? (
             <span className="text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
@@ -257,6 +258,7 @@ export default function OtbAllRowsPage() {
         onFilterChange={setFilters}
         tableKey="dt-otb-all"
         showColumnToggle
+        onRefresh={handleRefresh}
         height="calc(100vh - 200px)"
         emptyMessage="No OTBs match the filter — try widening the date range or pick a different stage."
         entityName="OTB"

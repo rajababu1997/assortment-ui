@@ -317,6 +317,11 @@ function EditorShell(props: ShellProps) {
   }, [op, categoryBands]);
 
   // ── Derive production_qty + option_plan_qty live (server confirms on save).
+  // Also strip sub-type lines whenever the derived option_plan_qty is 0:
+  // the server rejects any band where opq === 0 AND lines carry qty
+  // (`inactive_band_has_qty`), which can happen when the AI recommendation
+  // sizes avg_per_option > productionQty on a tiny band. Clearing lines
+  // here keeps stale saved state and fresh recommendations both consistent.
   const enrichedDraft = useMemo<OptionBand[]>(() => {
     return draft.map((band) => {
       const vp = vpBands.find((v) => v.band_id === band.band_id);
@@ -326,10 +331,12 @@ function EditorShell(props: ShellProps) {
         avg_mrp: 0,
         avg_cost: vp.avg_cost,
       } : undefined);
+      const opq = calcOptionPlanQty(productionQty, band.avg_production_qty_per_option);
       return {
         ...band,
         production_qty_snapshot: productionQty,
-        option_plan_qty: calcOptionPlanQty(productionQty, band.avg_production_qty_per_option),
+        option_plan_qty: opq,
+        lines: opq === 0 ? band.lines.map((l) => ({ ...l, qty: 0 })) : band.lines,
       };
     });
   }, [draft, vpBands, vpBudget]);
@@ -389,17 +396,29 @@ function EditorShell(props: ShellProps) {
           production_qty_snapshot: 0,
           lines: [],
         };
+        // Guard against engine's coerceAtLeast(1) producing a band where
+        // productionQty < avgPerOption. On the UI, `calcOptionPlanQty` floors
+        // that to 0 — and the server-side validator then rejects the save
+        // with `inactive_band_has_qty` because sub-type lines still carry
+        // positive qty. Clear the lines and zero the qty locally so the
+        // resulting draft is internally consistent and passes validation.
+        const productionQty = Number(r.productionQtySnapshot);
+        const avgPerOption = r.avgProductionQtyPerOption;
+        const uiOptionPlanQty = calcOptionPlanQty(productionQty, avgPerOption);
+        const lines = uiOptionPlanQty === 0
+          ? []
+          : r.lines.map((l) => ({
+              option_type: l.optionType,
+              sub_type_key: l.subTypeKey,
+              sub_type_label: l.subTypeLabel,
+              qty: Number(l.qty),
+            }));
         return {
           band_id: master.id,
-          avg_production_qty_per_option: r.avgProductionQtyPerOption,
-          option_plan_qty: Number(r.optionPlanQty),
-          production_qty_snapshot: Number(r.productionQtySnapshot),
-          lines: r.lines.map((l) => ({
-            option_type: l.optionType,
-            sub_type_key: l.subTypeKey,
-            sub_type_label: l.subTypeLabel,
-            qty: Number(l.qty),
-          })),
+          avg_production_qty_per_option: avgPerOption,
+          option_plan_qty: uiOptionPlanQty,
+          production_qty_snapshot: productionQty,
+          lines,
         };
       });
       setDraft(next);
@@ -891,6 +910,30 @@ function BandSection({
       {/* Last year reference hidden — engine's avg/option floor and zero-history
           sub-type rules make the LY comparison misleading for premium bands.
           Re-enable when the engine's per-band rules are tuned. */}
+
+      {/* Borderline-budget nudge: production capacity is smaller than avg per
+          option, so we round up to 1 hero option. The buyer should know why
+          they only got one and how to unlock more. */}
+      {!inactive
+        && band.option_plan_qty === 1
+        && band.production_qty_snapshot > 0
+        && (band.avg_production_qty_per_option ?? 0) > band.production_qty_snapshot && (
+        <div
+          className="mx-3.5 mb-2 flex items-start gap-2 rounded-md border px-3 py-2 text-[11.5px]"
+          style={{
+            borderColor: 'rgba(245,158,11,0.35)',
+            background: 'rgba(245,158,11,0.08)',
+            color: '#b45309',
+          }}
+        >
+          <Sparkles size={13} className="mt-0.5 shrink-0" />
+          <div>
+            <span className="font-semibold">Budget supports 1 hero option at this price.</span>
+            {' '}Increase this band's Value Plan % or reduce the avg cost to fund more distinct
+            options.
+          </div>
+        </div>
+      )}
 
       {/* Sub-grids */}
       <div className="grid grid-cols-1 gap-3 px-3.5 py-3 lg:grid-cols-3">

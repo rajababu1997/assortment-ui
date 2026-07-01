@@ -18,10 +18,20 @@ export function calcProductionQty(vpBudget: number, vpBand: BandAllocation | und
   return Math.max(0, Math.floor(bandBudget / cost));
 }
 
-/** floor(production_qty / avg_per_option). 0 when either side is non-positive. */
+/**
+ * How many distinct options the band can fund.
+ *
+ * Business rule: if the band has any real budget (positive productionQty +
+ * positive avgPerOption), guarantee at least ONE option — a "hero SKU."
+ * Historically this was a plain floor, which produced 0 whenever
+ * `avgPerOption > productionQty` (e.g. premium bands with borderline
+ * budgets). That 0 confused buyers because they had allocated real ₹ to
+ * the band via VP, yet the AI recommended "zero options." At-least-one
+ * matches how planners actually reason about premium tiers.
+ */
 export function calcOptionPlanQty(productionQty: number, avgPerOption: number): number {
   if (productionQty <= 0 || avgPerOption <= 0) return 0;
-  return Math.max(0, Math.floor(productionQty / avgPerOption));
+  return Math.max(1, Math.floor(productionQty / avgPerOption));
 }
 
 /** Σ qty for one (band, option_type) — used by the SubGrid subtotal chip. */

@@ -17,9 +17,7 @@ import {
   Calendar,
   CalendarRange,
   CheckCircle2,
-  Clock4,
   Eye,
-  Flame,
   Layers,
   LayoutDashboard,
   Lock,
@@ -217,9 +215,6 @@ export default function OtbDashboardPage() {
                     >
                       {overallBudget > 0 ? `${allocatedPct}% allocated` : 'No budget set'}
                     </span>
-                    <Button variant="secondary" size="sm" onClick={() => navigate(`/otb/${annual.plan_id}/annual`)}>
-                      View Plan
-                    </Button>
                   </div>
                 </div>
 
@@ -539,9 +534,7 @@ function PeriodCard({
   if (!plan) return null;
 
   const total = periodTotal(plan);
-  const days = daysBetween(period.lock_deadline_iso, todayMs);
-  const overdue = days < 0;
-  const urgent = days >= 0 && days <= 3;
+  const overdue = daysBetween(period.lock_deadline_iso, todayMs) < 0;
 
   const daysToStart = daysBetween(period.start_iso, todayMs);
   const open = plan.state !== OTB_STATES.LOCKED && plan.state !== OTB_STATES.SKIPPED;
@@ -607,16 +600,9 @@ function PeriodCard({
           </span>
         ) : (
           <div className="flex flex-col gap-0.5">
-            <span className="inline-flex items-center gap-1">
-              <Calendar size={11} style={{ color: 'var(--color-text-tertiary)' }} />
+            <span className="invisible inline-flex items-center gap-1" aria-hidden="true">
+              <Calendar size={11} />
               Release by {fmtDate(period.lock_deadline_iso)}
-            </span>
-            <span
-              className="inline-flex items-center gap-1 font-medium"
-              style={{ color: overdue ? '#dc2626' : urgent ? '#b45309' : 'var(--color-text-secondary)' }}
-            >
-              {overdue ? <Flame size={11} /> : urgent ? <AlertTriangle size={11} /> : <Clock4 size={11} />}
-              {overdue ? `${Math.abs(days)} days overdue` : `${days} days remaining`}
             </span>
             {insideLeadTime && (
               <span className="inline-flex items-center gap-1 font-medium" style={{ color: '#dc2626' }}>

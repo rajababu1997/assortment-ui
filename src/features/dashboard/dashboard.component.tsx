@@ -17,7 +17,8 @@
  * Mounts at `/dashboard`.
  */
 
-import { LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard, RefreshCw } from 'lucide-react';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useDashboardFilters } from './useDashboardFilters';
 import { useWipItems } from './useWipItems';
@@ -49,6 +50,16 @@ import { RecentActivities } from './components/RecentActivities';
 export default function DashboardPage() {
   const user = useAppSelector((s) => s.auth.user);
   const buyerName = user?.firstName || user?.userName || 'Buyer';
+
+  const queryClient = useQueryClient();
+  const activeFetches = useIsFetching();
+  const isRefreshing = activeFetches > 0;
+  // Invalidate every query the dashboard reads from. Broad invalidation is
+  // fine here — the buyer explicitly asked for fresh data.
+  const refreshAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['otb'] });
+    queryClient.invalidateQueries({ queryKey: ['sales'] });
+  };
 
   const { filters, setFilters, reset } = useDashboardFilters();
 
@@ -114,6 +125,26 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={refreshAll}
+            disabled={isRefreshing}
+            title={isRefreshing ? 'Refreshing…' : 'Refresh dashboard data'}
+            aria-label="Refresh dashboard"
+            className="flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-[11.5px] font-medium transition-colors hover:bg-[var(--color-surface-alt,#f8fafc)] disabled:opacity-60"
+            style={{
+              borderColor: 'var(--color-divider)',
+              color: 'var(--color-text-secondary)',
+              background: 'var(--color-surface)',
+            }}
+          >
+            <RefreshCw
+              size={13}
+              className={isRefreshing ? 'animate-spin' : ''}
+            />
+            {isRefreshing ? 'Refreshing…' : 'Refresh'}
+          </button>
         </div>
 
         {/* ── Filter bar ─────────────────────────────────────────────────── */}

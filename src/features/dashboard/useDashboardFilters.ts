@@ -43,30 +43,21 @@ function parsePeriod(value: string | null): string | undefined {
   return /^\d{4}-\d{2}/.test(value) ? value.slice(0, 7) : undefined;
 }
 
-/** YYYY-MM key for a Date. */
-function monthKeyOf(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-/** Add `n` months to a Date, returning a new Date. */
-function addMonths(d: Date, n: number): Date {
-  const out = new Date(d.getTime());
-  out.setMonth(out.getMonth() + n);
-  return out;
-}
-
 export interface DashboardDefaults {
   from: string;
   to: string;
 }
 
-/** Compute the canonical "today → today + 3 months" window. */
-export function computeDefaultRange(todayMs: number): DashboardDefaults {
-  const today = new Date(todayMs);
-  return {
-    from: monthKeyOf(today),
-    to: monthKeyOf(addMonths(today, 3)),
-  };
+/**
+ * Fixed default window: Oct 2025 → Jan 2026. Anchored to the season the
+ * demo data actually covers so the buyer sees populated widgets on first
+ * load instead of an empty "no rows in range" state.
+ *
+ * `todayMs` is kept in the signature so callers can start passing a
+ * rolling-window value later without a refactor.
+ */
+export function computeDefaultRange(_todayMs: number): DashboardDefaults {
+  return { from: '2025-10', to: '2026-01' };
 }
 
 export function useDashboardFilters(): UseDashboardFiltersResult & { defaults: DashboardDefaults } {

@@ -119,6 +119,45 @@ function formatCostRange(master: MrpBand): string {
  * needing a separate year input. Falls back to the original string if the
  * trailing 4-digit year can't be parsed (e.g. unusual cycle labels).
  */
+/**
+ * Round a list of fractional percentages to integers whose sum stays
+ * exactly at 100. Uses the Hare/largest-remainder method:
+ *   1. Floor each value.
+ *   2. Distribute the (100 − sum of floors) leftover to the bands with
+ *      the largest fractional parts, one point at a time.
+ *
+ * Example: [18.5, 51.4, 22.6, 7.5] → floors [18,51,22,7] sum 98, leftover 2
+ *   → largest fractions .6 (idx 2) and .5 (idx 0) each get +1
+ *   → [19, 51, 23, 7] (sums to 100).
+ *
+ * Naive `Math.round` on the same input gives [19, 51, 23, 8] which sums to
+ * 101 and shows the buyer an "over-budget" warning on a fresh suggestion.
+ */
+function roundPctsToSum100(pcts: number[]): number[] {
+  if (pcts.length === 0) return [];
+  const floors = pcts.map((v) => Math.floor(v));
+  const out = floors.slice();
+  let remaining = 100 - floors.reduce((s, n) => s + n, 0);
+  const orderDesc = pcts
+    .map((v, i) => ({ i, frac: v - Math.floor(v) }))
+    .sort((a, b) => b.frac - a.frac);
+  // Add leftover to bands with the largest fractional parts.
+  for (let k = 0; k < orderDesc.length && remaining > 0; k++) {
+    out[orderDesc[k].i] += 1;
+    remaining--;
+  }
+  // Rare — inputs summed > 100 (e.g. odd engine rounding drift). Subtract
+  // from the smallest-fraction bands so the total lands at 100.
+  const orderAsc = [...orderDesc].reverse();
+  for (let k = 0; k < orderAsc.length && remaining < 0; k++) {
+    if (out[orderAsc[k].i] > 0) {
+      out[orderAsc[k].i] -= 1;
+      remaining++;
+    }
+  }
+  return out;
+}
+
 function shiftPeriodLabelBackOneYear(label: string): string {
   const m = label.match(/^(.*?)(\d{4})\s*$/);
   if (!m) return label;
@@ -305,19 +344,25 @@ function EditorShell({
       const result = await recMut.mutateAsync({ planUuid: planId, otbCode: plan.otb_code });
       setRec(result);
       setRecGeneratedAt(Date.now());
-      // Apply to redux band state
-      const bands = category.bands
+      // Apply to redux band state. Engine returns fractional percentages
+      // that sum to 100.0 exactly, but naive `Math.round` on each band
+      // independently can push the total to 99 or 101 (e.g. four bands at
+      // .5 fractions all rounding up). Use largest-remainder rounding so
+      // the integers we display sum to exactly 100 — no more "1% over
+      // budget" toast on a fresh suggestion.
+      const raw = category.bands
         .map((master) => {
           const r = result.bands.find((rb) => rb.bandId === master.id);
-          if (!r) return null;
-          return {
-            band_id: master.id,
-            budget_pct: Math.round(r.budgetPct),
-            avg_mrp: clampMrp(r.avgMrp, master),
-            avg_cost: clampCost(r.avgCost, master),
-          };
+          return r ? { master, r } : null;
         })
-        .filter((b): b is NonNullable<typeof b> => b !== null);
+        .filter((x): x is NonNullable<typeof x> => x !== null);
+      const roundedPcts = roundPctsToSum100(raw.map((x) => x.r.budgetPct));
+      const bands = raw.map((x, i) => ({
+        band_id: x.master.id,
+        budget_pct: roundedPcts[i],
+        avg_mrp: clampMrp(x.r.avgMrp, x.master),
+        avg_cost: clampCost(x.r.avgCost, x.master),
+      }));
       if (bands.length > 0) {
         dispatch(setAllBands({ otb_code: plan.otb_code, bands }));
         toast.success('System suggestions applied — review and edit any field.');

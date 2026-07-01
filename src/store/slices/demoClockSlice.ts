@@ -8,7 +8,7 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-const DEFAULT_TODAY = new Date('2026-02-15T09:00:00').getTime();
+const DEFAULT_TODAY = new Date('2025-10-01T09:00:00').getTime();
 const STORAGE_KEY = 'demo_clock_today_ms';
 
 interface DemoClockState {

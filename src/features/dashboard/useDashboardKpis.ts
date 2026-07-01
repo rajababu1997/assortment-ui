@@ -97,7 +97,13 @@ export function useDashboardKpis(filters: DashboardFilters): DashboardKpis {
 
       // Independent dimensions — a row can be both 'released' and in a
       // later stage. Track these separately so the funnel reads top-down.
-      if (row.lifecycle_state === 'released' || row.lifecycle_state === 'final_approved') {
+      // `value_planned` and `option_planned` are downstream of `released` —
+      // once a row's VP or OP exists, it's still-and-always past the release
+      // gate. Count them all as "released" for the funnel.
+      if (row.lifecycle_state === 'released'
+        || row.lifecycle_state === 'value_planned'
+        || row.lifecycle_state === 'option_planned'
+        || row.lifecycle_state === 'final_approved') {
         releasedN++;
       }
       if (row.lifecycle_state === 'final_approved') {
@@ -135,7 +141,15 @@ export function useDashboardKpis(filters: DashboardFilters): DashboardKpis {
     let committed = 0;
     let totalBudget = 0;
     for (const row of rows) {
-      if (row.lifecycle_state === 'released' || row.lifecycle_state === 'final_approved') {
+      // Committed = anything past the "planned" gate. Released rows are
+      // committed money regardless of how deep they've moved into VP/OP;
+      // final_approved means the OTB is locked and POs are (or soon will be)
+      // in flight. Skipping `value_planned` and `option_planned` used to
+      // silently under-count the buyer's committed spend.
+      if (row.lifecycle_state === 'released'
+        || row.lifecycle_state === 'value_planned'
+        || row.lifecycle_state === 'option_planned'
+        || row.lifecycle_state === 'final_approved') {
         committed += row.otb_amount;
       }
     }

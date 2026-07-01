@@ -6,6 +6,8 @@ import { ThemeProvider } from './ThemeProvider';
 import { QueryProvider } from './QueryProvider';
 import { getAuthStrategy } from '@/auth/authStrategyFactory';
 import { secureStorage } from '@/lib/secureStorage';
+import { GlobalToast } from '@/components/GlobalToast';
+import { GlobalSnackbar } from '@/components/GlobalSnackbar';
 
 function AuthInitializer() {
   const dispatch = useDispatch<AppDispatch>();
@@ -39,6 +41,11 @@ export function AppProviders({ children }: Props) {
         <ThemeProvider>
           <AuthInitializer />
           {children}
+          {/* Toast + snackbar renderers — must live inside ThemeProvider so
+              they can read theme tokens. Absent-from-tree was the real reason
+              global `toast.error(...)` calls silently swallowed. */}
+          <GlobalToast />
+          <GlobalSnackbar />
         </ThemeProvider>
       </QueryProvider>
     </Provider>
