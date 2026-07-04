@@ -1,0 +1,1065 @@
+{
+  "dataset": {
+    "name": "India Retail Fashion — 2026 Calendar Signals",
+    "market": "IN",
+    "asOfDate": "2026-07-04",
+    "version": "1.0",
+    "scope": "Verifiable public calendar events only (Tier A). No editorial trend claims from third-party publishers, no numerical sales-uplift forecasts.",
+    "methodology": {
+      "principle": "Every signal is either (a) a fixed calendar date, (b) a lunar/Hijri date computed from a Panchang, or (c) an event date announced by the rights-holder. No trend name is taken from a fashion publication without direct source verification. No numerical sales impact is claimed — that must come from the retailer's own historical sales data.",
+      "dateConfidenceLevels": {
+        "HIGH": "Fixed Gregorian date, cannot shift (national holidays, Christian liturgical dates that are widely published a year in advance).",
+        "MEDIUM_ANNOUNCED": "Announced by rights-holder (movie studio, sports body) but can shift. Verify a week before displaying to end users.",
+        "LUNAR_VERIFY": "Computed from Hindu Panchang or Islamic Hijri calendar. Regional almanacs or moon-sighting can shift by 1 day. Verify with the retailer's regional almanac before customer-facing use."
+      },
+      "planningReviewGuidance": "planningReviewStart is set ~90 days before the event for most fashion buying lead times. Adjust to the retailer's actual OTB lead time (typically 60–120 days).",
+      "important": "The 'planningRelevance' block on each signal is analytical guidance for a merchandiser, not a source-published prediction. Direction words ('WATCH', 'REVIEW', 'TEST') are conservative — they say 'look at your historical data for this window,' not 'this will happen.'"
+    }
+  },
+  "signals": [
+    {
+      "id": "IN-2026-001",
+      "title": "New Year's Day",
+      "date": "2026-01-01",
+      "signalCategory": "NATIONAL_HOLIDAY",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Party / Occasion Wear",
+        "secondaryCategories": ["Casual Wear"],
+        "planningReviewStart": "2025-10-01",
+        "stockLandBy": "2025-12-10",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Public holiday triggers year-end/New-Year party demand. Review last year's Dec 25–Jan 5 window sales before setting allocation."
+      }
+    },
+    {
+      "id": "IN-2026-002",
+      "title": "Makar Sankranti / Pongal / Uttarayan",
+      "date": "2026-01-14",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "HIGH",
+      "dateType": "SOLAR_HINDU",
+      "coverageRegions": ["TAMIL_NADU", "KARNATAKA", "ANDHRA_PRADESH", "TELANGANA", "GUJARAT", "MAHARASHTRA", "PUNJAB", "WEST_BENGAL"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Traditional Sarees", "Kurtas"],
+        "planningReviewStart": "2025-10-15",
+        "stockLandBy": "2025-12-20",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Solar-calendar harvest festival with strong regional apparel tradition (yellow tones in South, traditional weaves in Gujarat). Use retailer's prior-year regional sales."
+      }
+    },
+    {
+      "id": "IN-2026-003",
+      "title": "Republic Day",
+      "date": "2026-01-26",
+      "signalCategory": "NATIONAL_HOLIDAY",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Retail Promotion Window",
+        "secondaryCategories": ["Casual Wear", "Kids"],
+        "planningReviewStart": "2025-10-26",
+        "stockLandBy": "2026-01-05",
+        "action": "PROMO_PLANNING",
+        "reasoning": "Long-standing national retail promotion window. Buyer should align markdown / promo depth calendar. Note the tricolour graphic-tee category is typically active in this window."
+      }
+    },
+    {
+      "id": "IN-2026-004",
+      "title": "Vasant Panchami / Saraswati Puja",
+      "date": "2026-01-23",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["WEST_BENGAL", "BIHAR", "UTTAR_PRADESH", "PUNJAB", "MAHARASHTRA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — verify with regional almanac",
+        "note": "Confirm date with retailer's regional Panchang before publishing"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Yellow / Basant themed apparel"],
+        "planningReviewStart": "2025-10-23",
+        "stockLandBy": "2026-01-05",
+        "action": "WATCH",
+        "reasoning": "Cultural festival with yellow-colour tradition, strongest in East and North India. Cross-check retailer's historical yellow-tone sell-through around this window."
+      }
+    },
+    {
+      "id": "IN-2026-005",
+      "title": "Maha Shivratri",
+      "date": "2026-02-15",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — verify with regional almanac",
+        "note": "Confirm date with retailer's regional Panchang before publishing"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "planningReviewStart": "2025-11-15",
+        "stockLandBy": "2026-01-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Major devotional festival, secondary apparel driver. Review category historical."
+      }
+    },
+    {
+      "id": "IN-2026-006",
+      "title": "Holi",
+      "date": "2026-03-04",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA", "STRONGEST_IN_NORTH"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Phalguna Purnima 2026",
+        "note": "Widely reported as March 4, 2026. Confirm with retailer's regional Panchang."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Casual Wear",
+        "secondaryCategories": ["White base cotton", "Easy-care apparel", "Old-clothes replacement window"],
+        "planningReviewStart": "2025-12-01",
+        "stockLandBy": "2026-02-10",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Colour-play festival. Historical demand pattern: white bases and easy-care cotton pre-Holi; replacement casual wear post-Holi. Review both windows in retailer's prior-year data."
+      }
+    },
+    {
+      "id": "IN-2026-007",
+      "title": "Eid-ul-Fitr",
+      "date": "2026-03-21",
+      "signalCategory": "MUSLIM_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HIJRI",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Islamic Hijri calendar — moon-sighting confirmation required",
+        "note": "Widely calculated as March 21, 2026, but actual date depends on Shawwal crescent moon sighting. Can shift by 1 day."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic / Occasion Wear",
+        "secondaryCategories": ["Kurta sets", "Sarees", "Kids ethnic"],
+        "planningReviewStart": "2025-12-15",
+        "stockLandBy": "2026-02-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Major Muslim festival with strong new-clothes tradition. Kurta / suit / kids ethnic categories peak. Review retailer's prior-year window."
+      }
+    },
+    {
+      "id": "IN-2026-008",
+      "title": "Ugadi / Gudi Padwa / Cheti Chand (Regional New Year)",
+      "date": "2026-03-19",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["MAHARASHTRA", "KARNATAKA", "ANDHRA_PRADESH", "TELANGANA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Chaitra Shukla Pratipada 2026",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "planningReviewStart": "2025-12-19",
+        "stockLandBy": "2026-02-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Regional new-year festival with new-clothes tradition. Strongest in Maharashtra and the Deccan."
+      }
+    },
+    {
+      "id": "IN-2026-009",
+      "title": "Ram Navami",
+      "date": "2026-03-26",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA", "STRONGEST_IN_NORTH"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "planningReviewStart": "2025-12-26",
+        "stockLandBy": "2026-03-05",
+        "action": "WATCH",
+        "reasoning": "Devotional festival, secondary apparel window. Bundle with the broader Chaitra Navratri window in North India."
+      }
+    },
+    {
+      "id": "IN-2026-010",
+      "title": "IPL 2026 Tournament Window (Indicative)",
+      "period": {"start": "2026-03-22", "end": "2026-05-31"},
+      "signalCategory": "SPORTS_EVENT",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "SPORTS_SCHEDULED",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "IPL Official Schedule (BCCI)",
+        "url": "https://www.iplt20.com/",
+        "note": "Confirm 2026 exact tournament dates from official schedule. Window shown is typical late-Mar to end-May pattern."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Athleisure",
+        "secondaryCategories": ["Casual Wear", "Graphic Tees (non-licensed)"],
+        "planningReviewStart": "2025-12-22",
+        "stockLandBy": "2026-02-28",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Sustained-attention sports window. Sports-inspired casual wear historically active. IMPORTANT: team names, franchise marks and league logos are trademarked — do not use without a licensing agreement."
+      }
+    },
+    {
+      "id": "IN-2026-011",
+      "title": "Good Friday",
+      "date": "2026-04-03",
+      "signalCategory": "CHRISTIAN_FESTIVAL",
+      "dateConfidence": "HIGH",
+      "dateType": "CHRISTIAN_LITURGICAL",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Occasion Wear (Kerala / Goa / North-East)",
+        "planningReviewStart": "2026-01-03",
+        "stockLandBy": "2026-03-15",
+        "action": "WATCH",
+        "reasoning": "Solemn observance day. Retailer promo depth typically light. Review historical for Kerala / Goa / North-East markets."
+      }
+    },
+    {
+      "id": "IN-2026-012",
+      "title": "Easter Sunday",
+      "date": "2026-04-05",
+      "signalCategory": "CHRISTIAN_FESTIVAL",
+      "dateConfidence": "HIGH",
+      "dateType": "CHRISTIAN_LITURGICAL",
+      "coverageRegions": ["KERALA", "GOA", "NORTH_EAST", "MUMBAI", "BENGALURU"],
+      "sourceCitation": {
+        "name": "Christian liturgical calendar 2026"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Occasion Wear",
+        "secondaryCategories": ["Kids party wear"],
+        "planningReviewStart": "2026-01-05",
+        "stockLandBy": "2026-03-15",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Christian celebration; new-clothes and kids party-wear tradition in strong-Christian markets."
+      }
+    },
+    {
+      "id": "IN-2026-013",
+      "title": "Ambedkar Jayanti",
+      "date": "2026-04-14",
+      "signalCategory": "NATIONAL_HOLIDAY",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "General Retail",
+        "planningReviewStart": "2026-01-14",
+        "stockLandBy": "2026-03-25",
+        "action": "WATCH",
+        "reasoning": "Public holiday, mid-week off. Modest promo window; review historical footfall."
+      }
+    },
+    {
+      "id": "IN-2026-014",
+      "title": "Baisakhi (Punjabi New Year)",
+      "date": "2026-04-14",
+      "signalCategory": "REGIONAL_FESTIVAL",
+      "dateConfidence": "HIGH",
+      "dateType": "SOLAR_HINDU",
+      "coverageRegions": ["PUNJAB", "HARYANA", "DELHI", "PUNJABI_DIASPORA"],
+      "sourceCitation": {
+        "name": "Solar Hindu calendar — first day of Vaishakha"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Kurta sets", "Traditional Punjabi wear"],
+        "planningReviewStart": "2026-01-14",
+        "stockLandBy": "2026-03-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Harvest festival + Sikh new year. Strong ethnic-wear pull in Punjab-culture markets."
+      }
+    },
+    {
+      "id": "IN-2026-015",
+      "title": "Akshaya Tritiya",
+      "date": "2026-04-20",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Vaishakha Shukla Tritiya",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear / Occasion Wear",
+        "secondaryCategories": ["Gold-tone accessories", "Wedding trousseau"],
+        "planningReviewStart": "2026-01-20",
+        "stockLandBy": "2026-03-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Highly auspicious day for buying gold and starting new ventures — retailers see strong ethnic-wear + wedding-trousseau demand. Review historical."
+      }
+    },
+    {
+      "id": "IN-2026-016",
+      "title": "Buddha Purnima",
+      "date": "2026-04-30",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Vaishakha Purnima",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "General Retail",
+        "planningReviewStart": "2026-01-30",
+        "stockLandBy": "2026-04-10",
+        "action": "WATCH",
+        "reasoning": "Public holiday, quiet apparel window. Review historical footfall only."
+      }
+    },
+    {
+      "id": "IN-2026-017",
+      "title": "Labour Day",
+      "date": "2026-05-01",
+      "signalCategory": "NATIONAL_HOLIDAY",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "General Retail",
+        "planningReviewStart": "2026-02-01",
+        "stockLandBy": "2026-04-10",
+        "action": "WATCH",
+        "reasoning": "Long-weekend potential if May 1 falls near weekend. Modest promo window."
+      }
+    },
+    {
+      "id": "IN-2026-018",
+      "title": "Eid-ul-Adha (Bakrid)",
+      "date": "2026-05-27",
+      "signalCategory": "MUSLIM_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HIJRI",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Islamic Hijri calendar — Dhul Hijjah 10",
+        "note": "Depends on Dhul Hijjah crescent sighting. Can shift by 1 day."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic / Occasion Wear",
+        "secondaryCategories": ["Kurta sets", "Sarees", "Kids ethnic"],
+        "planningReviewStart": "2026-02-27",
+        "stockLandBy": "2026-04-30",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Second Eid — new-clothes tradition. Kurta / suit / kids ethnic peak."
+      }
+    },
+    {
+      "id": "IN-2026-019",
+      "title": "Summer School Break Window",
+      "period": {"start": "2026-05-01", "end": "2026-06-15"},
+      "signalCategory": "SCHOOL_CALENDAR",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "STATE_EDUCATION_SCHEDULE",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "State education department academic calendars",
+        "note": "Actual dates vary by state and board (CBSE / ICSE / state boards). Window shown is the widest common range."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Kids Wear",
+        "secondaryCategories": ["Travel apparel", "Casual Wear"],
+        "planningReviewStart": "2026-02-01",
+        "stockLandBy": "2026-04-15",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Kids travel + activity apparel window. Retailers see kids-wear pull. Review by state cluster."
+      }
+    },
+    {
+      "id": "IN-2026-020",
+      "title": "Toy Story 5 Theatrical Release (India)",
+      "date": "2026-06-19",
+      "signalCategory": "ENTERTAINMENT_RELEASE",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "STUDIO_ANNOUNCED",
+      "coverageRegions": ["ALL_INDIA", "URBAN_METRO"],
+      "sourceCitation": {
+        "name": "Walt Disney Studios Motion Pictures release calendar",
+        "url": "https://www.disney.com/",
+        "note": "Confirm India release date near event; global studio dates can shift."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Kids Wear",
+        "secondaryCategories": ["Kids graphic tees"],
+        "planningReviewStart": "2026-03-19",
+        "stockLandBy": "2026-05-31",
+        "action": "WATCH",
+        "reasoning": "Family-franchise release; kids-wear category watch. IMPORTANT: character graphics (Woody, Buzz, etc.) are Disney-owned copyrighted characters — do not use without a Disney licensing agreement. Generic kids-wear planning is safe."
+      }
+    },
+    {
+      "id": "IN-2026-021",
+      "title": "FIFA World Cup 2026 (US / Canada / Mexico)",
+      "period": {"start": "2026-06-11", "end": "2026-07-19"},
+      "signalCategory": "SPORTS_EVENT",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "SPORTS_SCHEDULED",
+      "coverageRegions": ["ALL_INDIA", "STRONGEST_IN_METROS", "KERALA", "WEST_BENGAL", "GOA", "NORTH_EAST"],
+      "sourceCitation": {
+        "name": "FIFA World Cup 2026 Official",
+        "url": "https://www.fifa.com/",
+        "note": "Confirm final match schedule near event."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Athleisure",
+        "secondaryCategories": ["Football / soccer casual wear", "Team-colour casual wear (non-licensed)"],
+        "planningReviewStart": "2026-03-11",
+        "stockLandBy": "2026-05-15",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Global football attention window. Kerala, West Bengal, Goa and North-East India are traditionally strong football-following markets. IMPORTANT: FIFA, tournament, and national-team marks are trademarked — do not use without licence. Generic sports-inspired casual is safe."
+      }
+    },
+    {
+      "id": "IN-2026-022",
+      "title": "Moana Live-Action Theatrical Release (India)",
+      "date": "2026-07-10",
+      "signalCategory": "ENTERTAINMENT_RELEASE",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "STUDIO_ANNOUNCED",
+      "coverageRegions": ["ALL_INDIA", "URBAN_METRO"],
+      "sourceCitation": {
+        "name": "Walt Disney Studios Motion Pictures release calendar",
+        "url": "https://www.disney.com/",
+        "note": "Confirm India release date near event."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Kids Wear",
+        "secondaryCategories": ["Family / travel casual"],
+        "planningReviewStart": "2026-04-10",
+        "stockLandBy": "2026-06-20",
+        "action": "WATCH",
+        "reasoning": "Family-franchise release. IMPORTANT: Moana character and branded artwork are Disney-copyrighted — do not use. Generic kids / summer casual planning is safe."
+      }
+    },
+    {
+      "id": "IN-2026-023",
+      "title": "Rath Yatra (Puri)",
+      "date": "2026-07-15",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ODISHA", "WEST_BENGAL"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Ashadha Shukla Dwitiya",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "planningReviewStart": "2026-04-15",
+        "stockLandBy": "2026-06-25",
+        "action": "WATCH",
+        "reasoning": "Regional festival with strong footfall in Odisha and West Bengal. Review regional historical."
+      }
+    },
+    {
+      "id": "IN-2026-024",
+      "title": "Spider-Man: Brand New Day Theatrical Release (India)",
+      "date": "2026-07-31",
+      "signalCategory": "ENTERTAINMENT_RELEASE",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "STUDIO_ANNOUNCED",
+      "coverageRegions": ["ALL_INDIA", "URBAN_YOUTH"],
+      "sourceCitation": {
+        "name": "Marvel Studios / Sony Pictures release calendar",
+        "url": "https://www.marvel.com/movies",
+        "note": "Confirm India release date near event; superhero release windows shift regularly."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Casual Wear (Youth)",
+        "secondaryCategories": ["Graphic tees (non-licensed)", "Streetwear"],
+        "planningReviewStart": "2026-04-30",
+        "stockLandBy": "2026-07-05",
+        "action": "WATCH",
+        "reasoning": "Major youth-audience release. IMPORTANT: Spider-Man character, symbols and title artwork are Marvel/Disney-copyrighted — do not use without licensing. Generic urban / streetwear planning is safe."
+      }
+    },
+    {
+      "id": "IN-2026-025",
+      "title": "Raksha Bandhan",
+      "date": "2026-08-28",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA", "STRONGEST_IN_NORTH_AND_WEST"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Shravana Purnima",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Gifting apparel", "Kids ethnic"],
+        "planningReviewStart": "2026-05-28",
+        "stockLandBy": "2026-08-05",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Sibling-bond festival with strong gifting-apparel tradition (sister buys for brother, brother gifts back). Kurta and ethnic-set demand rises 3–4 weeks pre-event."
+      }
+    },
+    {
+      "id": "IN-2026-026",
+      "title": "Onam (Kerala)",
+      "date": "2026-08-26",
+      "signalCategory": "REGIONAL_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["KERALA", "KERALA_DIASPORA"],
+      "sourceCitation": {
+        "name": "Malayalam calendar — Thiruvonam",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Kasavu sarees", "Traditional Kerala wear"],
+        "planningReviewStart": "2026-05-26",
+        "stockLandBy": "2026-08-05",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Kerala's biggest annual festival. Cream and gold-border Kasavu wear traditionally peaks."
+      }
+    },
+    {
+      "id": "IN-2026-027",
+      "title": "Independence Day",
+      "date": "2026-08-15",
+      "signalCategory": "NATIONAL_HOLIDAY",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Retail Promotion Window",
+        "secondaryCategories": ["Casual Wear", "Kids"],
+        "planningReviewStart": "2026-05-15",
+        "stockLandBy": "2026-07-25",
+        "action": "PROMO_PLANNING",
+        "reasoning": "Major national retail promo window. Buyer should align markdown depth calendar. Tricolour graphic-tee category typically active."
+      }
+    },
+    {
+      "id": "IN-2026-028",
+      "title": "Milad-un-Nabi",
+      "date": "2026-08-26",
+      "signalCategory": "MUSLIM_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HIJRI",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Islamic Hijri calendar — Rabi-ul-Awwal 12",
+        "note": "Depends on moon-sighting"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "planningReviewStart": "2026-05-26",
+        "stockLandBy": "2026-08-05",
+        "action": "WATCH",
+        "reasoning": "Public holiday. Modest apparel window compared to Eids."
+      }
+    },
+    {
+      "id": "IN-2026-029",
+      "title": "Krishna Janmashtami",
+      "date": "2026-09-04",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA", "STRONGEST_IN_MATHURA_VRINDAVAN_MAHARASHTRA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Bhadrapada Krishna Ashtami",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Kids ethnic (Krishna dress-up)"],
+        "planningReviewStart": "2026-06-04",
+        "stockLandBy": "2026-08-15",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Devotional festival. Kids ethnic-wear historically active (school Krishna-themed events)."
+      }
+    },
+    {
+      "id": "IN-2026-030",
+      "title": "Ganesh Chaturthi",
+      "date": "2026-09-14",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["MAHARASHTRA", "GOA", "KARNATAKA", "TELANGANA", "ANDHRA_PRADESH"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Bhadrapada Shukla Chaturthi",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Kids ethnic", "Traditional Maharashtrian wear"],
+        "planningReviewStart": "2026-06-14",
+        "stockLandBy": "2026-08-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Maharashtra's biggest festival (10 days). Strong pull for kurta / kids-ethnic / traditional wear across the state and neighbouring Deccan markets."
+      }
+    },
+    {
+      "id": "IN-2026-031",
+      "title": "Gandhi Jayanti",
+      "date": "2026-10-02",
+      "signalCategory": "NATIONAL_HOLIDAY",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "General Retail",
+        "planningReviewStart": "2026-07-02",
+        "stockLandBy": "2026-09-10",
+        "action": "WATCH",
+        "reasoning": "Public holiday, dry-day observance. Modest apparel window; review footfall historical."
+      }
+    },
+    {
+      "id": "IN-2026-032",
+      "title": "Sharad Navratri Window",
+      "period": {"start": "2026-10-11", "end": "2026-10-19"},
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA", "STRONGEST_IN_GUJARAT_MAHARASHTRA_NORTH"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Ashwin Shukla Pratipada to Navami",
+        "note": "Verify start and end dates with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Chaniya cholis", "Kurtas", "Colour-of-the-day themed apparel"],
+        "planningReviewStart": "2026-07-11",
+        "stockLandBy": "2026-09-15",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Nine-day festival — largest ethnic-wear window of the year in Gujarat and Maharashtra (garba / dandiya). Colour-of-the-day tradition drives multi-outfit purchases. Extremely strong retail window."
+      }
+    },
+    {
+      "id": "IN-2026-033",
+      "title": "Durga Puja (Bengal)",
+      "period": {"start": "2026-10-15", "end": "2026-10-20"},
+      "signalCategory": "REGIONAL_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["WEST_BENGAL", "ASSAM", "TRIPURA", "BENGALI_DIASPORA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Ashwin Shukla Shashthi to Dashami",
+        "note": "Verify with Bengali regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Bengali sarees", "Kurtas", "Sherwanis", "Kids ethnic"],
+        "planningReviewStart": "2026-07-15",
+        "stockLandBy": "2026-09-20",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "West Bengal's biggest festival. Peak ethnic-wear window. Multi-day pandal-hopping tradition drives 3–4 outfits per person historically."
+      }
+    },
+    {
+      "id": "IN-2026-034",
+      "title": "Dussehra / Vijayadashami",
+      "date": "2026-10-20",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Ashwin Shukla Dashami",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "planningReviewStart": "2026-07-20",
+        "stockLandBy": "2026-09-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Concludes Navratri / Durga Puja. Auspicious day for new purchases (new-year gold, apparel). Historical ethnic-wear peak."
+      }
+    },
+    {
+      "id": "IN-2026-035",
+      "title": "Karva Chauth",
+      "date": "2026-10-30",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["NORTH_INDIA", "PUNJAB", "HARYANA", "DELHI", "UP", "RAJASTHAN"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Kartik Krishna Chaturthi",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear (Women)",
+        "secondaryCategories": ["Red / bridal-colour sarees", "Traditional accessories"],
+        "planningReviewStart": "2026-07-30",
+        "stockLandBy": "2026-10-05",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Married women's festival. Traditional red / bridal-colour ethnic wear peaks in North India."
+      }
+    },
+    {
+      "id": "IN-2026-036",
+      "title": "Dhanteras",
+      "date": "2026-11-06",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Kartik Krishna Trayodashi",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "secondaryCategories": ["Gifting apparel"],
+        "planningReviewStart": "2026-08-06",
+        "stockLandBy": "2026-10-15",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "First day of Diwali festival cluster. Auspicious for new purchases. Ethnic and gifting-apparel window opens."
+      }
+    },
+    {
+      "id": "IN-2026-037",
+      "title": "Diwali",
+      "date": "2026-11-08",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Kartik Amavasya",
+        "note": "Verify with regional almanac. Widely reported as Nov 8, 2026."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic / Occasion Wear",
+        "secondaryCategories": ["Sarees", "Kurtas", "Sherwanis", "Kids ethnic", "Party wear"],
+        "planningReviewStart": "2026-08-08",
+        "stockLandBy": "2026-10-15",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "India's largest single retail window of the year. Ethnic wear, occasion wear, gifting apparel and kids-ethnic all peak. Buyer should use retailer's prior-Diwali sales for allocation, not any external forecast."
+      }
+    },
+    {
+      "id": "IN-2026-038",
+      "title": "Bhai Dooj",
+      "date": "2026-11-10",
+      "signalCategory": "HINDU_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["NORTH_INDIA", "WEST_INDIA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Kartik Shukla Dwitiya",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Gifting Apparel",
+        "planningReviewStart": "2026-08-10",
+        "stockLandBy": "2026-10-15",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Sibling festival (post-Diwali). Extends the gifting-apparel window."
+      }
+    },
+    {
+      "id": "IN-2026-039",
+      "title": "Chhath Puja",
+      "period": {"start": "2026-11-13", "end": "2026-11-14"},
+      "signalCategory": "REGIONAL_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["BIHAR", "JHARKHAND", "EAST_UP", "BIHARI_DIASPORA"],
+      "sourceCitation": {
+        "name": "Hindu Panchang — Kartik Shukla Shashthi",
+        "note": "Verify with regional almanac"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "planningReviewStart": "2026-08-13",
+        "stockLandBy": "2026-10-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Bihar / Jharkhand major festival. Traditional wear pull; strongest in dedicated stores."
+      }
+    },
+    {
+      "id": "IN-2026-040",
+      "title": "Children's Day",
+      "date": "2026-11-14",
+      "signalCategory": "NATIONAL_OBSERVANCE",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "National observance — Jawaharlal Nehru's birth anniversary"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Kids Wear",
+        "planningReviewStart": "2026-08-14",
+        "stockLandBy": "2026-10-25",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "School events and kids-wear promo window."
+      }
+    },
+    {
+      "id": "IN-2026-041",
+      "title": "Winter Wedding Season (indicative window)",
+      "period": {"start": "2026-11-15", "end": "2027-02-15"},
+      "signalCategory": "SEASONAL_WINDOW",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "TRADITIONAL_WEDDING_SEASON",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Traditional Hindu wedding-season Panchang windows",
+        "note": "Actual shubh muhurat dates are determined per-year by Panchang. Window shown is the widest traditional season."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic / Wedding Wear",
+        "secondaryCategories": ["Sherwanis", "Bridal sarees", "Occasion wear", "Party wear", "Trousseau apparel"],
+        "planningReviewStart": "2026-06-15",
+        "stockLandBy": "2026-11-05",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Largest wedding-wear window of the year. Overlaps Diwali and extends through Feb. Sherwani / lehenga / occasion-wear peak."
+      }
+    },
+    {
+      "id": "IN-2026-042",
+      "title": "Guru Nanak Jayanti (Gurpurab)",
+      "date": "2026-11-24",
+      "signalCategory": "SIKH_FESTIVAL",
+      "dateConfidence": "LUNAR_VERIFY",
+      "dateType": "LUNAR_HINDU",
+      "coverageRegions": ["PUNJAB", "DELHI", "SIKH_DIASPORA"],
+      "sourceCitation": {
+        "name": "Nanakshahi calendar — Kartik Purnima",
+        "note": "Verify with Sikh community calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Ethnic Wear",
+        "planningReviewStart": "2026-08-24",
+        "stockLandBy": "2026-11-01",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "Sikh community's biggest festival. Traditional wear pull in Punjab and diaspora markets."
+      }
+    },
+    {
+      "id": "IN-2026-043",
+      "title": "Constitution Day",
+      "date": "2026-11-26",
+      "signalCategory": "NATIONAL_OBSERVANCE",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "National observance"
+      },
+      "planningRelevance": {
+        "primaryCategory": "General Retail",
+        "planningReviewStart": "2026-08-26",
+        "stockLandBy": "2026-11-05",
+        "action": "WATCH",
+        "reasoning": "Working day. Minor observance; not a retail driver."
+      }
+    },
+    {
+      "id": "IN-2026-044",
+      "title": "Avengers: Doomsday Theatrical Release (India)",
+      "date": "2026-12-18",
+      "signalCategory": "ENTERTAINMENT_RELEASE",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "STUDIO_ANNOUNCED",
+      "coverageRegions": ["ALL_INDIA", "URBAN_YOUTH"],
+      "sourceCitation": {
+        "name": "Marvel Studios release calendar",
+        "url": "https://www.marvel.com/movies",
+        "note": "This film has been rescheduled multiple times previously. Verify current date near release."
+      },
+      "planningRelevance": {
+        "primaryCategory": "Casual Wear (Youth)",
+        "secondaryCategories": ["Graphic tees (non-licensed)", "Streetwear"],
+        "planningReviewStart": "2026-09-18",
+        "stockLandBy": "2026-11-25",
+        "action": "WATCH",
+        "reasoning": "Franchise release. IMPORTANT: Avengers, character names and title artwork are Marvel/Disney-copyrighted — do not use without licensing. Generic urban / streetwear planning is safe."
+      }
+    },
+    {
+      "id": "IN-2026-045",
+      "title": "Christmas",
+      "date": "2026-12-25",
+      "signalCategory": "CHRISTIAN_FESTIVAL",
+      "dateConfidence": "HIGH",
+      "dateType": "FIXED_GREGORIAN",
+      "coverageRegions": ["ALL_INDIA", "STRONGEST_IN_KERALA_GOA_NORTH_EAST_METROS"],
+      "sourceCitation": {
+        "name": "Government of India Public Holidays 2026",
+        "url": "https://www.india.gov.in/calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "Occasion / Party Wear",
+        "secondaryCategories": ["Kids party wear", "Gifting apparel", "Winter casual"],
+        "planningReviewStart": "2026-09-25",
+        "stockLandBy": "2026-12-05",
+        "action": "REVIEW_HISTORICAL",
+        "reasoning": "End-of-year celebration + retail promo peak. Party wear, kids-wear and gifting apparel windows. Combined with year-end sale calendar."
+      }
+    },
+    {
+      "id": "IN-2026-046",
+      "title": "Year-End Sale Window",
+      "period": {"start": "2026-12-15", "end": "2026-12-31"},
+      "signalCategory": "RETAIL_PROMO_WINDOW",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "RETAIL_CALENDAR",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Traditional retail year-end sale calendar",
+        "note": "Retailer-specific — set by internal merchandising calendar"
+      },
+      "planningRelevance": {
+        "primaryCategory": "General Retail (Markdown)",
+        "planningReviewStart": "2026-09-15",
+        "stockLandBy": "N/A_MARKDOWN_WINDOW",
+        "action": "MARKDOWN_PLANNING",
+        "reasoning": "End-of-season markdown depth window. Buyer should plan clearance pricing calendar; not an inbound-buying signal."
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "SRC-IN-GOV-HOLIDAYS",
+      "name": "Government of India — Public Holidays 2026",
+      "url": "https://www.india.gov.in/calendar",
+      "type": "OFFICIAL_GOVERNMENT",
+      "citationSafe": true,
+      "notes": "Authoritative list of central-government-recognised holidays. State/optional holidays vary."
+    },
+    {
+      "id": "SRC-HINDU-PANCHANG",
+      "name": "Hindu Panchang (Regional)",
+      "url": null,
+      "type": "TRADITIONAL_ALMANAC",
+      "citationSafe": true,
+      "notes": "Hindu festival dates are computed from lunar Panchang. Regional almanacs can differ by 1 day. No single URL is authoritative; verify with the retailer's regional almanac (e.g., North Indian, Bengali, Malayalam, Tamil versions)."
+    },
+    {
+      "id": "SRC-HIJRI-CALENDAR",
+      "name": "Islamic Hijri Calendar",
+      "url": null,
+      "type": "LUNAR_CALENDAR",
+      "citationSafe": true,
+      "notes": "Muslim festival dates depend on moon-sighting and can shift by 1 day. Confirm locally near event."
+    },
+    {
+      "id": "SRC-BCCI-IPL",
+      "name": "IPL Official Schedule (BCCI)",
+      "url": "https://www.iplt20.com/",
+      "type": "OFFICIAL_RIGHTS_HOLDER",
+      "citationSafe": true,
+      "notes": "Team names, franchise marks and league logos are trademarked. Referencing the tournament window is fine; using marks is not without a licence."
+    },
+    {
+      "id": "SRC-FIFA-WC-2026",
+      "name": "FIFA World Cup 2026",
+      "url": "https://www.fifa.com/",
+      "type": "OFFICIAL_RIGHTS_HOLDER",
+      "citationSafe": true,
+      "notes": "FIFA and national-team marks are trademarked. Referencing the tournament window is fine; using marks is not without a licence."
+    },
+    {
+      "id": "SRC-MARVEL-CALENDAR",
+      "name": "Marvel Studios Movie Calendar",
+      "url": "https://www.marvel.com/movies",
+      "type": "OFFICIAL_STUDIO",
+      "citationSafe": true,
+      "notes": "Release dates are public. Character names, film titles, poster artwork and logos are Marvel/Disney-copyrighted — do not reproduce."
+    },
+    {
+      "id": "SRC-DISNEY-CALENDAR",
+      "name": "Walt Disney Studios Release Calendar",
+      "url": "https://www.disney.com/",
+      "type": "OFFICIAL_STUDIO",
+      "citationSafe": true,
+      "notes": "Release dates are public. All Disney character names, film artwork and logos are copyrighted — do not reproduce."
+    },
+    {
+      "id": "SRC-CHRISTIAN-LITURGY",
+      "name": "Christian Liturgical Calendar 2026",
+      "url": null,
+      "type": "CALENDAR_STANDARD",
+      "citationSafe": true,
+      "notes": "Easter 2026 = April 5. Good Friday and other dates derived from that anchor."
+    },
+    {
+      "id": "SRC-STATE-EDUCATION",
+      "name": "State Education Department Academic Calendars 2026",
+      "url": null,
+      "type": "GOVERNMENT_STATE",
+      "citationSafe": true,
+      "notes": "School break windows vary by state and board. The window in this dataset is the widest common range."
+    }
+  ],
+  "usageGuidelines": {
+    "safeToDisplay": [
+      "Event name",
+      "Event date (with dateConfidence label)",
+      "Event region and category",
+      "The 'planningRelevance' block, labelled clearly as analyst guidance",
+      "The source citation (name + URL if provided)"
+    ],
+    "requiresLicensingOrLegalReview": [
+      "Character graphics, movie posters, film logos (Marvel, Disney, etc.)",
+      "Team names, franchise logos, tournament marks (IPL, FIFA, national teams)",
+      "Screenshots, quoted text from third-party fashion publications (Vogue, Pinterest, etc.)",
+      "Third-party pageviews / trend charts (Google Trends, YouTube stats) when re-hosted"
+    ],
+    "neverDisplay": [
+      "A numerical sales-uplift percentage attributed to an event, unless it comes from the retailer's own historical sales data for that event window",
+      "A confidence percentage attributed to a third-party publisher (they do not publish confidence — it is an analyst-assigned number)",
+      "Presenting a lunar-calculated date as a fixed fact without the 'verify locally' note"
+    ]
+  }
+}

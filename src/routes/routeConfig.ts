@@ -29,6 +29,7 @@ const OptionAllPlansPage = lazy(() => import('@/features/option/all-plans/all-pl
 const SalesHistoryPage = lazy(() => import('@/features/saleshistory/saleshistory.component'));
 const DashboardPage = lazy(() => import('@/features/dashboard/dashboard.component'));
 const TrendIntelligencePage = lazy(() => import('@/features/trends/trend-intelligence.component'));
+const DemandCalendarPage = lazy(() => import('@/features/demand-calendar/demand-calendar.component'));
 
 export const routes: RouteConfig[] = [
   // `/home` is the post-login landing — point it at the OTB Dashboard.
@@ -59,4 +60,5 @@ export const routes: RouteConfig[] = [
   { path: '/saleshistory', component: SalesHistoryPage, layout: 'authenticated' },
   { path: '/dashboard', component: DashboardPage, layout: 'authenticated' },
   { path: '/trends', component: TrendIntelligencePage, layout: 'authenticated' },
+  { path: '/demand-calendar', component: DemandCalendarPage, layout: 'authenticated' },
 ];

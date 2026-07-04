@@ -53,6 +53,7 @@ export const SIDEBAR_NAV: NavigationItem[] = [
   { id: 'divider-1', title: '', type: 'divider' },
   { id: 'history', title: 'Sales History', type: 'basic', icon: 'barChart', link: '/saleshistory' },
   { id: 'trends', title: 'Trend Intelligence', type: 'basic', icon: 'activity', link: '/trends' },
+  { id: 'demand-calendar', title: 'Demand Calendar 2026', type: 'basic', icon: 'calendar', link: '/demand-calendar' },
   // { id: 'profile', title: 'Profile', type: 'basic', icon: 'user', link: '/user-profile' },
   // { id: 'settings', title: 'Settings', type: 'basic', icon: 'settings', link: '/settings' },
 ];
