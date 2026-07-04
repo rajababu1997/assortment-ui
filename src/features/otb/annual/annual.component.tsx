@@ -14,7 +14,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
-  BarChart3,
   CalendarDays,
   CheckCircle2,
   Circle,
@@ -42,7 +41,7 @@ import {
 } from '@/components/primitives';
 import { toast } from '@/lib/toast';
 import { useDemoToday } from '@/hooks/useDemoClock';
-import { generateAutoFilledRows } from '../utils/autofill';
+import { generateRowSkeleton } from '../utils/autofill';
 import { HistoricalLensPanel } from '../components/dashboard/HistoricalLensPanel';
 import {
   annualTotal,
@@ -77,12 +76,14 @@ import { useAnnualRecommendation } from '@/features/recommendation/useRecommenda
 import { SuggestButton } from '@/features/recommendation/components/SuggestButton';
 import { WhyAiButton } from '@/features/recommendation/components/WhyAiButton';
 import { ExplanationDrawer, type SectionedExplanation } from '@/features/recommendation/components/ExplanationDrawer';
+import { AnnualExplanationCard } from '@/features/recommendation/components/AnnualExplanationCard';
 import type { AnnualRecommendation } from '@/features/recommendation/types';
+import { useSalesAggregate } from '@/features/sales/useSales';
 
 export default function OtbAnnualPage() {
   const { data: apiBrands = [] } = useApiBrands();      // prefetch for picker + autofill
   const { data: apiCategories = [] } = useApiCategories(); // prefetch for autofill
-  const { findCategory } = useBrandCategoryLookup();
+  const { findBrand, findCategory } = useBrandCategoryLookup();
   const savePlan = useSaveAnnualPlan();
   const deletePlan = useDeleteAnnualPlan();
   const navigate = useNavigate();
@@ -181,6 +182,26 @@ export default function OtbAnnualPage() {
   const overBudget = budgetSet ? allocated > overallBudget : false;
   const hasAnyRow = !!annual && Object.values(annual.periods).some((p) => p.rows.length > 0);
   const allocatedPct = budgetSet ? Math.min(100, Math.round((allocated / overallBudget) * 100)) : 0;
+
+  // Last Year total OTB — needed at Auto-Plan time so we can auto-derive the
+  // growth% the recommender uses for its summary text + override caveat. The
+  // buyer never sees or edits this; it's computed from overallBudget / LY.
+  const lyYear = useMemo(
+    () => new Date(planStartIso).getFullYear() - 1,
+    [planStartIso],
+  );
+  const lyAgg = useSalesAggregate(
+    { from: `${lyYear}-01`, to: `${lyYear}-12` },
+    { enabled: !!planStartIso && isAdmin },
+  );
+  const lyTotalOtb = useMemo(() => {
+    if (!lyAgg.data || lyAgg.data.length === 0) return 0;
+    // Same formula as the server's `computeHistoricalOtb`.
+    return lyAgg.data.reduce(
+      (s, r) => s + r.netSalesValue + r.markdownValue + r.eomValue - r.bomValue,
+      0,
+    );
+  }, [lyAgg.data]);
   const periodsWithRows = annual ? Object.values(annual.periods).filter((p) => p.rows.length > 0).length : 0;
   // Submit requires EVERY period to have at least one row — partial plans
   // should be saved as draft, not submitted.
@@ -286,51 +307,51 @@ export default function OtbAnnualPage() {
     const planId = ensurePlan();
 
     try {
-      // ── Step 1: build a full (brand × category × period) grid ──────────
-      const seededByPeriod = generateAutoFilledRows({
+      // ── Step 1: build an empty row skeleton (zeros) ────────────────────
+      // The recommender reads rows from the server, so we need row entities
+      // to exist before we can ask for recommendations against them. The
+      // actual OTB values will come exclusively from the recommender.
+      const skeletonByPeriod = generateRowSkeleton({
         periods: activePeriods,
-        overallBudget,
         brands: apiBrands,
         categories: apiCategories,
       });
-      Object.entries(seededByPeriod).forEach(([periodKey, rows]) => {
-        dispatch(setPeriodRows({ plan_id: planId, period_key: periodKey, rows }));
-      });
 
-      // ── Step 2: persist the seeded grid so the recommender can read it ─
-      // Build the snapshot inline — Redux dispatch above hasn't flushed yet
-      // when we send to the server, so we have to construct the plan manually.
-      const planToSave = annual
+      // ── Step 2: persist the skeleton so the recommender can read it ────
+      const planWithSkeleton = annual
         ? {
             ...annual,
             plan_id: planId,
             periods: Object.fromEntries(
               Object.entries(annual.periods).map(([k, p]) => [
                 k,
-                { ...p, rows: seededByPeriod[k] ?? p.rows },
+                { ...p, rows: skeletonByPeriod[k] ?? p.rows },
               ]),
             ),
           }
         : null;
-      if (planToSave) {
-        await savePlan.mutateAsync(planToSave);
+      if (planWithSkeleton) {
+        await savePlan.mutateAsync(planWithSkeleton);
       }
 
       // ── Step 3: ask the recommender for AI values ──────────────────────
-      const result = await recMut.mutateAsync({ planUuid: planId });
+      // Auto-derive growthPct from overallBudget vs LY total so the engine's
+      // summary text + override caveat still work. Buyer never types this.
+      const growthPct =
+        lyTotalOtb > 0
+          ? Math.round(((overallBudget / lyTotalOtb) - 1) * 1000) / 10
+          : undefined;
+      const result = await recMut.mutateAsync({ planUuid: planId, growthPct });
       setRec(result);
-      // Stamp the moment the rec was generated so the "Why this plan?"
-      // button can show "Generated N min ago". Session-only — clears on
-      // reload, by design (per the storage-size discussion).
       setRecGeneratedAt(Date.now());
 
-      // ── Step 4: overwrite every row's 5 fields with the AI values ──────
-      // Index by (period, brand, category) so the lookup is O(1) per row.
+      // ── Step 4: apply rec values to skeleton rows (in memory) ──────────
       const recIndex = new Map(
         result.rows.map((rr) => [`${rr.periodKey}|${rr.brandUuid}|${rr.categoryUuid}`, rr]),
       );
-      Object.entries(seededByPeriod).forEach(([periodKey, rows]) => {
-        const updated = rows.map((row) => {
+      const finalByPeriod: Record<string, typeof skeletonByPeriod[string]> = {};
+      Object.entries(skeletonByPeriod).forEach(([periodKey, rows]) => {
+        finalByPeriod[periodKey] = rows.map((row) => {
           const recRow = recIndex.get(`${periodKey}|${row.brand_uuid}|${row.category_uuid}`);
           if (!recRow) return row;
           return {
@@ -342,9 +363,28 @@ export default function OtbAnnualPage() {
             on_order: Number(recRow.onOrder),
           };
         });
-        dispatch(setPeriodRows({ plan_id: planId, period_key: periodKey, rows: updated }));
       });
-      const filledPeriods = Object.keys(seededByPeriod).length;
+
+      // ── Step 5: dispatch to Redux AND persist to server ────────────────
+      // Persisting is critical: without it, any re-hydration from server
+      // (react-query refetch, window focus) would overwrite the rec values
+      // with the skeleton zeros from Step 2.
+      Object.entries(finalByPeriod).forEach(([periodKey, rows]) => {
+        dispatch(setPeriodRows({ plan_id: planId, period_key: periodKey, rows }));
+      });
+      if (planWithSkeleton) {
+        const planWithRec = {
+          ...planWithSkeleton,
+          periods: Object.fromEntries(
+            Object.entries(planWithSkeleton.periods).map(([k, p]) => [
+              k,
+              { ...p, rows: finalByPeriod[k] ?? p.rows },
+            ]),
+          ),
+        };
+        await savePlan.mutateAsync(planWithRec);
+      }
+      const filledPeriods = Object.keys(finalByPeriod).length;
       toast.success(
         `Auto-planned ${result.rows.length} rows across ${filledPeriods} periods`,
       );
@@ -485,15 +525,7 @@ export default function OtbAnnualPage() {
               onClick={handleSuggest}
               label="Auto-Plan"
             />
-            <Button
-              variant="secondary"
-              size="sm"
-              leftIcon={<BarChart3 size={12} />}
-              onClick={() => setHistoryOpen(true)}
-              title="See last-year performance for this period"
-            >
-              History
-            </Button>
+            {/* History button hidden for now. */}
             <Button
               variant="secondary"
               size="sm"
@@ -898,11 +930,54 @@ export default function OtbAnnualPage() {
         title="Why these annual allocations"
         overall={rec?.summary}
         sections={
-          rec?.rows.map((r): SectionedExplanation => ({
-            title: `${r.periodKey} · ${r.otbCode ?? `${r.brandUuid.slice(0, 6)}…/${r.categoryUuid.slice(0, 6)}…`}`,
-            subtitle: `OTB ${fmtMoneyCompact(r.recommendedOtbAmount, company.base_currency)}`,
-            explanation: r.explanation,
-          })) ?? []
+          rec?.rows.map((r): SectionedExplanation => {
+            const brand = findBrand(r.brandUuid);
+            const category = findCategory(r.categoryUuid);
+            const otbLabel =
+              r.otbCode ?? `${r.brandUuid.slice(0, 6)}…/${r.categoryUuid.slice(0, 6)}…`;
+            return {
+              title: otbLabel,
+              explanation: r.explanation,
+              headerNode: (
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-baseline gap-x-2">
+                    <span
+                      className="truncate text-sm"
+                      style={{ color: 'var(--color-text-tertiary)' }}
+                    >
+                      {otbLabel}
+                    </span>
+                    <span
+                      className="text-sm font-bold uppercase tracking-wide"
+                      style={{ color: 'var(--color-text-primary)' }}
+                    >
+                      {formatMonthYear(r.periodKey)}
+                    </span>
+                  </div>
+                  <div
+                    className="mt-0.5 truncate text-xs font-bold"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    {brand?.name ?? r.brandUuid.slice(0, 6)}
+                    <span
+                      className="mx-1 font-normal"
+                      style={{ color: 'var(--color-text-tertiary)' }}
+                    >
+                      ·
+                    </span>
+                    {category?.name ?? r.categoryUuid.slice(0, 6)}
+                  </div>
+                </div>
+              ),
+              richContent: (
+                <AnnualExplanationCard
+                  row={r}
+                  currency={company.base_currency}
+                  planTotal={rec?.overallBudget ?? 0}
+                />
+              ),
+            };
+          }) ?? []
         }
       />
     </div>
@@ -1156,6 +1231,13 @@ function yearOptions(todayMs: number): { value: string; label: string }[] {
   const years: number[] = [];
   for (let offset = -3; offset <= 3; offset += 1) years.push(baseYear + offset);
   return years.map((y) => ({ value: String(y), label: String(y) }));
+}
+
+/** "2026-01" → "JAN 2026" for the explanation-drawer card headers. */
+function formatMonthYear(periodKey: string): string {
+  const [y, m] = periodKey.split('-');
+  const d = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1);
+  return `${d.toLocaleString('en-US', { month: 'short' }).toUpperCase()} ${y}`;
 }
 
 function validateRows(annual: NonNullable<ReturnType<typeof useAnnualPlan>>): boolean {

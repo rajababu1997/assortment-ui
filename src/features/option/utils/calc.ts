@@ -23,15 +23,16 @@ export function calcProductionQty(vpBudget: number, vpBand: BandAllocation | und
  *
  * Business rule: if the band has any real budget (positive productionQty +
  * positive avgPerOption), guarantee at least ONE option — a "hero SKU."
- * Historically this was a plain floor, which produced 0 whenever
- * `avgPerOption > productionQty` (e.g. premium bands with borderline
- * budgets). That 0 confused buyers because they had allocated real ₹ to
- * the band via VP, yet the AI recommended "zero options." At-least-one
- * matches how planners actually reason about premium tiers.
+ *
+ * Uses half-up rounding (not floor) to match the backend recommender, which
+ * decides option count via `round(LY_options × budgetGrowthRatio)` and then
+ * derives depth as a residual. Floor would produce 1 for near-integer ratios
+ * like 1.99 while the backend returned 2 — a UI/backend disagreement the
+ * buyer would see as "AI said 2 but the editor shows 1."
  */
 export function calcOptionPlanQty(productionQty: number, avgPerOption: number): number {
   if (productionQty <= 0 || avgPerOption <= 0) return 0;
-  return Math.max(1, Math.floor(productionQty / avgPerOption));
+  return Math.max(1, Math.round(productionQty / avgPerOption));
 }
 
 /** Σ qty for one (band, option_type) — used by the SubGrid subtotal chip. */

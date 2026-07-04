@@ -16,8 +16,9 @@ import {
   ArrowLeft,
   ArrowRight,
   CalendarRange,
+  ChevronDown,
+  ChevronUp,
   ClipboardCheck,
-  Clock,
   Layers,
   LineChart,
   ListChecks,
@@ -120,8 +121,7 @@ export default function OtbReleasePage() {
     alreadyReleased &&
     plan.rows.some((r) => valuePlans[r.otb_code] !== undefined);
   const readonly = plan.state === OTB_STATES.SKIPPED || anyVpStarted || !isAdmin;
-  const days = daysBetween(period.lock_deadline_iso, todayMs);
-  const overdue = days < 0;
+  const overdue = daysBetween(period.lock_deadline_iso, todayMs) < 0;
 
   const daysToStart = daysBetween(period.start_iso, todayMs);
   const leadTimeThreshold = timeConfig.lead_time_days - LEAD_TIME_LOCK_BUFFER_DAYS;
@@ -195,14 +195,6 @@ export default function OtbReleasePage() {
     ? plan.baseline_rows.reduce((s, r) => s + calcOtb(r), 0)
     : null;
   const lockDisabled = !!blockingPrior || insideLeadTime || plan.rows.length === 0;
-
-  // Tone for the days-remaining chip
-  const daysTone =
-    readonly || overdue
-      ? 'danger'
-      : days <= 3
-        ? 'warning'
-        : 'neutral';
 
   return (
     <div className="flex h-full w-full flex-col p-1">
@@ -281,43 +273,16 @@ export default function OtbReleasePage() {
               tone="muted"
             />
           ) : (
-            <>
-              {alreadyReleased && (
-                <InfoTile
-                  icon={<ClipboardCheck size={13} />}
-                  label="Last released"
-                  value={`${plan.locked_at ? new Date(plan.locked_at).toLocaleDateString() : '—'}${
-                    plan.locked_by ? ` · ${plan.locked_by}` : ''
-                  }`}
-                  tone="accent"
-                />
-              )}
+            alreadyReleased && (
               <InfoTile
-                icon={<Send size={13} />}
-                label={alreadyReleased ? 'Next release by' : 'Release by'}
-                value={fmtDate(period.lock_deadline_iso)}
+                icon={<ClipboardCheck size={13} />}
+                label="Last released"
+                value={`${plan.locked_at ? new Date(plan.locked_at).toLocaleDateString() : '—'}${
+                  plan.locked_by ? ` · ${plan.locked_by}` : ''
+                }`}
+                tone="accent"
               />
-              <InfoTile
-                icon={<Clock size={13} />}
-                label={overdue ? 'Overdue' : 'Days left'}
-                value={
-                  overdue
-                    ? `${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'}`
-                    : `${days} day${days === 1 ? '' : 's'}`
-                }
-                tone={daysTone}
-              />
-              <InfoTile
-                icon={<AlertTriangle size={13} />}
-                label="Period starts"
-                value={
-                  daysToStart < 0
-                    ? `${Math.abs(daysToStart)}d ago`
-                    : `in ${daysToStart} day${daysToStart === 1 ? '' : 's'}`
-                }
-                tone={insideLeadTime ? 'danger' : 'muted'}
-              />
-            </>
+            )
           )}
           <div className="ml-auto flex flex-wrap items-stretch gap-2">
             <InfoTile
@@ -326,13 +291,6 @@ export default function OtbReleasePage() {
               value={fmtMoney(total, company.base_currency)}
               tone="accent"
             />
-            {baseline !== null && (
-              <InfoTile
-                label="Baseline"
-                value={fmtMoney(baseline, company.base_currency)}
-                tone="muted"
-              />
-            )}
           </div>
         </div>
 
@@ -385,42 +343,7 @@ export default function OtbReleasePage() {
             </div>
           )}
 
-          {/* Section 1 — Previous-period actuals */}
-          <SectionShell
-            icon={<ClipboardCheck size={13} />}
-            title="Previous-period actuals"
-            subtitle={
-              previousPeriod
-                ? `Showing actuals for ${previousPeriod.label} (the period before ${period.label}).`
-                : `${period.label} is the first period in the planning horizon — no previous-period actuals to show.`
-            }
-            badge="demo-stubbed"
-          >
-            {previousPeriod ? (
-              <ActualsTable currency={company.base_currency} periodKey={previousPeriod.key} />
-            ) : (
-              <div
-                className="py-2 text-sm italic"
-                style={{ color: 'var(--color-text-tertiary)' }}
-              >
-                First period — no prior actuals available.
-              </div>
-            )}
-          </SectionShell>
-
-          {/* Section 2 — Sales history */}
-          {plan.rows.length > 0 && (
-            <div className="shrink-0">
-              <SalesHistorySection
-                rows={plan.rows}
-                periodStartIso={period.start_iso}
-                periodEndIso={period.end_iso}
-                currency={company.base_currency}
-              />
-            </div>
-          )}
-
-          {/* Section 3 — Adjust OTB values */}
+          {/* Section 1 — Adjust OTB values (primary editor) */}
           <SectionShell
             icon={<ListChecks size={13} />}
             title="Adjust OTB values"
@@ -449,7 +372,7 @@ export default function OtbReleasePage() {
             </div>
           </SectionShell>
 
-          {/* Section 4 — Value Plans (Step 2) — only after release */}
+          {/* Section 2 — Value Plans (Step 2) — only after release */}
           {alreadyReleased && plan.rows.length > 0 && (
             <SectionShell
               icon={<Layers size={13} />}
@@ -460,6 +383,48 @@ export default function OtbReleasePage() {
               <ValuePlanLauncher
                 rows={plan.rows}
                 onOpen={(code) => navigate(`/value/${annual.plan_id}/${code}`)}
+              />
+            </SectionShell>
+          )}
+
+          {/* Section 3 — Previous-period actuals (reference, collapsed) */}
+          <SectionShell
+            icon={<ClipboardCheck size={13} />}
+            title="Previous-period actuals"
+            subtitle={
+              previousPeriod
+                ? `Showing actuals for ${previousPeriod.label} (the period before ${period.label}).`
+                : `${period.label} is the first period in the planning horizon — no previous-period actuals to show.`
+            }
+            collapsible
+            defaultCollapsed
+          >
+            {previousPeriod ? (
+              <ActualsTable currency={company.base_currency} periodKey={previousPeriod.key} />
+            ) : (
+              <div
+                className="py-2 text-sm italic"
+                style={{ color: 'var(--color-text-tertiary)' }}
+              >
+                First period — no prior actuals available.
+              </div>
+            )}
+          </SectionShell>
+
+          {/* Section 4 — Sales history (reference, collapsed) */}
+          {plan.rows.length > 0 && (
+            <SectionShell
+              icon={<LineChart size={13} />}
+              title="Sales history"
+              subtitle="Trailing 12-month demand picture for the selected brand × category."
+              collapsible
+              defaultCollapsed
+            >
+              <SalesHistorySection
+                rows={plan.rows}
+                periodStartIso={period.start_iso}
+                periodEndIso={period.end_iso}
+                currency={company.base_currency}
               />
             </SectionShell>
           )}
@@ -609,6 +574,8 @@ function SectionShell({
   subtitle,
   badge,
   bodyPadded = true,
+  collapsible = false,
+  defaultCollapsed = false,
   children,
 }: {
   icon?: React.ReactNode;
@@ -616,15 +583,33 @@ function SectionShell({
   subtitle?: string;
   badge?: string;
   bodyPadded?: boolean;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
   children: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(collapsible ? !defaultCollapsed : true);
+  const toggle = () => {
+    if (collapsible) setOpen((v) => !v);
+  };
   return (
     <section
       className="flex shrink-0 flex-col overflow-hidden rounded-xl border"
       style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface)' }}
     >
       <div
-        className="flex items-start justify-between gap-3 border-b px-3.5 py-2.5"
+        role={collapsible ? 'button' : undefined}
+        tabIndex={collapsible ? 0 : undefined}
+        onClick={toggle}
+        onKeyDown={(e) => {
+          if (!collapsible) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggle();
+          }
+        }}
+        className={`flex items-start justify-between gap-3 px-3.5 py-2.5 ${
+          collapsible ? 'cursor-pointer transition-colors hover:bg-[var(--color-surface-alt,#f1f5f9)]' : ''
+        } ${open ? 'border-b' : ''}`}
         style={{
           borderColor: 'var(--color-divider)',
           background: 'var(--color-surface-alt, #f8fafc)',
@@ -659,20 +644,35 @@ function SectionShell({
             )}
           </div>
         </div>
-        {badge && (
-          <span
-            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
-            style={{
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-divider)',
-              color: 'var(--color-text-tertiary)',
-            }}
-          >
-            {badge}
-          </span>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {badge && (
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
+              style={{
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-divider)',
+                color: 'var(--color-text-tertiary)',
+              }}
+            >
+              {badge}
+            </span>
+          )}
+          {collapsible && (
+            <span
+              className="flex h-6 w-6 items-center justify-center rounded-md border"
+              style={{
+                borderColor: 'var(--color-divider)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text-secondary)',
+              }}
+              aria-hidden
+            >
+              {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            </span>
+          )}
+        </div>
       </div>
-      <div className={bodyPadded ? 'p-3.5' : ''}>{children}</div>
+      {open && <div className={bodyPadded ? 'p-3.5' : ''}>{children}</div>}
     </section>
   );
 }

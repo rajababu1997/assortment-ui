@@ -13,8 +13,16 @@ import type {
 } from './types';
 
 export const recommendationApi = {
-  annual: async (planUuid: string): Promise<AnnualRecommendation> =>
-    invokeService<AnnualRecommendation>(API_CONFIG.recommendation.annual, { planUuid }),
+  annual: async (
+    planUuid: string,
+    growthPct?: number,
+  ): Promise<AnnualRecommendation> =>
+    invokeService<AnnualRecommendation>(
+      API_CONFIG.recommendation.annual,
+      { planUuid },
+      undefined,
+      growthPct !== undefined ? { growthPct } : undefined,
+    ),
 
   value: async (planUuid: string, otbCode: string): Promise<ValuePlanRecommendation> =>
     invokeService<ValuePlanRecommendation>(

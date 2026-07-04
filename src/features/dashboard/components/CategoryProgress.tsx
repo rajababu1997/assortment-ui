@@ -21,8 +21,11 @@ export function CategoryProgress({ rows, isLoading, totalCategories, completed, 
       style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}
     >
       <header
-        className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2"
-        style={{ borderColor: 'var(--color-divider)' }}
+        className="flex flex-wrap items-center justify-between gap-2 rounded-t-xl border-b px-3 py-2"
+        style={{
+          borderColor: 'var(--color-divider)',
+          background: 'linear-gradient(90deg, rgba(96,165,250,0.12), rgba(167,139,250,0.06))',
+        }}
       >
         <div className="flex items-center gap-2">
           <span

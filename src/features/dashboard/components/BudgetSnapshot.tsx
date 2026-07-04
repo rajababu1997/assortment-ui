@@ -12,7 +12,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const fmtCr = (v: number) => `₹${(v / 1e7).toFixed(1)} Cr`;
+const fmtCr = (v: number) => `₹${Math.round(v).toLocaleString('en-IN')}`;
 
 export function BudgetSnapshot({ data, isLoading }: Props) {
   return (
@@ -21,8 +21,11 @@ export function BudgetSnapshot({ data, isLoading }: Props) {
       style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}
     >
       <header
-        className="flex items-center gap-2 border-b px-3 py-2"
-        style={{ borderColor: 'var(--color-divider)' }}
+        className="flex items-center gap-2 rounded-t-xl border-b px-3 py-2"
+        style={{
+          borderColor: 'var(--color-divider)',
+          background: 'linear-gradient(90deg, rgba(96,165,250,0.12), rgba(167,139,250,0.06))',
+        }}
       >
         <span
           className="flex h-6 w-6 items-center justify-center rounded-md"
@@ -45,7 +48,11 @@ export function BudgetSnapshot({ data, isLoading }: Props) {
         {/* Budget cluster: Annual · Released · Remaining + bar */}
         <div
           className="rounded-lg border px-3 py-2.5"
-          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(96,165,250,0.18) 0%, var(--color-surface) 70%)',
+            borderColor: 'rgba(96,165,250,0.32)',
+          }}
         >
           <div
             className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.10em]"
@@ -94,6 +101,8 @@ export function BudgetSnapshot({ data, isLoading }: Props) {
         <SecondaryGroup
           icon={<Layers size={11} />}
           label="Categories"
+          tint="rgba(167,139,250,0.18)"
+          borderTint="rgba(167,139,250,0.32)"
           tiles={[
             { label: 'Total', value: data.totalCategories, fg: 'var(--color-text-primary)' },
             { label: 'Done', value: data.completedCategories, fg: '#047857' },
@@ -106,6 +115,8 @@ export function BudgetSnapshot({ data, isLoading }: Props) {
         <SecondaryGroup
           icon={<ShieldCheck size={11} />}
           label="Approvals pending"
+          tint="rgba(16,185,129,0.16)"
+          borderTint="rgba(16,185,129,0.30)"
           tiles={[
             { label: 'Option', value: data.optionPlansPending, fg: '#1d4ed8' },
             { label: 'Design', value: data.designReviewPending, fg: '#6d28d9' },
@@ -145,17 +156,22 @@ function NumberBlock({
 }
 
 function SecondaryGroup({
-  icon, label, tiles, isLoading,
+  icon, label, tiles, isLoading, tint, borderTint,
 }: {
   icon: React.ReactNode;
   label: string;
   tiles: Array<{ label: string; value: number; fg: string }>;
   isLoading: boolean;
+  tint: string;
+  borderTint: string;
 }) {
   return (
     <div
       className="rounded-lg border px-3 py-2.5"
-      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-divider)' }}
+      style={{
+        background: `linear-gradient(180deg, ${tint} 0%, var(--color-surface) 70%)`,
+        borderColor: borderTint,
+      }}
     >
       <div
         className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.10em]"

@@ -5,6 +5,7 @@
  */
 
 import { X } from 'lucide-react';
+import type { ReactNode } from 'react';
 import type { RecommendationExplanation } from '../types';
 
 export interface SectionedExplanation {
@@ -13,6 +14,18 @@ export interface SectionedExplanation {
   /** Optional second line (e.g. ₹13.2 Cr · 11% of plan). */
   subtitle?: string;
   explanation: RecommendationExplanation;
+  /**
+   * Optional rich card body. When present, replaces the default drivers list
+   * with plan-type-specific UI (Annual YoY card, VP LY/TY/Reasons card, etc.).
+   * Header + caveats still render around it uniformly.
+   */
+  richContent?: ReactNode;
+  /**
+   * Optional rich card header. When present, replaces the default
+   * title/subtitle stack — the caller renders whatever it wants (badges,
+   * multi-line bold text, etc.).
+   */
+  headerNode?: ReactNode;
 }
 
 export function ExplanationDrawer({
@@ -44,18 +57,9 @@ export function ExplanationDrawer({
           className="flex items-center justify-between border-b px-4 py-3"
           style={{ borderColor: 'var(--color-divider)' }}
         >
-          <div className="min-w-0">
-            <h2 className="truncate text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              {title}
-            </h2>
-            {overall && (
-              <div className="mt-1 flex items-center gap-2 text-xs">
-                <span style={{ color: 'var(--color-text-tertiary)' }}>
-                  {overall.monthsOfHistory} month{overall.monthsOfHistory === 1 ? '' : 's'} of history
-                </span>
-              </div>
-            )}
-          </div>
+          <h2 className="min-w-0 truncate text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            {title}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -68,20 +72,6 @@ export function ExplanationDrawer({
         </header>
 
         <div className="flex-1 overflow-y-auto px-4 py-3">
-          {overall?.summary && (
-            <p className="mb-3 text-sm leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
-              {overall.summary}
-            </p>
-          )}
-          {overall?.contextNotes?.length ? (
-            <div className="mb-4 rounded-lg border px-3 py-2 text-xs"
-              style={{ borderColor: 'var(--color-divider)', background: 'var(--color-surface-alt, #f8fafc)' }}>
-              {overall.contextNotes.map((n) => (
-                <div key={n} style={{ color: 'var(--color-text-secondary)' }}>· {n}</div>
-              ))}
-            </div>
-          ) : null}
-
           <div className="flex flex-col gap-3">
             {sections.map((s, i) => (
               <SectionCard key={`${s.title}-${i}`} section={s} />
@@ -106,54 +96,60 @@ export function ExplanationDrawer({
 }
 
 function SectionCard({ section }: { section: SectionedExplanation }) {
-  const { title, subtitle, explanation } = section;
+  const { title, subtitle, explanation, richContent, headerNode } = section;
   return (
     <section
       className="rounded-lg border"
       style={{ borderColor: 'var(--color-divider)' }}
     >
       <header className="flex items-center justify-between gap-2 px-3 py-2.5">
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {title}
-          </div>
-          {subtitle && (
-            <div className="mt-0.5 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              {subtitle}
+        {headerNode ? (
+          <div className="min-w-0 flex-1">{headerNode}</div>
+        ) : (
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              {title}
             </div>
-          )}
-        </div>
-      </header>
-      {explanation.summary && (
-        <p className="px-3 pb-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-          {explanation.summary}
-        </p>
-      )}
-      {explanation.drivers.length > 0 && (
-        <ul className="border-t" style={{ borderColor: 'var(--color-divider)' }}>
-          {explanation.drivers.map((d, idx) => (
-            <li
-              key={`${d.label}-${idx}`}
-              className="border-b px-3 py-1.5 text-xs last:border-b-0"
-              style={{ borderColor: 'var(--color-divider)' }}
-            >
-              <div className="min-w-0">
-                <div className="truncate font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                  {d.label}
-                </div>
-                <div className="truncate" style={{ color: 'var(--color-text-tertiary)' }}>
-                  {d.observation}
-                </div>
+            {subtitle && (
+              <div className="mt-0.5 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                {subtitle}
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {explanation.caveats.length > 0 && (
-        <div className="border-t px-3 py-1.5 text-[11px]"
-          style={{ borderColor: 'var(--color-divider)', color: 'var(--color-text-tertiary)' }}>
-          {explanation.caveats.map((c) => <div key={c}>· {c}</div>)}
+            )}
+          </div>
+        )}
+      </header>
+      {richContent ? (
+        <div className="border-t" style={{ borderColor: 'var(--color-divider)' }}>
+          {richContent}
         </div>
+      ) : (
+        <>
+          {explanation.summary && (
+            <p className="px-3 pb-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+              {explanation.summary}
+            </p>
+          )}
+          {explanation.drivers.length > 0 && (
+            <ul className="border-t" style={{ borderColor: 'var(--color-divider)' }}>
+              {explanation.drivers.map((d, idx) => (
+                <li
+                  key={`${d.label}-${idx}`}
+                  className="border-b px-3 py-1.5 text-xs last:border-b-0"
+                  style={{ borderColor: 'var(--color-divider)' }}
+                >
+                  <div className="min-w-0">
+                    <div className="truncate font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                      {d.label}
+                    </div>
+                    <div className="truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {d.observation}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </section>
   );

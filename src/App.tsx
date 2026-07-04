@@ -8,20 +8,13 @@ import { FullscreenLayout } from './app/layout/FullscreenLayout';
 import { useDynamicRoutes } from './routes/DynamicRoutes';
 import { useAppSelector } from './hooks/useAppSelector';
 import { getHomePage } from './constants/navigation';
+import { SpinnerCenter } from './components/primitives';
 
 const SignInPage = lazy(() => import('./features/auth/SignInPage'));
 const ForgotPasswordPage = lazy(() => import('./features/auth/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./features/auth/ResetPasswordPage'));
 const SignOutPage = lazy(() => import('./features/auth/SignOutPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-
-function PageLoader() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-bg">
-      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
-}
 
 function AppRoutes() {
   const authenticated = useDynamicRoutes('authenticated');
@@ -32,11 +25,11 @@ function AppRoutes() {
     <Routes>
       <Route element={<PublicLayout />}>
         <Route element={<GuestRoute />}>
-          <Route path="/sign-in" element={<Suspense fallback={<PageLoader />}><SignInPage /></Suspense>} />
-          <Route path="/forgot-password" element={<Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>} />
-          <Route path="/reset-password" element={<Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense>} />
+          <Route path="/sign-in" element={<Suspense fallback={<SpinnerCenter />}><SignInPage /></Suspense>} />
+          <Route path="/forgot-password" element={<Suspense fallback={<SpinnerCenter />}><ForgotPasswordPage /></Suspense>} />
+          <Route path="/reset-password" element={<Suspense fallback={<SpinnerCenter />}><ResetPasswordPage /></Suspense>} />
         </Route>
-        <Route path="/sign-out" element={<Suspense fallback={<PageLoader />}><SignOutPage /></Suspense>} />
+        <Route path="/sign-out" element={<Suspense fallback={<SpinnerCenter />}><SignOutPage /></Suspense>} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
@@ -45,7 +38,7 @@ function AppRoutes() {
       </Route>
 
       <Route path="/" element={<Navigate to={isAuthenticated ? getHomePage() : '/sign-in'} replace />} />
-      <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} />
+      <Route path="*" element={<Suspense fallback={<SpinnerCenter />}><NotFoundPage /></Suspense>} />
     </Routes>
   );
 }

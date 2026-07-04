@@ -40,7 +40,7 @@ export function KpiStrip({ filters }: { filters: DashboardFilters }) {
 
   return (
     <section
-      className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8"
+      className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7"
     >
       <KpiTile
         label="Net Sales"
@@ -88,13 +88,6 @@ export function KpiStrip({ filters }: { filters: DashboardFilters }) {
         label="Stockout days"
         value={cur ? `${cur.stockoutDaysTotal}` : '—'}
         polarity="lower-better"
-        spark={[]}
-        loading={kpi.isLoading}
-      />
-      <KpiTile
-        label="Rows in slice"
-        value={cur ? cur.rowCount.toLocaleString('en-IN') : '—'}
-        polarity="neutral"
         spark={[]}
         loading={kpi.isLoading}
       />

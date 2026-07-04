@@ -310,14 +310,9 @@ function aggregateByCategory(rows: SalesAggregateRow[], cats: NameOpt[]): CatRow
 }
 
 function fmtTick(v: number): string {
-  if (v >= 1_00_00_000) return `₹${Math.round(v / 1_00_00_000)} Cr`;
-  if (v >= 1_00_000)    return `₹${Math.round(v / 1_00_000)} L`;
-  if (v >= 1_000)       return `₹${Math.round(v / 1_000)}K`;
-  return `₹${Math.round(v)}`;
+  return `₹${Math.round(v).toLocaleString('en-IN')}`;
 }
 
 function fmtCountTick(v: number): string {
-  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
-  if (v >= 1_000)     return `${Math.round(v / 1_000)}K`;
-  return `${Math.round(v)}`;
+  return Math.round(v).toLocaleString('en-IN');
 }

@@ -28,7 +28,7 @@ import {
   Send,
   Sparkles,
 } from 'lucide-react';
-import { Button, Dialog, NumberInput, SpinnerCenter } from '@/components/primitives';
+import { Button, ConfirmDialog, Dialog, NumberInput, SpinnerCenter } from '@/components/primitives';
 import { toast } from '@/lib/toast';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useDemoToday } from '@/hooks/useDemoClock';
@@ -76,6 +76,7 @@ import { useOptionRecommendation } from '@/features/recommendation/useRecommenda
 import { SuggestButton } from '@/features/recommendation/components/SuggestButton';
 import { WhyAiButton } from '@/features/recommendation/components/WhyAiButton';
 import { ExplanationDrawer, type SectionedExplanation } from '@/features/recommendation/components/ExplanationDrawer';
+import { OptionPlanExplanationCard } from '@/features/recommendation/components/OptionPlanExplanationCard';
 import type { OptionPlanRecommendation } from '@/features/recommendation/types';
 import type { OptionBand, OptionLine, OptionPlan } from '../types';
 
@@ -372,13 +373,18 @@ function EditorShell(props: ShellProps) {
   };
 
   // ── Suggest handler — replaces draft bands with AI-recommended ones.
-  const handleSuggest = async () => {
+  const [suggestConfirmOpen, setSuggestConfirmOpen] = useState(false);
+  const handleSuggest = () => {
     const hasEntries = draft.some(
       (b) => (b.avg_production_qty_per_option ?? 0) > 0 || b.lines.some((l) => (l.qty ?? 0) > 0),
     );
-    if (hasEntries && !window.confirm(
-      'This will replace your current entries with system suggestions. Continue?',
-    )) return;
+    if (hasEntries) {
+      setSuggestConfirmOpen(true);
+      return;
+    }
+    void runSuggest();
+  };
+  const runSuggest = async () => {
     try {
       const result = await recMut.mutateAsync({ planUuid: planId, otbCode });
       setRec(result);
@@ -732,8 +738,22 @@ function EditorShell(props: ShellProps) {
             title: `${b.bandId.toUpperCase()} · ${b.optionPlanQty} options`,
             subtitle: `${b.productionQtySnapshot.toLocaleString()} units · ${b.avgProductionQtyPerOption.toLocaleString()} per option`,
             explanation: b.explanation,
+            richContent: <OptionPlanExplanationCard band={b} />,
           })) ?? []
         }
+      />
+
+      <ConfirmDialog
+        open={suggestConfirmOpen}
+        onClose={() => setSuggestConfirmOpen(false)}
+        onConfirm={async () => {
+          setSuggestConfirmOpen(false);
+          await runSuggest();
+        }}
+        title="Replace your option entries?"
+        description="Auto-generate will overwrite your current avg-per-option qty and sub-type line qtys with system suggestions. This cannot be undone."
+        confirmLabel="Replace with suggestions"
+        variant="warning"
       />
     </div>
   );

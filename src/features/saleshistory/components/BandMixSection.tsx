@@ -96,7 +96,7 @@ export function BandMixSection({ filters }: { filters: DashboardFilters }) {
       {isLoading || totalValue === 0 ? (
         <EmptyState loading={isLoading} />
       ) : (
-        <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[220px_1fr]">
+        <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[300px_1fr]">
           <Donut
             summaries={summaries}
             total={totalValue}
@@ -127,9 +127,9 @@ function Donut({
   hovered: BandKey | null;
   onHover: (b: BandKey | null) => void;
 }) {
-  const size = 200;
-  const r = 78;
-  const rInner = 50;
+  const size = 280;
+  const r = 112;
+  const rInner = 78;
   const cx = size / 2;
   const cy = size / 2;
 
@@ -163,8 +163,8 @@ function Donut({
         })}
         {/* Center label */}
         <text
-          x={cx} y={cy - 6}
-          fontSize={10}
+          x={cx} y={cy - 8}
+          fontSize={11}
           textAnchor="middle"
           fill="var(--color-text-tertiary)"
           style={{ textTransform: 'uppercase', letterSpacing: '0.10em' }}
@@ -173,7 +173,7 @@ function Donut({
         </text>
         <text
           x={cx} y={cy + 12}
-          fontSize={16}
+          fontSize={14}
           fontWeight={600}
           textAnchor="middle"
           fill="var(--color-text-primary)"

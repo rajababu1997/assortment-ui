@@ -3,16 +3,10 @@
  * Kept tiny + dependency-free.
  */
 
-/** ₹1.2 Cr / ₹3.5 L / ₹4.2K / ₹420 — fashion industry shorthand. */
+/** Full number with Indian grouping — e.g. ₹1,23,45,678. */
 export function fmtMoneyCompact(value: number, currency = 'INR'): string {
   const symbol = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : '';
-  const abs = Math.abs(value);
-  let body: string;
-  if (abs >= 1_00_00_000) body = `${(value / 1_00_00_000).toFixed(2)} Cr`;
-  else if (abs >= 1_00_000) body = `${(value / 1_00_000).toFixed(2)} L`;
-  else if (abs >= 1_000) body = `${(value / 1_000).toFixed(1)}K`;
-  else body = `${value.toFixed(0)}`;
-  return `${symbol}${body}`;
+  return `${symbol}${Math.round(value).toLocaleString('en-IN')}`;
 }
 
 /** 4,250,000 — plain unit count. */

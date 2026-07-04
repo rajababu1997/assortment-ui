@@ -17,7 +17,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const fmtCr = (v: number) => `₹${(v / 1e7).toFixed(1)} Cr`;
+const fmtCr = (v: number) => `₹${Math.round(v).toLocaleString('en-IN')}`;
 const fmtPct = (v: number) => `${Math.round(v * 100)}%`;
 
 export function KpiStrip({ snapshot, isLoading }: Props) {
@@ -66,11 +66,19 @@ interface TileProps {
 }
 
 const TONE_BG: Record<TileProps['tone'], string> = {
-  info: 'rgba(96,165,250,0.10)',
-  success: 'rgba(16,185,129,0.10)',
-  warning: 'rgba(245,158,11,0.12)',
-  accent: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-  neutral: 'var(--color-surface-alt, #f1f5f9)',
+  info: 'rgba(96,165,250,0.18)',
+  success: 'rgba(16,185,129,0.16)',
+  warning: 'rgba(245,158,11,0.18)',
+  accent: 'color-mix(in srgb, var(--color-primary) 18%, transparent)',
+  neutral: 'rgba(148,163,184,0.18)',
+};
+
+const TONE_BORDER: Record<TileProps['tone'], string> = {
+  info: 'rgba(96,165,250,0.32)',
+  success: 'rgba(16,185,129,0.30)',
+  warning: 'rgba(245,158,11,0.32)',
+  accent: 'color-mix(in srgb, var(--color-primary) 28%, transparent)',
+  neutral: 'var(--color-divider)',
 };
 
 const TONE_FG: Record<TileProps['tone'], string> = {
@@ -81,19 +89,27 @@ const TONE_FG: Record<TileProps['tone'], string> = {
   neutral: 'var(--color-text-secondary)',
 };
 
+const TONE_ICON_BG: Record<TileProps['tone'], string> = {
+  info: 'rgba(96,165,250,0.20)',
+  success: 'rgba(16,185,129,0.18)',
+  warning: 'rgba(245,158,11,0.22)',
+  accent: 'color-mix(in srgb, var(--color-primary) 18%, transparent)',
+  neutral: 'rgba(148,163,184,0.24)',
+};
+
 function Tile({ icon: Icon, label, value, sub, tone, progress }: TileProps) {
   return (
     <div
       className="rounded-xl border px-3 py-2.5"
       style={{
-        background: 'var(--color-surface)',
-        borderColor: 'var(--color-divider)',
+        background: `linear-gradient(180deg, ${TONE_BG[tone]} 0%, var(--color-surface) 70%)`,
+        borderColor: TONE_BORDER[tone],
       }}
     >
       <div className="flex items-center gap-2">
         <span
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
-          style={{ background: TONE_BG[tone], color: TONE_FG[tone] }}
+          style={{ background: TONE_ICON_BG[tone], color: TONE_FG[tone] }}
         >
           <Icon size={13} />
         </span>

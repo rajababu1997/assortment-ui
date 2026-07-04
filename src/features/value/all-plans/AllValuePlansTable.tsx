@@ -21,8 +21,9 @@
  *     because `fixedPlanId` is set — defaultDateRange still seeds applied state)
  */
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ArrowRight, Layers, RotateCcw, Search } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, DatePicker, SpinnerCenter } from '@/components/primitives';
 import { TpsDataTable } from '@/components/tps-data-table';
 import type { ColumnConfig, FilterSlotConfig } from '@/components/tps-data-table';
@@ -110,8 +111,13 @@ export function AllValuePlansTable({
   fixedPeriodKey,
   defaultDateRange,
 }: AllValuePlansTableProps) {
+  const queryClient = useQueryClient();
   const { company, isLoading } = useSetupConfig();
   const { findBrand, findCategory, brands, categories, isLoading: masterLoading } = useBrandCategoryLookup();
+
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['otb', 'value', 'all'] });
+  }, [queryClient]);
 
   // Brand + category filter state still flows through the table's slot
   // system (instant apply is fine for cheap client-side filtering).
@@ -342,6 +348,7 @@ export function AllValuePlansTable({
         onFilterChange={setFilters}
         tableKey="dt-value-all"
         showColumnToggle
+        onRefresh={handleRefresh}
         height={height}
         emptyMessage="No Value Plans yet — release some OTBs and start planning"
         entityName="Band"

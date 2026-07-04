@@ -132,17 +132,18 @@ export function SalesInsightsSection({
           background: 'var(--color-surface)',
         }}
       >
+        {/* YoY delta chips removed — engine no longer reads LLY, so the
+            comparison is always "flat 0%" and misleading. Show LY absolute
+            values only; TY comparison lives on the recommendation drawer. */}
         <KpiTile
           icon={<ShoppingBag size={13} />}
           label="Units sold"
           value={insights.ly_total_units.toLocaleString()}
-          delta={insights.yoy_units_growth_pct}
         />
         <KpiTile
           icon={<Banknote size={13} />}
           label="Revenue"
           value={fmtMoneyCompact(insights.ly_total_revenue, currency)}
-          delta={insights.yoy_revenue_growth_pct}
         />
         <KpiTile
           icon={<Percent size={13} />}

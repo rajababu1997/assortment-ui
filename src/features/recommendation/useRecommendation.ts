@@ -17,8 +17,8 @@ import type {
 } from './types';
 
 export const useAnnualRecommendation = () =>
-  useMutation<AnnualRecommendation, Error, { planUuid: string }>({
-    mutationFn: ({ planUuid }) => recommendationApi.annual(planUuid),
+  useMutation<AnnualRecommendation, Error, { planUuid: string; growthPct?: number }>({
+    mutationFn: ({ planUuid, growthPct }) => recommendationApi.annual(planUuid, growthPct),
   });
 
 export const useValueRecommendation = () =>

@@ -26,6 +26,21 @@ export interface RecommendationExplanation {
 
 // ── Annual ────────────────────────────────────────────────────────────────
 
+export interface AnnualLySnapshot {
+  mrpValueSales: number;
+  netSales: number;
+  saleVolume: number;
+  categoryVolume: number;
+  gpPct: number;
+  productCost: number;
+  markdown: number;
+  sellThroughPct: number;
+  lyLiftPct: number;
+  /** Full LY OTB = netSales + markdown + eom − bom. Preferred over the
+   *  `netSales + markdown` approximation for YoY math in the drawer. */
+  lyOtb?: number;
+}
+
 export interface RecommendedAnnualRow {
   otbRowUuid: string;
   periodKey: string;
@@ -38,6 +53,9 @@ export interface RecommendedAnnualRow {
   eomInventory: number;
   bomInventory: number;
   onOrder: number;
+  lySnapshot?: AnnualLySnapshot;
+  thisLiftPct?: number;
+  activeEventNames?: string[];
   explanation: RecommendationExplanation;
 }
 
@@ -45,17 +63,48 @@ export interface AnnualRecommendation {
   planUuid: string;
   overallBudget: number;
   totalRecommended: number;
+  planLyTotalOtb?: number;
+  growthPctApplied?: number;
   rows: RecommendedAnnualRow[];
   summary: RecommendationExplanation;
 }
 
 // ── Value Plan ────────────────────────────────────────────────────────────
 
+export interface ValuePlanBandLySnapshot {
+  revenue: number;
+  revenueSharePct: number;
+  units: number;
+  avgMrp: number;
+  avgCost: number;
+  gpPct: number;
+  strPct: number;
+  markdownPct: number;
+}
+
+export interface ValuePlanBandTySnapshot {
+  bandBudget: number;
+  budgetPct: number;
+  units: number;
+  avgMrp: number;
+  avgCost: number;
+  gpPct: number;
+}
+
+export interface ChangeReason {
+  type: string;
+  text: string;
+  deltaPct?: number;
+}
+
 export interface RecommendedValuePlanBand {
   bandId: string;
   budgetPct: number;
   avgMrp: number;
   avgCost: number;
+  lySnapshot?: ValuePlanBandLySnapshot;
+  tySnapshot?: ValuePlanBandTySnapshot;
+  reasons?: ChangeReason[];
   explanation: RecommendationExplanation;
 }
 
@@ -76,12 +125,28 @@ export interface RecommendedOptionLine {
   qty: number;
 }
 
+export interface OptionSubTypeMix {
+  optionType: string;
+  subTypeKey: string;
+  subTypeLabel: string;
+  qty: number;
+}
+
+export interface OptionPlanBandLySnapshot {
+  optionsActive: number;
+  avgPerOption: number;
+  totalUnits: number;
+  subTypeMix: OptionSubTypeMix[];
+}
+
 export interface RecommendedOptionBand {
   bandId: string;
   avgProductionQtyPerOption: number;
   productionQtySnapshot: number;
   optionPlanQty: number;
   lines: RecommendedOptionLine[];
+  lySnapshot?: OptionPlanBandLySnapshot;
+  reasons?: ChangeReason[];
   explanation: RecommendationExplanation;
 }
 

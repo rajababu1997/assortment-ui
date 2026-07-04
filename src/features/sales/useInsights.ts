@@ -33,12 +33,6 @@ export function periodLabelToKey(label: string): string | null {
   return `${m[2]}-${String(idx + 1).padStart(2, '0')}`;
 }
 
-/** "2025-01" → "2024-01" (shift back one calendar year). */
-function shiftYearBack(periodKey: string): string {
-  const [y, m] = periodKey.split('-');
-  return `${parseInt(y, 10) - 1}-${m}`;
-}
-
 // ── Festival hints (same calendar wording as the old mock) ──────────────────
 
 const FESTIVAL_HINTS: Record<string, string> = {
@@ -145,29 +139,27 @@ export function useValueSalesInsights(args: {
   band_ids: MrpBand['id'][];
 }): { data: SalesInsights | undefined; isLoading: boolean } {
   const lyKey = periodLabelToKey(args.ly_period_label);
-  const llyKey = lyKey ? shiftYearBack(lyKey) : null;
 
   const ly = useSalesAggregate(
     { brand: args.brand_uuid, category: args.category_uuid, from: lyKey ?? undefined, to: lyKey ?? undefined },
     { enabled: !!lyKey },
   );
-  const lly = useSalesAggregate(
-    { brand: args.brand_uuid, category: args.category_uuid, from: llyKey ?? undefined, to: llyKey ?? undefined },
-    { enabled: !!llyKey },
-  );
 
   const data = useMemo(() => {
     if (!lyKey || !ly.data) return undefined;
+    // LY-only per product decision. YoY chips fall to 0/flat since there's no
+    // year-before-last comparison — the transformer treats the empty LLY as
+    // "no prior data" which returns 0 from pctChange().
     return transformValueInsights({
       lyRows: ly.data,
-      llyRows: lly.data ?? [],
+      llyRows: [],
       ly_period_label: args.ly_period_label,
       ly_period_key: lyKey,
       band_ids: args.band_ids,
     });
-  }, [lyKey, ly.data, lly.data, args.ly_period_label, args.band_ids]);
+  }, [lyKey, ly.data, args.ly_period_label, args.band_ids]);
 
-  return { data, isLoading: ly.isLoading || lly.isLoading };
+  return { data, isLoading: ly.isLoading };
 }
 
 // ── Hook: per-band last-year % share (replaces mockLastYearPct) ────────────
@@ -307,7 +299,6 @@ export function useOptionPlanInsights(args: {
   band_ids: MrpBand['id'][];
 }): { data: OptionPlanInsights | undefined; isLoading: boolean } {
   const lyKey = periodLabelToKey(args.ly_period_label);
-  const llyKey = lyKey ? shiftYearBack(lyKey) : null;
 
   const agg = useSalesAggregate(
     { brand: args.brand_uuid, category: args.category_uuid, from: lyKey ?? undefined, to: lyKey ?? undefined },
@@ -317,25 +308,23 @@ export function useOptionPlanInsights(args: {
     { brand: args.brand_uuid, category: args.category_uuid, from: lyKey ?? undefined, to: lyKey ?? undefined },
     { enabled: !!lyKey },
   );
-  const attrLly = useSalesAttribute(
-    { brand: args.brand_uuid, category: args.category_uuid, from: llyKey ?? undefined, to: llyKey ?? undefined },
-    { enabled: !!llyKey },
-  );
 
   const data = useMemo(() => {
     if (!lyKey || !agg.data || !attrLy.data) return undefined;
+    // LY-only per product decision. Sub-type YoY chips fall to 0 since we no
+    // longer read year-before-last data.
     return transformOptionInsights({
       agg: agg.data,
       attrLy: attrLy.data,
-      attrLly: attrLly.data ?? [],
+      attrLly: [],
       category_label: args.category_label,
       ly_period_label: args.ly_period_label,
       ly_period_key: lyKey,
       band_ids: args.band_ids,
     });
-  }, [lyKey, agg.data, attrLy.data, attrLly.data, args.category_label, args.ly_period_label, args.band_ids]);
+  }, [lyKey, agg.data, attrLy.data, args.category_label, args.ly_period_label, args.band_ids]);
 
-  return { data, isLoading: agg.isLoading || attrLy.isLoading || attrLly.isLoading };
+  return { data, isLoading: agg.isLoading || attrLy.isLoading };
 }
 
 // ── Math helpers ────────────────────────────────────────────────────────────

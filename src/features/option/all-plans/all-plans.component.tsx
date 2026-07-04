@@ -12,7 +12,7 @@
  * clock without the user having to pick dates.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CheckCircle2,
   PackageCheck,
@@ -21,6 +21,7 @@ import {
   Search,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, DatePicker, SpinnerCenter } from '@/components/primitives';
 import { TpsDataTable } from '@/components/tps-data-table';
 import type { ColumnConfig, FilterSlotConfig } from '@/components/tps-data-table';
@@ -71,6 +72,7 @@ interface TableRow {
 
 export default function OptionAllPlansPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { company, isLoading } = useSetupConfig();
   const {
     findBrand, findCategory,
@@ -117,6 +119,10 @@ export default function OptionAllPlansPage() {
     setAppliedFrom(null);
     setAppliedTo(null);
   };
+
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['otb', 'option', 'all'] });
+  }, [queryClient]);
 
   const [filters, setFilters] = useState<Record<string, unknown>>({});
 
@@ -297,6 +303,7 @@ export default function OptionAllPlansPage() {
         onFilterChange={setFilters}
         tableKey="dt-option-all"
         showColumnToggle
+        onRefresh={handleRefresh}
         height="calc(100vh - 200px)"
         emptyMessage="No Option Plans match the filter — try widening the date range or pick a different state."
         entityName="Option Plan"

@@ -1,6 +1,7 @@
 import { Suspense, useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
+import { SpinnerCenter } from '@/components/primitives';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useTheme } from '@/hooks/useTheme';
 import { useBreakpoint } from '@/hooks/useMediaQuery';
@@ -77,13 +78,7 @@ export function AuthenticatedLayout() {
           className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto dark:bg-[var(--p-surface-900)]"
           style={{ background: '#F8FAFC', padding: isFullHeightPage ? '0.5rem 0.75rem 0' : '0.75rem' }}
         >
-          <Suspense
-            fallback={
-              <div className="flex min-h-[200px] flex-1 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              </div>
-            }
-          >
+          <Suspense fallback={<SpinnerCenter />}>
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>

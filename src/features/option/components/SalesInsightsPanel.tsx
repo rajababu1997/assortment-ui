@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import { Activity, ChevronDown, ChevronUp, TrendingDown, TrendingUp } from 'lucide-react';
+import { Activity, ChevronDown, ChevronUp } from 'lucide-react';
 import { OPTION_TYPE_LABELS, OPTION_TYPES, type OptionType } from '../constants';
 import type { OptionPlanInsights, SubTypeLyPerformance } from '@/features/sales/insightTypes';
 import type { MrpBand } from '@/features/otb/types';
@@ -115,8 +115,7 @@ function PerfTable({ subTypes }: { subTypes: SubTypeLyPerformance[] }) {
             <th className="px-1.5 py-1.5 text-right font-medium">ST%</th>
             <th className="px-1.5 py-1.5 text-right font-medium">MD%</th>
             <th className="px-1.5 py-1.5 text-right font-medium">Margin%</th>
-            <th className="px-1.5 py-1.5 text-right font-medium">Return%</th>
-            <th className="py-1.5 pl-2 text-right font-medium">YoY</th>
+            <th className="py-1.5 pl-2 text-right font-medium">Return%</th>
           </tr>
         </thead>
         <tbody>
@@ -144,18 +143,8 @@ function PerfTable({ subTypes }: { subTypes: SubTypeLyPerformance[] }) {
               <td className="px-1.5 py-1.5 text-right">
                 <Cell value={s.realized_margin_pct} color={tone(s.realized_margin_pct, 65, 55)} />
               </td>
-              <td className="px-1.5 py-1.5 text-right">
-                <Cell value={s.return_pct} color={tone(s.return_pct, 3, 4, true)} />
-              </td>
               <td className="py-1.5 pl-2 text-right">
-                <span
-                  className="inline-flex items-center gap-0.5 font-medium"
-                  style={{ color: s.yoy_pct >= 0 ? '#15803d' : '#b91c1c' }}
-                >
-                  {s.yoy_pct >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                  {s.yoy_pct >= 0 ? '+' : ''}
-                  {s.yoy_pct}%
-                </span>
+                <Cell value={s.return_pct} color={tone(s.return_pct, 3, 4, true)} />
               </td>
             </tr>
           ))}

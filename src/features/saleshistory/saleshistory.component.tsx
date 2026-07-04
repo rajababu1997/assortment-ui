@@ -15,6 +15,7 @@ import { KpiStrip } from './components/KpiStrip';
 import { TrendChartSection } from './components/TrendChartSection';
 import { TopBrandsCategoriesSection } from './components/TopBrandsCategoriesSection';
 import { CategoryParetoSection } from './components/CategoryParetoSection';
+import { CategoryPerformanceSection } from './components/CategoryPerformanceSection';
 import { BandMixSection } from './components/BandMixSection';
 import { TopMoversSection } from './components/TopMoversSection';
 import { DiscountDepthSection } from './components/DiscountDepthSection';
@@ -84,6 +85,7 @@ export default function SalesHistoryPage() {
           <TopBrandsCategoriesSection filters={filters} />
           <TrendChartSection filters={filters} />
           <CategoryParetoSection filters={filters} />
+          <CategoryPerformanceSection filters={filters} />
           <BandMixSection filters={filters} />
           <TopMoversSection filters={filters} setFilters={setFilters} />
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">

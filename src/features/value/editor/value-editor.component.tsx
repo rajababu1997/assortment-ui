@@ -21,16 +21,14 @@ import {
   CalendarDays,
   CheckCircle2,
   Coins,
-  LineChart,
   Package,
   RotateCcw,
   Save,
   Send,
   Table as TableIcon,
-  TrendingUp,
   Wallet,
 } from 'lucide-react';
-import { Alert, Button, Dialog, NumberInput, Slider, SpinnerCenter } from '@/components/primitives';
+import { Alert, Button, ConfirmDialog, Dialog, NumberInput, SpinnerCenter } from '@/components/primitives';
 import { useDemoToday } from '@/hooks/useDemoClock';
 import { FashionCalendar } from '@/components/calendar';
 import { AllValuePlansTable } from '../all-plans/AllValuePlansTable';
@@ -67,15 +65,11 @@ import { validateHard } from '../utils/hardValidation';
 import { DEFAULT_SPLIT, SOFT_LIMITS, TOTAL_PCT, VP_STATES } from '../constants';
 import {
   bandBudget,
-  bandMargin,
-  bandRevenue,
   bandUnits,
   clampCost,
   clampMrp,
   defaultBandsForCategory,
   planAllocatedPct,
-  planAvgMargin,
-  planTotalRevenue,
   planTotalUnits,
 } from '../utils/calc';
 import { bandWarnings } from '../utils/validation';
@@ -84,6 +78,7 @@ import { useValueRecommendation } from '@/features/recommendation/useRecommendat
 import { SuggestButton } from '@/features/recommendation/components/SuggestButton';
 import { WhyAiButton } from '@/features/recommendation/components/WhyAiButton';
 import { ExplanationDrawer, type SectionedExplanation } from '@/features/recommendation/components/ExplanationDrawer';
+import { ValuePlanExplanationCard } from '@/features/recommendation/components/ValuePlanExplanationCard';
 import type { ValuePlanRecommendation } from '@/features/recommendation/types';
 import { SalesInsightsSection } from '../components/SalesInsightsSection';
 import type { BandAllocation, ValuePlan } from '../types';
@@ -334,12 +329,17 @@ function EditorShell({
   const [rec, setRec] = useState<ValuePlanRecommendation | null>(null);
   const [recGeneratedAt, setRecGeneratedAt] = useState<number | null>(null);
   const [recDrawerOpen, setRecDrawerOpen] = useState(false);
-  const handleSuggest = async () => {
-    // Confirm if buyer already has data — Suggest replaces everything.
+  const [suggestConfirmOpen, setSuggestConfirmOpen] = useState(false);
+  const handleSuggest = () => {
+    // Confirm via dialog if buyer already has data — Suggest replaces everything.
     const hasEntries = plan.bands.some((b) => b.budget_pct > 0 || b.avg_mrp > 0);
-    if (hasEntries && !window.confirm(
-      'This will replace your current band entries with system suggestions. Continue?',
-    )) return;
+    if (hasEntries) {
+      setSuggestConfirmOpen(true);
+      return;
+    }
+    void runSuggest();
+  };
+  const runSuggest = async () => {
     try {
       const result = await recMut.mutateAsync({ planUuid: planId, otbCode: plan.otb_code });
       setRec(result);
@@ -378,9 +378,7 @@ function EditorShell({
   const allocatedPct = planAllocatedPct(plan);
   const allocatedAmount = Math.round((plan.budget_snapshot * allocatedPct) / 100);
   const remaining = plan.budget_snapshot - allocatedAmount;
-  const avgMargin = planAvgMargin(plan);
   const totalUnits = planTotalUnits(plan);
-  const totalRevenue = planTotalRevenue(plan);
 
   const allocationValid = allocatedPct === TOTAL_PCT;
   const isStale = currentBudget !== null && currentBudget !== plan.budget_snapshot;
@@ -594,21 +592,9 @@ function EditorShell({
           />
           <div className="ml-auto flex flex-wrap items-stretch gap-2">
             <InfoTile
-              icon={<TrendingUp size={13} />}
-              label="Avg margin"
-              value={`${avgMargin.toFixed(1)}%`}
-              tone={avgMargin < SOFT_LIMITS.MIN_MARGIN_PCT ? 'danger' : 'success'}
-            />
-            <InfoTile
               icon={<Package size={13} />}
               label="Total units"
               value={totalUnits.toLocaleString()}
-              tone="muted"
-            />
-            <InfoTile
-              icon={<LineChart size={13} />}
-              label="Revenue"
-              value={fmtMoneyCompact(totalRevenue, currency)}
               tone="muted"
             />
           </div>
@@ -658,8 +644,8 @@ function EditorShell({
             bandMaster={bandMaster}
           />
 
-          {/* Allocation bar */}
-          <div className="shrink-0">
+          {/* Allocation bar — hidden per product request; keep component ready to re-enable */}
+          <div className="hidden shrink-0">
             <AllocationBar plan={plan} bandMaster={bandMaster} />
           </div>
 
@@ -822,11 +808,25 @@ function EditorShell({
         overall={rec?.summary}
         sections={
           rec?.bands.map((b): SectionedExplanation => ({
-            title: `${b.bandId.toUpperCase()} · ${b.budgetPct.toFixed(1)}%`,
+            title: `${b.bandId.toUpperCase()} · ${Math.round(b.budgetPct)}%`,
             subtitle: `Avg MRP ₹${b.avgMrp.toLocaleString()} · Avg cost ₹${b.avgCost.toLocaleString()}`,
             explanation: b.explanation,
+            richContent: <ValuePlanExplanationCard band={b} />,
           })) ?? []
         }
+      />
+
+      <ConfirmDialog
+        open={suggestConfirmOpen}
+        onClose={() => setSuggestConfirmOpen(false)}
+        onConfirm={async () => {
+          setSuggestConfirmOpen(false);
+          await runSuggest();
+        }}
+        title="Replace your band entries?"
+        description="Auto-generate will overwrite your current band %, MRP, and cost values with system suggestions. This cannot be undone."
+        confirmLabel="Replace with suggestions"
+        variant="warning"
       />
     </div>
   );
@@ -1023,14 +1023,10 @@ function BandCard({
   const palette = BAND_PALETTE;
   const amount = bandBudget(band, budget);
   const units = bandUnits(band, budget);
-  const revenue = bandRevenue(band, budget);
-  const margin = bandMargin(band);
-  const lowMargin = margin < SOFT_LIMITS.MIN_MARGIN_PCT;
   const warnings = bandWarnings(band);
 
   const mrpRange = formatMrpRange(master, ' – ');
   const costRange = formatCostRange(master);
-  const lyDelta = band.budget_pct - lastYearPct;
 
   return (
     <section
@@ -1092,49 +1088,18 @@ function BandCard({
       <div className="grid grid-cols-1 gap-3 px-3.5 py-3 md:grid-cols-3">
         {/* % budget */}
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between gap-2">
-            <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-              % of budget
-            </label>
-            <button
-              type="button"
-              onClick={() => onPctChange(lastYearPct)}
-              disabled={readonly}
-              className="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[9.5px] font-semibold tabular-nums transition-colors hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ background: 'var(--color-surface-alt, #f1f5f9)', color: 'var(--color-text-secondary)' }}
-              title={`Use last-year split (${lastYearPct}%)`}
-            >
-              LY {lastYearPct}%
-              {lyDelta !== 0 && (
-                <span style={{ color: lyDelta > 0 ? '#047857' : '#b45309' }}>
-                  {lyDelta > 0 ? `+${lyDelta}` : lyDelta}
-                </span>
-              )}
-            </button>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
-              <Slider
-                value={band.budget_pct}
-                onChange={(v) => onPctChange(v)}
-                min={0}
-                max={TOTAL_PCT}
-                step={1}
-                disabled={readonly}
-              />
-            </div>
-            <div className="w-20">
-              <NumberInput
-                value={band.budget_pct}
-                onChange={(v) => onPctChange(v ?? 0)}
-                min={0}
-                max={TOTAL_PCT}
-                step={1}
-                showButtons={false}
-                disabled={readonly}
-              />
-            </div>
-          </div>
+          <label className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+            % of budget
+          </label>
+          <NumberInput
+            value={band.budget_pct}
+            onChange={(v) => onPctChange(v ?? 0)}
+            min={0}
+            max={TOTAL_PCT}
+            step={1}
+            showButtons={false}
+            disabled={readonly}
+          />
         </div>
 
         {/* Avg MRP */}
@@ -1177,12 +1142,6 @@ function BandCard({
       >
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <DerivedStat label="Units" value={units.toLocaleString()} />
-          <DerivedStat label="Revenue" value={fmtMoney(revenue, currency)} />
-          <DerivedStat
-            label="Margin"
-            value={`${margin.toFixed(1)}%`}
-            tone={lowMargin ? 'danger' : 'success'}
-          />
         </div>
         {warnings.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">
