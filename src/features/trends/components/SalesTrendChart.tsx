@@ -59,6 +59,7 @@ export function SalesTrendChart({ ty, ly, isLoading }: Props) {
     : '';
 
   return (
+    
     <SectionCard title="Sales Trend Over Time" icon={TrendingUp}>
       {isLoading ? (
         <div

@@ -423,7 +423,7 @@ function BandPerformanceCard({
           value={`${band.realized_margin_pct}%`}
           tone={marginTone}
         />
-        <PerfStat label="DOC" value={`${band.doc_days}d`} />
+        {/* <PerfStat label="DOC" value={`${band.doc_days}d`} /> */}
       </div>
     </div>
   );

@@ -34,16 +34,16 @@ export default function TrendIntelligencePage() {
         <Header />
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3">
-          <KpiStrip ty={data.ty} ly={data.ly} isLoading={data.isLoading} />
+          {/* <KpiStrip ty={data.ty} ly={data.ly} isLoading={data.isLoading} /> */}
 
           <AiInsightsStrip insights={insights} isLoading={data.isLoading} />
 
           {/* Trend chart spans full width so 12 months read comfortably. */}
-          <SalesTrendChart
+          {/* <SalesTrendChart
             ty={data.monthly}
             ly={data.monthlyLy}
             isLoading={data.isLoading}
-          />
+          /> */}
 
           {/* Attribute rollups pair up so each card gets ~50% width. */}
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
