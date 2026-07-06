@@ -17,6 +17,9 @@ import {
   FileBarChart,
   ChartPie,
 
+  // ── Weather ──
+  Cloud,
+
   // ── Incidents & Tasks ──
   AlertTriangle,
   Inbox,
@@ -180,7 +183,7 @@ import {
 
 // Re-export all icons
 export {
-  Home, LayoutDashboard, BarChart3, PieChart, Activity, BarChart2, FileBarChart, ChartPie,
+  Home, LayoutDashboard, BarChart3, PieChart, Activity, BarChart2, FileBarChart, ChartPie, Cloud,
   AlertTriangle, Inbox, ClipboardList, Monitor, Radio, Video, Clock, MapPin, SmartphoneNfc,
   Plane, Navigation, Route, Send, GitBranch, SearchCheck, ScanEye, ScanLine, Car, CarFront,
   FolderArchive, Image, Aperture, Images, FileText, ShieldAlert, ShieldCheck, Layers,
@@ -257,6 +260,7 @@ export const NAV_ICONS = {
   sliders: SlidersHorizontal,
   helpCircle: HelpCircle,
   chartPie: ChartPie,
+  cloud: Cloud,
 } as const;
 
 export type NavIconKey = keyof typeof NAV_ICONS;
