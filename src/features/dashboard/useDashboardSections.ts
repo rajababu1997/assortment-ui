@@ -10,6 +10,7 @@
 import { useMemo } from 'react';
 import { useApiAnnualPlans } from '@/features/otb/useApiAnnualPlans';
 import { useApiAllOtbRows } from '@/features/otb/lifecycle/useApiOtbLifecycle';
+import { useApiAllOptionPlanRows } from '@/features/option/useApiOptionPlans';
 import { useAllPlans } from '@/features/otb/useOtb';
 import { useBrandCategoryLookup } from '@/features/otb/useOtbMaster';
 import { useDemoToday } from '@/hooks/useDemoClock';
@@ -17,6 +18,7 @@ import { OTB_STATES, type OtbState } from '@/features/otb/constants';
 import { daysOld, fmtAge } from './utils/age';
 import type { DashboardFilters } from './useDashboardFilters';
 import type { LifecycleState, OtbRowView } from '@/features/otb/lifecycle/types';
+import type { OptionPlanRow } from '@/features/option/types';
 
 // ── Shared upstream query ───────────────────────────────────────────────────
 
@@ -42,7 +44,14 @@ function useDashboardData(filters: DashboardFilters) {
     { enabled: !!dateRange },
   );
 
+  const optionRowsQ = useApiAllOptionPlanRows(
+    dateRange?.from,
+    dateRange?.to,
+    { enabled: !!dateRange },
+  );
+
   const allRows = otbRowsQ.data ?? [];
+  const optionRows = optionRowsQ.data ?? [];
   const annualPlans = apiAnnual.data ?? [];
 
   const filteredRows = useMemo(
@@ -53,6 +62,7 @@ function useDashboardData(filters: DashboardFilters) {
   return {
     annualPlans,
     allRows,
+    optionRows,
     filteredRows,
     isLoading: apiAnnual.isLoading || otbRowsQ.isLoading,
   };
@@ -147,46 +157,90 @@ export interface PipelineStage {
   total: number;
   /** Status tone — green when on track (>= 67%), amber (>= 33%), red (<33%). */
   tone: 'success' | 'warning' | 'danger' | 'neutral';
+  /** OTB amount rolled up for rows that have passed this stage. */
+  value?: number;
+  /** Σ production_qty_snapshot across OP bands. Only set for option/design. */
+  volume?: number;
+  /** Σ option_plan_qty across OP bands. Only set for option/design. */
+  option?: number;
 }
 
 export function usePlanningPipeline(filters: DashboardFilters): {
   stages: PipelineStage[];
   isLoading: boolean;
 } {
-  const { filteredRows, isLoading } = useDashboardData(filters);
+  const { filteredRows, optionRows, isLoading } = useDashboardData(filters);
 
   const stages = useMemo<PipelineStage[]>(() => {
     const total = filteredRows.length;
     if (total === 0) {
       return [
-        { key: 'otb', label: 'OTB Planning', complete: 0, total: 0, tone: 'neutral' },
-        { key: 'value', label: 'Value Planning', complete: 0, total: 0, tone: 'neutral' },
-        { key: 'option', label: 'Option Planning', complete: 0, total: 0, tone: 'neutral' },
-        { key: 'design', label: 'Design Review', complete: 0, total: 0, tone: 'neutral' },
-        { key: 'release', label: 'PO Release', complete: 0, total: 0, tone: 'neutral' },
+        { key: 'otb', label: 'OTB Planning', complete: 0, total: 0, tone: 'neutral', value: 0 },
+        { key: 'value', label: 'Value Planning', complete: 0, total: 0, tone: 'neutral', value: 0 },
+        { key: 'option', label: 'Option Planning', complete: 0, total: 0, tone: 'neutral', value: 0, volume: 0, option: 0 },
+        { key: 'design', label: 'Design Review', complete: 0, total: 0, tone: 'neutral', value: 0, volume: 0, option: 0 },
+        { key: 'release', label: 'Ready To Release', complete: 0, total: 0, tone: 'neutral' },
       ];
     }
+
+    // Index OP rows by otb_code for a cheap join inside the funnel loop.
+    const opByCode = new Map<string, OptionPlanRow>();
+    for (const op of optionRows) opByCode.set(op.otb_code, op);
+
     // OTB row "complete" at each stage. A row passing a later stage implies
     // earlier stages are done — so counts read top-down as a funnel.
-    let otb = 0, value = 0, option = 0, design = 0, release = 0;
+    let otbC = 0, valC = 0, optC = 0, desC = 0, relC = 0;
+    let otbV = 0, valV = 0, optV = 0, desV = 0;
+    let optVol = 0, optOpt = 0, desVol = 0, desOpt = 0;
+
     for (const r of filteredRows) {
-      if (r.lifecycle_state === 'released'
+      const pastOtb = r.lifecycle_state === 'released'
         || r.lifecycle_state === 'value_planned'
         || r.lifecycle_state === 'option_planned'
-        || r.lifecycle_state === 'final_approved') otb++;
-      if (r.vp_state === 'approved' || r.op_state || r.lifecycle_state === 'final_approved') value++;
-      if (r.op_state === 'approved' || r.lifecycle_state === 'final_approved') option++;
-      if (r.op_state === 'approved' || r.lifecycle_state === 'final_approved') design++;
-      if (r.lifecycle_state === 'final_approved') release++;
+        || r.lifecycle_state === 'final_approved';
+      const pastValue = r.vp_state === 'approved' || !!r.op_state || r.lifecycle_state === 'final_approved';
+      const pastOption = r.op_state === 'submitted'
+        || r.op_state === 'revisions_requested'
+        || r.op_state === 'approved'
+        || r.lifecycle_state === 'final_approved';
+      const pastDesign = r.op_state === 'approved' || r.lifecycle_state === 'final_approved';
+      const pastRelease = r.lifecycle_state === 'final_approved';
+
+      if (pastOtb) { otbC++; otbV += r.otb_amount; }
+      if (pastValue) { valC++; valV += r.otb_amount; }
+      if (pastOption) {
+        optC++;
+        optV += r.otb_amount;
+        const op = opByCode.get(r.otb_code);
+        if (op) {
+          for (const b of op.bands) {
+            optVol += b.production_qty_snapshot || 0;
+            optOpt += b.option_plan_qty || 0;
+          }
+        }
+      }
+      if (pastDesign) {
+        desC++;
+        desV += r.otb_amount;
+        const op = opByCode.get(r.otb_code);
+        if (op) {
+          for (const b of op.bands) {
+            desVol += b.production_qty_snapshot || 0;
+            desOpt += b.option_plan_qty || 0;
+          }
+        }
+      }
+      if (pastRelease) relC++;
     }
+
     return [
-      mkStage('otb', 'OTB Planning', otb, total),
-      mkStage('value', 'Value Planning', value, total),
-      mkStage('option', 'Option Planning', option, total),
-      mkStage('design', 'Design Review', design, total),
-      mkStage('release', 'PO Release', release, total),
+      mkStage('otb', 'OTB Planning', otbC, total, { value: otbV }),
+      mkStage('value', 'Value Planning', valC, total, { value: valV }),
+      mkStage('option', 'Option Planning', optC, total, { value: optV, volume: optVol, option: optOpt }),
+      mkStage('design', 'Design Review', desC, total, { value: desV, volume: desVol, option: desOpt }),
+      mkStage('release', 'Ready To Release', relC, total),
     ];
-  }, [filteredRows]);
+  }, [filteredRows, optionRows]);
 
   return { stages, isLoading };
 }
@@ -196,13 +250,14 @@ function mkStage(
   label: string,
   complete: number,
   total: number,
+  extras?: { value?: number; volume?: number; option?: number },
 ): PipelineStage {
   const ratio = total > 0 ? complete / total : 0;
   const tone: PipelineStage['tone'] =
     ratio >= 0.67 ? 'success'
     : ratio >= 0.33 ? 'warning'
     : 'danger';
-  return { key, label, complete, total, tone };
+  return { key, label, complete, total, tone, ...extras };
 }
 
 // ── 3. Release Timeline ────────────────────────────────────────────────────

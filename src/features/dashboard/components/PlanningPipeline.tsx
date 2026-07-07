@@ -26,6 +26,9 @@ const TONE_DOT: Record<PipelineStage['tone'], string> = {
   neutral: '⚪',
 };
 
+const nfIndian = new Intl.NumberFormat('en-IN');
+const fmtNum = (n?: number) => (n == null ? '' : nfIndian.format(n));
+
 export function PlanningPipeline({ stages, isLoading }: Props) {
   return (
     <section
@@ -57,6 +60,19 @@ export function PlanningPipeline({ stages, isLoading }: Props) {
       </header>
 
       <div className="flex flex-col gap-2 px-3 py-3">
+        <div
+          className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.08em]"
+          style={{ color: 'var(--color-text-tertiary)' }}
+        >
+          <div className="w-[120px] shrink-0" />
+          <div className="flex-1" />
+          <span className="w-12 shrink-0 text-right">%</span>
+          <span className="w-4 shrink-0" />
+          <span className="w-24 shrink-0 text-right">Value</span>
+          <span className="w-20 shrink-0 text-right">Volume</span>
+          <span className="w-16 shrink-0 text-right">Option</span>
+        </div>
+
         {isLoading
           ? Array.from({ length: 5 }).map((_, i) => (
               <div
@@ -67,6 +83,8 @@ export function PlanningPipeline({ stages, isLoading }: Props) {
             ))
           : stages.map((s) => {
               const pct = s.total > 0 ? (s.complete / s.total) * 100 : 0;
+              const showValue = s.key !== 'release';
+              const showVolOpt = s.key === 'option' || s.key === 'design';
               return (
                 <div key={s.key} className="flex items-center gap-3">
                   <div className="w-[120px] shrink-0">
@@ -101,6 +119,24 @@ export function PlanningPipeline({ stages, isLoading }: Props) {
                   </span>
                   <span className="w-4 shrink-0 text-center text-[12px]" aria-hidden>
                     {TONE_DOT[s.tone]}
+                  </span>
+                  <span
+                    className="w-24 shrink-0 text-right text-[11px] tabular-nums"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    {showValue ? fmtNum(s.value) : ''}
+                  </span>
+                  <span
+                    className="w-20 shrink-0 text-right text-[11px] tabular-nums"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    {showVolOpt ? fmtNum(s.volume) : ''}
+                  </span>
+                  <span
+                    className="w-16 shrink-0 text-right text-[11px] tabular-nums"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    {showVolOpt ? fmtNum(s.option) : ''}
                   </span>
                 </div>
               );

@@ -32,7 +32,7 @@ export function CompositionPerformanceCard({ rows, isLoading }: Props) {
               <Th align="left">Composition</Th>
               <Th>Sales %</Th>
               <Th>GP%</Th>
-              <Th align="left">AI Recommendation</Th>
+              <Th >AI Recommendation</Th>
             </tr>
           </thead>
           <tbody>
@@ -47,7 +47,7 @@ export function CompositionPerformanceCard({ rows, isLoading }: Props) {
                 </Td>
                 <Td>{r.salesPct.toFixed(0)}%</Td>
                 <Td>{r.gpPct.toFixed(0)}%</Td>
-                <Td align="left"><RecommendationChip label={classifyAttribute(r)} /></Td>
+                <Td ><RecommendationChip label={classifyAttribute(r)} /></Td>
               </tr>
             ))}
           </tbody>

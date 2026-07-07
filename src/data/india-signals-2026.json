@@ -966,6 +966,27 @@
         "action": "MARKDOWN_PLANNING",
         "reasoning": "End-of-season markdown depth window. Buyer should plan clearance pricing calendar; not an inbound-buying signal."
       }
+    },
+    {
+      "id": "IN-2026-047",
+      "title": "End of Season Sale — Summer (SS26)",
+      "period": {"start": "2026-06-20", "end": "2026-07-31"},
+      "signalCategory": "END_OF_SEASON_SALE",
+      "dateConfidence": "MEDIUM_ANNOUNCED",
+      "dateType": "RETAIL_CALENDAR",
+      "coverageRegions": ["ALL_INDIA"],
+      "sourceCitation": {
+        "name": "Industry EOSS calendar (mainline apparel retailers)",
+        "note": "Timing varies per retailer; typically begins mid-June and runs to end-July for the Spring/Summer collection."
+      },
+      "planningRelevance": {
+        "primaryCategory": "General Apparel (Markdown)",
+        "secondaryCategories": ["Casual Wear", "Summer Wear", "Ethnic Wear"],
+        "planningReviewStart": "2026-03-20",
+        "stockLandBy": "N/A_MARKDOWN_WINDOW",
+        "action": "MARKDOWN_PLANNING",
+        "reasoning": "Primary summer-collection clearance window before AW26 intake. Plan markdown ladder, floor-space rotation and RTV (return-to-vendor) cutoffs for slow-movers. Not an inbound-buying signal."
+      }
     }
   ],
   "sources": [

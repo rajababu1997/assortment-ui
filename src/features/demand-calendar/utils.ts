@@ -51,6 +51,7 @@ export const CATEGORY_LABEL: Record<SignalCategory, string> = {
   SCHOOL_CALENDAR:       'School calendar',
   SEASONAL_WINDOW:       'Seasonal window',
   RETAIL_PROMO_WINDOW:   'Retail promo window',
+  END_OF_SEASON_SALE:    'End of season sale',
 };
 
 export const CATEGORY_TONE: Record<SignalCategory, { bg: string; fg: string; border: string }> = {
@@ -66,6 +67,7 @@ export const CATEGORY_TONE: Record<SignalCategory, { bg: string; fg: string; bor
   SCHOOL_CALENDAR:       { bg: 'rgba(20,184,166,0.14)',  fg: '#0f766e', border: 'rgba(20,184,166,0.30)' },
   SEASONAL_WINDOW:       { bg: 'rgba(234,179,8,0.14)',   fg: '#a16207', border: 'rgba(234,179,8,0.30)' },
   RETAIL_PROMO_WINDOW:   { bg: 'rgba(5,150,105,0.14)',   fg: '#047857', border: 'rgba(5,150,105,0.30)' },
+  END_OF_SEASON_SALE:    { bg: 'rgba(244,63,94,0.14)',   fg: '#be123c', border: 'rgba(244,63,94,0.30)' },
 };
 
 export const CONFIDENCE_LABEL: Record<DateConfidence, string> = {

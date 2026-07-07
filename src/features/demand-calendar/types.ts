@@ -18,7 +18,8 @@ export type SignalCategory =
   | 'ENTERTAINMENT_RELEASE'
   | 'SCHOOL_CALENDAR'
   | 'SEASONAL_WINDOW'
-  | 'RETAIL_PROMO_WINDOW';
+  | 'RETAIL_PROMO_WINDOW'
+  | 'END_OF_SEASON_SALE';
 
 export type ActionKey =
   | 'REVIEW_HISTORICAL'
@@ -53,6 +54,10 @@ export interface Signal {
   coverageRegions: string[];
   sourceCitation: SourceCitation;
   planningRelevance: PlanningRelevance;
+  /** True when this signal was created by the user via the "Add event" dialog. */
+  isUserCreated?: boolean;
+  /** Epoch ms — set when the user saves the signal. */
+  createdAt?: number;
 }
 
 export interface SourceRef {

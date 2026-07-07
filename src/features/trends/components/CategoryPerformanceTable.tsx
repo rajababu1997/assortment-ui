@@ -45,7 +45,7 @@ export function CategoryPerformanceTable({ rows, isLoading }: Props) {
                 <Th>GP%</Th>
                 <Th>Sell Through</Th>
                 <Th>Growth vs LY</Th>
-                <Th align="left">AI Recommendation</Th>
+                <Th>AI Recommendation</Th>
               </tr>
             </thead>
             <tbody>
@@ -62,7 +62,7 @@ export function CategoryPerformanceTable({ rows, isLoading }: Props) {
                   <Td>{c.gpPct.toFixed(0)}%</Td>
                   <Td>{c.strPct.toFixed(0)}%</Td>
                   <Td><DeltaBadge value={c.growthVsLy} /></Td>
-                  <Td align="left"><RecommendationChip label={classifyCategory(c)} /></Td>
+                  <Td ><RecommendationChip label={classifyCategory(c)} /></Td>
                 </tr>
               ))}
               {rows.length === 0 && (

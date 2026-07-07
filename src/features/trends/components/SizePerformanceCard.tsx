@@ -13,7 +13,7 @@ export function SizePerformanceCard() {
     <SectionCard
       title="Size Performance (Overall)"
       icon={Ruler}
-      right={<DemoBadge />}
+      
     >
       <table className="w-full text-[11.5px]">
         <thead>
@@ -22,7 +22,7 @@ export function SizePerformanceCard() {
             <Th>Sales %</Th>
             <Th>Sell Through</Th>
             <Th>Returns %</Th>
-            <Th align="left">AI Recommendation</Th>
+            <Th >AI Recommendation</Th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +38,7 @@ export function SizePerformanceCard() {
               <Td>{s.salesPct}%</Td>
               <Td>{s.strPct}%</Td>
               <Td>{s.returnsPct.toFixed(1)}%</Td>
-              <Td align="left"><RecommendationChip label={s.recommendation} /></Td>
+              <Td ><RecommendationChip label={s.recommendation} /></Td>
             </tr>
           ))}
         </tbody>

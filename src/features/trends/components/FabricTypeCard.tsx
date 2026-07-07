@@ -71,7 +71,7 @@ function Table({ rows }: { rows: AttributePerf[] }) {
           <Th align="left">Fabric Type</Th>
           <Th>Sales %</Th>
           <Th>GP%</Th>
-          <Th align="left">AI Recommendation</Th>
+          <Th>AI Recommendation</Th>
         </tr>
       </thead>
       <tbody>
@@ -85,7 +85,7 @@ function Table({ rows }: { rows: AttributePerf[] }) {
             </Td>
             <Td>{r.salesPct.toFixed(0)}%</Td>
             <Td>{r.gpPct.toFixed(0)}%</Td>
-            <Td align="left"><RecommendationChip label={classifyAttribute(r)} /></Td>
+            <Td ><RecommendationChip label={classifyAttribute(r)} /></Td>
           </tr>
         ))}
       </tbody>

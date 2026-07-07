@@ -10,9 +10,10 @@ import { SignalCard } from './SignalCard';
 interface Props {
   monthIdx: number;
   signals: Signal[];
+  onDelete?: (id: string) => void;
 }
 
-export function MonthGroup({ monthIdx, signals }: Props) {
+export function MonthGroup({ monthIdx, signals, onDelete }: Props) {
   return (
     <section className="flex flex-col gap-2">
       <header className="flex items-center gap-2">
@@ -38,7 +39,7 @@ export function MonthGroup({ monthIdx, signals }: Props) {
       </header>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {signals.map((s) => <SignalCard key={s.id} signal={s} />)}
+        {signals.map((s) => <SignalCard key={s.id} signal={s} onDelete={onDelete} />)}
       </div>
     </section>
   );

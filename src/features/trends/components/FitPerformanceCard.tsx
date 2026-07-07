@@ -35,7 +35,7 @@ export function FitPerformanceCard({ rows, isLoading }: Props) {
               <Th>Growth vs LY</Th>
               <Th>GP%</Th>
               <Th>Sell Through</Th>
-              <Th align="left">AI Recommendation</Th>
+              <Th >AI Recommendation</Th>
             </tr>
           </thead>
           <tbody>
@@ -52,7 +52,7 @@ export function FitPerformanceCard({ rows, isLoading }: Props) {
                 <Td><DeltaBadge value={r.growthVsLy} /></Td>
                 <Td>{r.gpPct.toFixed(0)}%</Td>
                 <Td>{r.strPct.toFixed(0)}%</Td>
-                <Td align="left">
+                <Td >
                   <RecommendationChip label={classifyAttribute(r)} />
                 </Td>
               </tr>

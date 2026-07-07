@@ -11,7 +11,7 @@
  * and which came from our team.
  */
 
-import { CalendarDays, ExternalLink, Info, MapPin } from 'lucide-react';
+import { CalendarDays, ExternalLink, Info, MapPin, Trash2 } from 'lucide-react';
 import type { Signal } from '../types';
 import {
   ACTION_LABEL,
@@ -26,9 +26,10 @@ import {
 
 interface Props {
   signal: Signal;
+  onDelete?: (id: string) => void;
 }
 
-export function SignalCard({ signal }: Props) {
+export function SignalCard({ signal, onDelete }: Props) {
   const catTone = CATEGORY_TONE[signal.signalCategory];
   const confTone = CONFIDENCE_TONE[signal.dateConfidence];
   const actionKey = signal.planningRelevance.action;
@@ -67,16 +68,46 @@ export function SignalCard({ signal }: Props) {
             </div>
           </div>
 
-          <span
-            className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]"
-            style={{
-              background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-              color: 'var(--color-primary)',
-            }}
-            title="This block is source-backed fact"
-          >
-            Source
-          </span>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {signal.isUserCreated && (
+              <span
+                className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]"
+                style={{
+                  background: 'rgba(244,63,94,0.14)',
+                  color: '#be123c',
+                }}
+                title="Created by you on this device"
+              >
+                Custom
+              </span>
+            )}
+            <span
+              className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]"
+              style={{
+                background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+                color: 'var(--color-primary)',
+              }}
+              title="This block is source-backed fact"
+            >
+              Source
+            </span>
+            {signal.isUserCreated && onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(signal.id)}
+                aria-label={`Delete ${signal.title}`}
+                title="Delete this event"
+                className="flex h-6 w-6 items-center justify-center rounded-md border transition-colors hover:bg-red-50"
+                style={{
+                  borderColor: 'var(--color-divider)',
+                  color: '#b91c1c',
+                  background: 'var(--color-surface)',
+                }}
+              >
+                <Trash2 size={12} />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-1">

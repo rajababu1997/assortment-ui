@@ -12,12 +12,14 @@
  */
 
 import { useMemo, useState } from 'react';
-import { CalendarClock, ChevronDown, Filter, Inbox } from 'lucide-react';
+import { CalendarClock, ChevronDown, Filter, Inbox, Plus } from 'lucide-react';
 import dataset from '@/data/india-signals-2026.json';
 import type { Signal, SignalCategory, SignalsDataset } from './types';
 import { anchorMonth, monthName } from './utils';
 import { FilterBar, type CalendarFilters } from './components/FilterBar';
 import { MonthGroup } from './components/MonthGroup';
+import { AddEventDialog } from './components/AddEventDialog';
+import { useUserEvents } from './userEventsStore';
 
 const DATA = dataset as unknown as SignalsDataset;
 
@@ -27,8 +29,13 @@ export default function DemandCalendarPage() {
     months: new Set(),
   });
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const { events: userEvents, add: addUserEvent, remove: removeUserEvent } = useUserEvents();
 
-  const allSignals = DATA.signals;
+  const allSignals = useMemo(
+    () => [...DATA.signals, ...userEvents],
+    [userEvents],
+  );
   const activeFilterCount = filters.categories.size + filters.months.size;
 
   // Available filter values — derived from the full dataset once.
@@ -88,6 +95,7 @@ export default function DemandCalendarPage() {
           activeFilterCount={activeFilterCount}
           filtersOpen={filtersOpen}
           onToggleFilters={() => setFiltersOpen((v) => !v)}
+          onAddEvent={() => setAddOpen(true)}
         />
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3">
@@ -114,18 +122,25 @@ export default function DemandCalendarPage() {
                   key={monthIdx}
                   monthIdx={monthIdx}
                   signals={signals}
+                  onDelete={removeUserEvent}
                 />
               ))}
             </div>
           )}
         </div>
       </div>
+
+      <AddEventDialog
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSave={addUserEvent}
+      />
     </div>
   );
 }
 
 function Header({
-  totalCount, shownCount, asOf, activeFilterCount, filtersOpen, onToggleFilters,
+  totalCount, shownCount, asOf, activeFilterCount, filtersOpen, onToggleFilters, onAddEvent,
 }: {
   totalCount: number;
   shownCount: number;
@@ -133,6 +148,7 @@ function Header({
   activeFilterCount: number;
   filtersOpen: boolean;
   onToggleFilters: () => void;
+  onAddEvent: () => void;
 }) {
   const filtered = shownCount !== totalCount;
   return (
@@ -164,6 +180,21 @@ function Header({
           {filtered ? `${shownCount} of ${totalCount}` : totalCount} verified calendar events · As of {asOf}
         </p>
       </div>
+
+      <button
+        type="button"
+        onClick={onAddEvent}
+        aria-label="Add new event"
+        title="Add new event"
+        className="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[11.5px] font-semibold transition-colors"
+        style={{
+          background: 'var(--color-primary)',
+          color: '#fff',
+        }}
+      >
+        <Plus size={13} />
+        New event
+      </button>
 
       <button
         type="button"

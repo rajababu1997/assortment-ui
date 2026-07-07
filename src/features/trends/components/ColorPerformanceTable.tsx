@@ -15,7 +15,7 @@ export function ColorPerformanceTable() {
     <SectionCard
       title="Top Colors by Sales %"
       icon={Palette}
-      right={<DemoBadge />}
+     
     >
       <table className="w-full text-[11.5px]">
         <thead>
@@ -23,7 +23,7 @@ export function ColorPerformanceTable() {
             <Th align="left">Color</Th>
             <Th>Sales %</Th>
             <Th>Growth vs LY</Th>
-            <Th align="left">AI Recommendation</Th>
+            <Th >AI Recommendation</Th>
           </tr>
         </thead>
         <tbody>
@@ -48,7 +48,7 @@ export function ColorPerformanceTable() {
                   ? <span style={{ color: 'var(--color-text-tertiary)' }}>—</span>
                   : <DeltaBadge value={c.growthVsLy} />}
               </Td>
-              <Td align="left"><RecommendationChip label={c.recommendation} /></Td>
+              <Td ><RecommendationChip label={c.recommendation} /></Td>
             </tr>
           ))}
         </tbody>

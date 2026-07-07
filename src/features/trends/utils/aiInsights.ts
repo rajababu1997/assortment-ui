@@ -93,16 +93,16 @@ export function buildInsights(data: UseTrendDataResult): Insight[] {
     });
   }
 
-  const strDelta = data.ty.strPct - data.ly.strPct;
-  out.push({
-    id: 'str-headline',
-    tone: strDelta >= 0 ? 'positive' : 'warning',
-    title: 'Sell-through',
-    detail: strDelta >= 0
-      ? `up ${strDelta.toFixed(1)}pp — inventory clearing faster`
-      : `down ${Math.abs(strDelta).toFixed(1)}pp — review buys`,
-    metric: 'Overall',
-  });
+  //const strDelta = data.ty.strPct - data.ly.strPct;
+  // out.push({
+  //   id: 'str-headline',
+  //   tone: strDelta >= 0 ? 'positive' : 'warning',
+  //   title: 'Sell-through',
+  //   detail: strDelta >= 0
+  //     ? `up ${strDelta.toFixed(1)}pp — inventory clearing faster`
+  //     : `down ${Math.abs(strDelta).toFixed(1)}pp — review buys`,
+  //   metric: 'Overall',
+  // });
 
   const bestGrowthCat = topBy(data.categories, (c) => c.growthVsLy);
   if (bestGrowthCat && bestGrowthCat.growthVsLy > 10) {
